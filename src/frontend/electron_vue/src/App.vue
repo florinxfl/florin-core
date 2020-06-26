@@ -77,7 +77,8 @@ export default {
     },
     computedBalance() {
       if (this.balance === undefined || this.balance === null) return null;
-      return (
+      return ( 
+        alert('a')
         (this.balance.availableIncludingLocked +
           this.balance.unconfirmedIncludingLocked) /
         100000000

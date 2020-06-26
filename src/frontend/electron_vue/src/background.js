@@ -8,6 +8,7 @@ import {
 } from "vue-cli-plugin-electron-builder/lib";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
+const os = require("os");
 
 import path from "path";
 import fs from "fs";
@@ -18,10 +19,16 @@ import store, { AppStatus } from "./store";
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
-let walletPath = path.join(
-  app.getPath("userData"),
-  isDevelopment ? "dev-wallet" : "wallet"
-);
+let walletPath;
+if (os.platform() === "linux") {
+  walletPath = path.join(
+    app.getPath("home"),
+    isDevelopment ? ".novo_dev" : ".novo"
+  );
+} else {
+  walletPath = app.getPath("userData");
+  if (isDevelopment) walletPath = walletPath + "_dev";
+}
 
 let libUnity = new LibUnity({ walletPath });
 

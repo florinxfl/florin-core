@@ -54,7 +54,7 @@
 All code, binaries and other assets in this repository are subject to [The Novo license](https://github.com/novocurrency/novocurrency-core/blob/master/COPYING_novo) except where explicitely stated otherwise.
 
 ### Branches
-`master` branch tracks the current public release; is generally updated only for each release (with accompanying tag) and very occasionally for minor documentation or other commits. If all you want is to build/track the current version of the sofrware than use the `master` branch.
+`master` branch tracks the current public release; is generally updated only for each release (with accompanying tag) and very occasionally for minor documentation or other commits. If all you want is to build/track the current version of the software than use the `master` branch.
 
 `development` branch tracks the current ongoing development that has not yet been released. Individual features may have their own feature branch from time to time.
 Major features are worked on in temporary feature branches until they can be merged back into one of the development branches.
@@ -87,7 +87,7 @@ For those who really need too or are technically inclined it is of course possib
 ### Additional technical information
 |Technical specifications|Main network|[Testnet](./technical_documentation/accelerated_testnet.md#official-testnet)|
 |:-----------|:---------|:---------|
-|Consensus algorithm:|PoW² SIGMA/Witness|PoW² SIGMA/Witness|
+|Consensus algorithm:|PoW² SIGMA/Holding|PoW² SIGMA/Holding|
 |Recommended transaction confirmations:|2|2|
 |Block reward SIGMA:|0.10 Novo|0.10 Novo|
 |Block reward witness:|0.04 Novo|0.04 Novo|
