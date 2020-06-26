@@ -80,7 +80,7 @@ export default {
       return ( 
         alert('a')
         (this.balance.availableIncludingLocked +
-          this.balance.unconfirmedIncludingLocked) /
+          this.balance.unconfirmedIncludingLocked + this.balance.immatureIncludingLocked) /
         100000000
       ).toFixed(2);
     },
