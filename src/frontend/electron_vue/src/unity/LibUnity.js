@@ -68,11 +68,6 @@ class LibUnity {
     );
   }
 
-  _setStatus(status) {
-    if (status === AppStatus.synchronize) status = AppStatus.ready; // todo: when novo network is available remove this code to show synchronization
-    store.dispatch({ type: "SET_STATUS", status: status });
-  }
-
   _registerSignalHandlers() {
     let self = this;
     let signalHandler = this.signalHandler;
@@ -139,16 +134,18 @@ class LibUnity {
 
     signalHandler.notifyInitWithExistingWallet = function() {
       console.log("received: notifyInitWithExistingWallet");
-      self._setStatus(AppStatus.synchronize);
+      store.dispatch({ type: "SET_WALLET_EXISTS", walletExists: true });
     };
 
     signalHandler.notifyInitWithoutExistingWallet = function() {
       console.log("received: notifyInitWithoutExistingWallet");
       self.newRecoveryPhrase = backend.GenerateRecoveryMnemonic();
-      self._setStatus(AppStatus.setup);
+      store.dispatch({ type: "SET_WALLET_EXISTS", walletExists: false });
     };
 
     signalHandler.notifyShutdown = function() {
+      //NB! It is important to set the signalHandler to null here as this is the last thing the core lib is waiting on for clean exit; once we set this to null we are free to quit the app
+      signalHandler = null
       console.log("received: notifyShutdown");
       self.isTerminated = true;
       app.quit();
@@ -169,8 +166,8 @@ class LibUnity {
         if (result === true) {
           delete this.newRecoveryPhrase; // remove recoveryPhrase property because it isn't needed anymore
           store.dispatch({
-            type: "SET_STATUS",
-            status: AppStatus.ready // todo: for now set status to ready. when the novo network is available, this needs to be changed to synchronize
+            type: "SET_WALLET_EXISTS",
+            walletExists: true
           });
         }
         break;

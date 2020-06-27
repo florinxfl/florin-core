@@ -1,30 +1,15 @@
 <template>
   <div id="app">
-    <!-- app loader -->
-    <div id="app-loader" v-show="showLoader">
-      <div class="logo-outer">
-        <div class="logo-inner"></div>
-      </div>
-      <div class="version-container">
-        <span>Unity: {{ unityVersion }}</span>
-        <span class="divider">|</span>
-        <span>Wallet: {{ walletVersion }}</span>
-        <span class="divider">|</span>
-        <span>Electron: {{ electronVersion }}</span>
-      </div>
-      <div class="info">
-        <p v-show="isShuttingDown">
-          {{ $t("loader.shutdown") }}
-        </p>
-        <div v-show="isSynchronizing">
-          <!-- todo: add progress bar -->
-          <div>{{ $t("loader.synchronizing") }}</div>
-        </div>
-      </div>
-    </div>
+    <app-loader
+      v-show="showLoader"
+      :unityVersion="unityVersion"
+      :walletVersion="walletVersion"
+      :electronVersion="electronVersion"
+      :isShuttingDown="isShuttingDown"
+      :isSynchronizing="isSynchronizing"
+    />
 
-    <!-- main application -->
-    <div>
+    <div v-show="!showLoader">
       <div class="app-top">
         <span class="app-logo"></span>
         <span class="app-balance" v-show="computedBalance !== null">{{
@@ -50,10 +35,7 @@
 <script>
 import { mapState } from "vuex";
 import { AppStatus } from "./store";
-import UnityBackend from "./unity/UnityBackend";
-
-let splashTimeout = 2500;
-let synchronizeTimeout = null;
+import AppLoader from "./components/AppLoader";
 
 export default {
   data() {
@@ -63,11 +45,12 @@ export default {
       progress: 1
     };
   },
+  components: {
+    AppLoader
+  },
   watch: {
     status() {
-      if (this.status === AppStatus.synchronize) {
-        this.synchronize();
-      }
+      this.handleStatusChanged();
     }
   },
   computed: {
@@ -77,9 +60,10 @@ export default {
     },
     computedBalance() {
       if (this.balance === undefined || this.balance === null) return null;
-      return ( 
+      return (
         (this.balance.availableIncludingLocked +
-          this.balance.unconfirmedIncludingLocked + this.balance.immatureIncludingLocked) /
+          this.balance.unconfirmedIncludingLocked +
+          this.balance.immatureIncludingLocked) /
         100000000
       ).toFixed(2);
     },
@@ -96,36 +80,28 @@ export default {
       return this.status === AppStatus.synchronize;
     }
   },
+  created() {
+    this.handleStatusChanged();
+  },
   mounted() {
     setTimeout(() => {
       this.splashReady = true;
-    }, splashTimeout);
-    if (this.status === AppStatus.synchronize) {
-      this.synchronize();
-    }
+    }, 2500);
   },
   methods: {
-    synchronize() {
-      clearTimeout(synchronizeTimeout);
-
-      let progress = UnityBackend.GetUnifiedProgress();
-      progress = parseInt(parseFloat(progress) * 100);
-
-      if (this.progress < progress) {
-        this.progress = progress;
+    handleStatusChanged() {
+      let routeName;
+      switch (this.status) {
+        case AppStatus.setup:
+          routeName = "setup";
+          break;
+        case AppStatus.synchronize:
+        case AppStatus.ready:
+          routeName = "wallet";
+          break;
       }
-      if (this.progress < 100) {
-        synchronizeTimeout = setTimeout(this.synchronize, 1000);
-      } else {
-        synchronizeTimeout = setTimeout(() => {
-          if (this.status !== AppStatus.shutdown) {
-            this.$store.dispatch({
-              type: "SET_STATUS",
-              status: AppStatus.ready
-            });
-          }
-        }, splashTimeout);
-      }
+      if (routeName === undefined || this.$route.name === routeName) return;
+      this.$router.push({ name: routeName });
     }
   }
 };
@@ -156,32 +132,6 @@ export default {
   height: 100%;
   color: #000;
   background-color: #fff;
-}
-
-#app-loader {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  margin-top: 0;
-  margin-left: 0;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-  background-color: #fff;
-  z-index: 1;
-}
-
-#app-loader .version-container {
-  margin: 16px 0;
-}
-
-#app-loader .version-container .divider {
-  margin: 0 8px;
-}
-
-#app-loader .info {
-  min-height: 100px;
 }
 
 .app-top {
@@ -235,26 +185,6 @@ export default {
   width: 22px;
   height: 22px;
   background: url("./img/logo.svg"), linear-gradient(transparent, transparent);
-}
-
-.logo-outer {
-  margin: 24px;
-  background: #009572;
-  width: 128px;
-  height: 128px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo-inner {
-  width: 64px;
-  height: 64px;
-  background: url("./img/logo.svg");
-  background-size: cover;
 }
 
 .app-balance {
