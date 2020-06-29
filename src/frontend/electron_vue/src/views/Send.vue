@@ -1,38 +1,34 @@
 <template>
-  <div class="settings">
-    <div class="section">
-      <div class="back">
-        <router-link :to="{ name: 'wallet' }">
-          <fa-icon :icon="['fal', 'long-arrow-left']" />
-          <span> {{ $t("buttons.back") }}</span>
-        </router-link>
-      </div>
+  <div class="send-view">
+    <novo-section class="back">
+      <router-link :to="{ name: 'wallet' }">
+        <fa-icon :icon="['fal', 'long-arrow-left']" />
+        <span> {{ $t("buttons.back") }}</span>
+      </router-link>
+    </novo-section>
 
-      <h2>{{ "Send coins" }}</h2>
-      <div class="password">
-        <div class="password-row">
-          <h4>{{ "address" }}:</h4>
-          <novo-input v-model="address" />
-        </div>
-        <div class="password-row">
-          <h4>{{ "amount" }}:</h4>
-          <currency-input currency="N" v-model="amount" />
-        </div>
-      </div>
+    <h2>{{ $t("wallet.send_novo") }}</h2>
 
-      <div class="password">
-        <div class="password-row">
-          <h4>{{ "Password" }}:</h4>
-          <novo-input ref="password" type="password" v-model="password" />
-        </div>
-      </div>
+    <novo-form-field :title="$t('common.receiving_address')">
+      <input v-model="address" :class="addressClass" @input="onAddressInput" />
+    </novo-form-field>
+    <novo-form-field :title="$t('common.amount')">
+      <currency-input v-model="amount" currency="N" />
+    </novo-form-field>
 
-      <div class="button-wrapper">
-        <novo-button class="btn" @click="sendCoins"
-          >{{ "Send coins" }}
-        </novo-button>
-      </div>
-    </div>
+    <novo-form-field :title="$t('common.password')">
+      <input
+        ref="password"
+        type="password"
+        v-model="password"
+        :class="passwordClass"
+        @input="onPasswordInput"
+      />
+    </novo-form-field>
+
+    <novo-button-section>
+      <button @click="sendCoins">{{ $t("buttons.send") }}</button>
+    </novo-button-section>
   </div>
 </template>
 
@@ -40,23 +36,10 @@
 .back a {
   padding: 4px 8px;
   margin: 0 0 0 -8px;
-}
-.back {
-  margin-bottom: 20px;
-}
 
-.back a:hover {
-  background-color: #f5f5f5;
-}
-
-.settings-row {
-  padding: 4px 0;
-  border-bottom: 1px solid #ccc;
-}
-
-.settings-row a {
-  display: inline-block;
-  width: 100%;
+  &:hover {
+    background-color: #f5f5f5;
+  }
 }
 
 .arrow {
@@ -76,9 +59,19 @@ export default {
   data() {
     return {
       address: "",
-      amount: 0,
-      pasword: ""
+      amount: null,
+      password: "",
+      isAddressInvalid: false,
+      isPasswordInvalid: false
     };
+  },
+  computed: {
+    addressClass() {
+      return this.isAddressInvalid ? "error" : "";
+    },
+    passwordClass() {
+      return this.isPasswordInvalid ? "error" : "";
+    }
   },
   methods: {
     sendCoins() {
@@ -88,16 +81,16 @@ export default {
         items: []
       });
       if (check.valid === false) {
-        alert("invalid address");
+        this.isAddressInvalid = true;
         return;
       }
 
       if (this.password.length === 0) {
-        alert("invalid password");
+        this.isPasswordInvalid = true;
         return;
       }
       if (!UnityBackend.UnlockWallet(this.password)) {
-        alert("invalid password");
+        this.isPasswordInvalid = true;
         return;
       }
 
@@ -109,7 +102,7 @@ export default {
         amount: this.amount * 100000000.0
       };
       var ret = UnityBackend.PerformPaymentToRecipient(request, false);
-      if (ret != 0) {
+      if (ret !== 0) {
         alert("failed to make payment");
         UnityBackend.LockWallet();
         return;
@@ -117,6 +110,12 @@ export default {
         this.address = "";
       }
       UnityBackend.LockWallet();
+    },
+    onAddressInput() {
+      this.isAddressInvalid = false;
+    },
+    onPasswordInput() {
+      this.isPasswordInvalid = false;
     }
   }
 };

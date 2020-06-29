@@ -1,9 +1,11 @@
 import Vue from "vue";
 
-import AppButton from "./AppButton";
-import AppInput from "./AppInput";
-import PhraseValidator from "./PhraseValidator";
+import CurrencyInput from "./CurrencyInput";
+import NovoButtonSection from "./layout/NovoButtonSection";
+import NovoFormField from "./layout/NovoFormField";
+import NovoSection from "./layout/NovoSection";
 
-Vue.component(`Novo${AppButton.name.replace("App", "")}`, AppButton);
-Vue.component(`Novo${AppInput.name.replace("App", "")}`, AppInput);
-Vue.component(`Novo${PhraseValidator.name}`, PhraseValidator);
+Vue.component(CurrencyInput.name, CurrencyInput);
+Vue.component(NovoButtonSection.name, NovoButtonSection);
+Vue.component(NovoFormField.name, NovoFormField);
+Vue.component(NovoSection.name, NovoSection);

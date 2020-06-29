@@ -9,31 +9,28 @@
       :isSynchronizing="isSynchronizing"
     />
 
-    <div v-show="!showLoader">
-      <div class="app-top">
-        <span class="app-logo"></span>
-        <span class="app-balance" v-show="computedBalance !== null">{{
-          computedBalance
-        }}</span>
-
-        <span class="top-menu" v-if="showSettings">
-          <router-link :to="{ name: 'settings' }">
-            <fa-icon :icon="['fal', 'cog']" />
-            <span> {{ $t("settings.header") }}</span>
-          </router-link>
-        </span>
-      </div>
-      <div class="app-main">
-        <div class="holder">
-          <router-view />
-        </div>
+    <div class="app-topbar">
+      <span class="app-topbar--logo"></span>
+      <span class="app-topbar--balance" v-show="totalBalance !== null">{{
+        totalBalance
+      }}</span>
+      <span class="app-topbar--settings" v-if="showSettings">
+        <router-link :to="{ name: 'settings' }">
+          <fa-icon :icon="['fal', 'cog']" />
+          <span> {{ $t("settings.header") }}</span>
+        </router-link>
+      </span>
+    </div>
+    <div class="app-main">
+      <div class="app-main--wrapper">
+        <router-view />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import { AppStatus } from "./store";
 import AppLoader from "./components/AppLoader";
 
@@ -55,17 +52,9 @@ export default {
   },
   computed: {
     ...mapState(["status", "unityVersion", "walletVersion", "balance"]),
+    ...mapGetters(["totalBalance"]),
     showSettings() {
       return this.status === AppStatus.ready;
-    },
-    computedBalance() {
-      if (this.balance === undefined || this.balance === null) return null;
-      return (
-        (this.balance.availableIncludingLocked +
-          this.balance.unconfirmedIncludingLocked +
-          this.balance.immatureIncludingLocked) /
-        100000000
-      ).toFixed(2);
     },
     showLoader() {
       return (
@@ -110,8 +99,9 @@ export default {
 <style lang="less">
 @import "./css/app.less";
 
-:root {
-  --top-height: 62px;
+body,
+#app {
+  overflow: hidden;
 }
 
 *,
@@ -128,13 +118,15 @@ export default {
 }
 
 #app {
+  --top-height: 62px;
+
   width: 100%;
   height: 100%;
   color: #000;
   background-color: #fff;
 }
 
-.app-top {
+.app-topbar {
   position: absolute;
   top: 0;
   height: var(--top-height);
@@ -143,26 +135,39 @@ export default {
   padding: 0 40px 0 40px;
   background-color: #000;
   color: #fff;
-}
 
-.top-menu {
-  float: right;
-  margin-right: -15px;
-}
+  & .app-topbar--logo {
+    float: left;
+    margin-top: 20px;
+    width: 22px;
+    height: 22px;
+    background: url("./img/logo.svg"), linear-gradient(transparent, transparent);
+  }
 
-.top-menu a,
-.top-menu a:active,
-.top-menu a:visited {
-  display: inline-block;
-  padding: 0 10px 0 10px;
-  font-size: 0.9em;
-  font-weight: 400;
-  line-height: 32px;
-  color: #fff;
-}
+  & .app-topbar--balance {
+    float: left;
+    margin-left: 10px;
+  }
 
-.top-menu a:hover {
-  background-color: #222;
+  & .app-topbar--settings {
+    float: right;
+    margin-right: -10px;
+  }
+
+  & .app-topbar--settings a,
+  .app-topbar--settings a:active,
+  .app-topbar--settings a:visited {
+    display: inline-block;
+    padding: 0 10px 0 10px;
+    font-size: 0.9em;
+    font-weight: 400;
+    line-height: 32px;
+    color: #fff;
+  }
+
+  .app-topbar--settings a:hover {
+    background-color: #222;
+  }
 }
 
 .app-main {
@@ -171,24 +176,11 @@ export default {
   height: calc(100% - var(--top-height));
   width: 100%;
   padding: 0 40px 100px 40px;
-}
 
-.holder {
-  margin: 0 auto;
-  width: 100%;
-  max-width: 800px;
-}
-
-.app-logo {
-  float: left;
-  margin-top: 20px;
-  width: 22px;
-  height: 22px;
-  background: url("./img/logo.svg"), linear-gradient(transparent, transparent);
-}
-
-.app-balance {
-  float: left;
-  margin-left: 10px;
+  & .app-main--wrapper {
+    margin: 40px auto;
+    width: 100%;
+    max-width: 800px;
+  }
 }
 </style>

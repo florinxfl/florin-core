@@ -1,61 +1,44 @@
 <template>
-  <div id="setup-container">
-    <div class="section">
-      <div class="back">
-        <router-link :to="{ name: current === 1 ? 'settings' : 'wallet' }">
-          <fa-icon :icon="['fal', 'long-arrow-left']" />
-          <span> {{ $t("buttons.back") }}</span>
-        </router-link>
-      </div>
+  <div class="change-password-view">
+    <h2>
+      <span v-if="current === 1">{{ $t("setup.enter_your_password") }}</span>
+      <span v-else>{{ $t("setup.choose_password") }}</span>
+    </h2>
 
-      <h2>
-        <span v-if="current === 1">{{ $t("setup.enter_your_password") }}</span>
-        <span v-else>{{ $t("setup.choose_password") }}</span>
-      </h2>
+    <!-- step 1: Enter old password -->
+    <novo-form-field v-if="current === 1" :title="$t('common.password')">
+      <input
+        ref="passwordold"
+        type="password"
+        v-model="passwordold"
+        @keydown="validatePasswordOnEnter"
+        :class="passwordOldStatus"
+      />
+    </novo-form-field>
 
-      <!-- step 1: Enter old password -->
-      <div v-if="current === 1" class="password">
-        <div class="password-row">
-          <h4>{{ $t("setup.password") }}:</h4>
-          <novo-input
-            ref="passwordold"
-            type="password"
-            v-model="passwordold"
-            @keydown="validatePasswordOnEnter"
-            :status="passwordOldStatus"
-          />
-        </div>
-      </div>
-
-      <!-- step 2: enter new password -->
-      <div v-else class="password">
-        <div class="password-row">
-          <h4>{{ $t("setup.password") }}:</h4>
-          <novo-input ref="password1" type="password" v-model="password1" />
-        </div>
-        <div class="password-row">
-          <h4>{{ $t("setup.repeat_password") }}:</h4>
-          <novo-input
-            type="password"
-            v-model="password2"
-            :status="password2Status"
-            @keydown="validatePasswordRepeatOnEnter"
-          />
-        </div>
-      </div>
-
-      <div class="button-wrapper">
-        <novo-button
-          class="btn"
-          v-if="current <= 2"
-          @click="nextStep"
-          :disabled="isNextDisabled"
-        >
-          <span v-if="current < 2">{{ $t("buttons.next") }}</span>
-          <span v-else>{{ $t("buttons.change_password") }}</span>
-        </novo-button>
-      </div>
+    <!-- step 2: enter new password -->
+    <div v-else>
+      <novo-form-field :title="$t('common.password')">
+        <input ref="password1" type="password" v-model="password1" />
+      </novo-form-field>
+      <novo-form-field :title="$t('setup.repeat_password')">
+        <input
+          type="password"
+          v-model="password2"
+          :class="password2Status"
+          @keydown="validatePasswordRepeatOnEnter"
+        />
+      </novo-form-field>
     </div>
+
+    <novo-button-section>
+      <button v-if="current === 1" @click="nextStep" :disabled="isNextDisabled">
+        {{ $t("buttons.next") }}
+      </button>
+      <button v-if="current === 2" @click="nextStep" :disabled="isNextDisabled">
+        {{ $t("buttons.change_password") }}
+      </button>
+    </novo-button-section>
   </div>
 </template>
 
@@ -102,7 +85,7 @@ export default {
     }
   },
   mounted() {
-    this.$refs.passwordold.$el.focus();
+    this.$refs.passwordold.focus();
   },
   methods: {
     nextStep() {
@@ -129,7 +112,7 @@ export default {
         UnityBackend.LockWallet();
         this.current++;
         this.$nextTick(() => {
-          this.$refs.password1.$el.focus();
+          this.$refs.password1.focus();
         });
       } else {
         this.isPasswordInvalid = true;
@@ -138,30 +121,3 @@ export default {
   }
 };
 </script>
-
-<style lang="less" scoped>
-.back a {
-  padding: 4px 8px;
-  margin: 0 0 0 -8px;
-}
-.back {
-  margin-bottom: 20px;
-}
-
-.back a:hover {
-  background-color: #f5f5f5;
-}
-
-.button-wrapper {
-  margin: 10px 0 0 0;
-  float: right;
-}
-
-.password {
-  margin: 0 0 20px 0;
-}
-
-.password-row {
-  margin: 0 0 20px 0;
-}
-</style>

@@ -1,82 +1,78 @@
 <template>
-  <div id="setup-container">
-    <div class="steps-container section">
+  <div class="setup-view">
+    <div class="steps-container">
       <!-- step 1: show recovery phrase -->
-      <div v-if="current === 1">
+      <novo-section v-if="current === 1">
         <h2 class="important">{{ $t("common.important") }}</h2>
         <p>{{ $t("setup.this_is_your_recovery_phrase") }}</p>
-        <div class="phrase">
+        <novo-section class="phrase">
           {{ recoveryPhrase }}
-        </div>
-      </div>
+        </novo-section>
+      </novo-section>
 
       <!-- step 2: repeat recovery phrase -->
-      <div v-else-if="current === 2">
+      <novo-section v-else-if="current === 2">
         <h2>{{ $t("setup.enter_recovery_phrase") }}</h2>
         <p>{{ $t("setup.repeat_your_recovery_phrase") }}</p>
-        <novo-phrase-validator
+        <phrase-validator
           :phrase="recoveryPhrase"
           :autofocus="true"
           @validated="onPhraseValidated"
         />
-      </div>
+      </novo-section>
 
       <!-- step 3: enter a password -->
       <div v-else-if="current === 3">
         <h2>{{ $t("setup.choose_password") }}</h2>
         <p>{{ $t("setup.choose_password_information") }}</p>
-        <div class="password">
-          <div class="password-row">
-            <h4>{{ $t("setup.password") }}:</h4>
-            <novo-input ref="password" type="password" v-model="password1" />
-          </div>
-          <div class="password-row">
-            <h4>{{ $t("setup.repeat_password") }}:</h4>
-            <novo-input
-              type="password"
-              v-model="password2"
-              :status="password2Status"
-              @keyup="onPassword2Keyup"
-            />
-          </div>
-        </div>
+        <novo-form-field :title="$t('common.password')">
+          <input ref="password" type="password" v-model="password1" />
+        </novo-form-field>
+        <novo-form-field :title="$t('setup.repeat_password')">
+          <input
+            type="password"
+            v-model="password2"
+            :class="password2Status"
+            @keyup="onPassword2Keyup"
+          />
+        </novo-form-field>
       </div>
 
-      <div class="button-wrapper">
-        <div class="left">
-          <novo-button
+      <novo-button-section>
+        <template v-slot:left>
+          <button
             v-if="current === 2"
             @click="previousStep"
             :disabled="isButtonDisabled()"
           >
             {{ $t("buttons.back") }}
-          </novo-button>
-        </div>
-
-        <div class="right">
-          <novo-button
+          </button>
+        </template>
+        <template v-slot:right>
+          <button
             v-if="current === 1"
             @click="nextStep"
             :disabled="isButtonDisabled()"
           >
             {{ $t("buttons.next") }}
-          </novo-button>
+          </button>
 
-          <novo-button
+          <button
             v-else-if="current === 3"
             @click="nextStep"
             :disabled="isButtonDisabled()"
           >
             {{ $t("buttons.finish") }}
-          </novo-button>
-        </div>
-      </div>
+          </button>
+        </template>
+      </novo-button-section>
     </div>
   </div>
 </template>
 
 <script>
 import UnityBackend from "../unity/UnityBackend";
+import PhraseValidator from "../components/PhraseValidator";
 
 export default {
   data() {
@@ -88,6 +84,9 @@ export default {
       isRecoveryPhraseCorrect: false,
       isBackDisabled: false
     };
+  },
+  components: {
+    PhraseValidator
   },
   created() {
     this.$nextTick(() => {
@@ -137,7 +136,7 @@ export default {
       switch (this.current) {
         case 2:
           this.$nextTick(() => {
-            this.$refs.password.$el.focus();
+            this.$refs.password.focus();
           });
           break;
         case 3:
@@ -174,18 +173,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.button-wrapper {
-  margin: 10px 0 0 0;
-
-  & .left {
-    float: left;
-  }
-
-  & .right {
-    float: right;
-  }
-}
-
 .phrase {
   padding: 10px;
   font-size: 1.05em;
@@ -193,15 +180,5 @@ export default {
   text-align: center;
   word-spacing: 4px;
   background-color: #f5f5f5;
-}
-
-.phrase,
-.password,
-.password-row {
-  margin: 0 0 20px 0;
-}
-
-.important {
-  color: #dd3333;
 }
 </style>
