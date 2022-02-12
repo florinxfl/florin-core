@@ -223,6 +223,7 @@ CORE_H = rpc/accounts.h \
   util/moneystr.h \
   util/strencodings.h \
   util/time.h \
+  util/check.h \
   util/threadnames.h \
   attributes.h \
   validation/validation.h \
