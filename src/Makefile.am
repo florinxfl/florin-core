@@ -195,6 +195,7 @@ CORE_H = rpc/accounts.h \
   random.h \
   randomenv.h \
   reverselock.h \
+  reverse_iterator.h \
   rpc/blockchain.h \
   rpc/client.h \
   rpc/protocol.h \
