@@ -228,6 +228,7 @@ CORE_H = rpc/accounts.h \
   util/time.h \
   util/check.h \
   util/macros.h \
+  util/overloaded.h \
   util/syscall_sandbox.h \
   util/getuniquepath.h \
   util/threadnames.h \
