@@ -224,6 +224,7 @@ CORE_H = rpc/accounts.h \
   util/strencodings.h \
   util/time.h \
   util/threadnames.h \
+  attributes.h \
   validation/validation.h \
   validation/witnessvalidation.h \
   validation/versionbitsvalidation.h \
