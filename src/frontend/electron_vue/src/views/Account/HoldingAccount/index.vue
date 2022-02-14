@@ -94,6 +94,14 @@
 
     <portal to="footer-slot">
       <section class="footer">
+        <span
+          class="button"
+          @click="showLinkHoldingAccount"
+          v-if="linkHoldingAccountVisible"
+        >
+          <fa-icon :icon="['fal', 'key']" />
+          {{ $t("buttons.holding_key") }}
+        </span>
         <span class="button" @click="renewAccount" v-if="renewButtonVisible">
           <fa-icon :icon="['fal', 'redo-alt']" />
           {{ $t("buttons.renew") }}
@@ -120,6 +128,7 @@ import { WitnessController } from "../../../unity/Controllers";
 import EventBus from "../../../EventBus";
 import Send from "../MiningAccount/Send";
 import RenewAccount from "./RenewAccount";
+import LinkHoldingAccount from "./LinkHoldingAccount";
 import AccountSettings from "../AccountSettings";
 
 let timeout;
@@ -194,6 +203,9 @@ export default {
       return (
         this.accountStatus === "expired" && this.rightSidebar !== RenewAccount
       );
+    },
+    linkHoldingAccountVisible() {
+      return this.rightSidebar !== LinkHoldingAccount;
     }
   },
   mounted() {
@@ -255,6 +267,9 @@ export default {
     },
     renewAccount() {
       this.rightSidebar = RenewAccount;
+    },
+    showLinkHoldingAccount() {
+      this.rightSidebar = LinkHoldingAccount;
     }
   }
 };
