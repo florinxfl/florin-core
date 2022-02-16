@@ -168,6 +168,7 @@ CORE_H = rpc/accounts.h \
   httpserver.h \
   indirectmap.h \
   init.h \
+  node/context.h \
   unity/appmanager.h \
   unity/signals.h \
   key.h \
@@ -675,6 +676,7 @@ lib_common_a_SOURCES = \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
+  node/context.cpp \
   blockfilter.cpp \
   key.cpp \
   keystore.cpp \

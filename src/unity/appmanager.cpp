@@ -97,7 +97,8 @@ void AppLifecycleManager::initialize()
 
             if (fShutDownHasBeenInitiated)
                 return;
-            bool rv = AppInitMain(threadGroup, scheduler);
+
+            bool rv = AppInitMain(threadGroup, nodeContext);
             signalAppInitializeResult(rv);
         }
         catch (const std::exception& e)
@@ -264,7 +265,7 @@ void AppLifecycleManager::shutdownThread()
 
             // Terminate all core threads.
             LogPrintf("shutdown thread: Shut down core\n");
-            CoreShutdown(threadGroup);
+            CoreShutdown(threadGroup, nodeContext);
             MilliSleep(50);
 
             LogPrintf("shutdown thread: Core shutdown finished, signaling UI to shut itself down\n");
