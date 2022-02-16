@@ -22,6 +22,7 @@
 #include "util.h"
 #include "util/moneystr.h"
 #include "validation/validation.h"
+#include "node/context.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
@@ -250,7 +251,7 @@ void ServerInterrupt(boost::thread_group& threadGroup)
 {
 }
 
-void ServerShutdown(boost::thread_group& threadGroup)
+void ServerShutdown(boost::thread_group& threadGroup, node::NodeContext& nodeContext)
 {
 }
 

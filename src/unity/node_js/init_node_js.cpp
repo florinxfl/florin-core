@@ -11,6 +11,7 @@
 #include "wallet/rpcwallet.h"
 #endif
 #include "warnings.h"
+#include "node/context.h"
 
 #include "unity/djinni/cpp/legacy_wallet_result.hpp"
 #include "unity/djinni/cpp/i_library_controller.hpp"
@@ -86,12 +87,13 @@ void ServerInterrupt(boost::thread_group& threadGroup)
     InterruptTorControl();
 }
 
-void ServerShutdown(boost::thread_group& threadGroup)
+void ServerShutdown(boost::thread_group& threadGroup, node::NodeContext& nodeContext)
 {
     RPCUnsetTimerInterface(timerInterface);
     StopHTTPServer();
     StopHTTPRPC();
     MilliSleep(20); //Allow other threads (UI etc. a chance to cleanup as well)
+    if (nodeContext.scheduler) nodeContext.scheduler->stop();
     StopRPC();
     StopREST();
     MilliSleep(20); //Allow other threads (UI etc. a chance to cleanup as well)
