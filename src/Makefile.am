@@ -207,6 +207,7 @@ CORE_H = rpc/accounts.h \
   script/sign.h \
   script/standard.h \
   script/ismine.h \
+  span.h \
   streams.h \
   support/allocators/secure.h \
   support/allocators/zeroafterfree.h \
