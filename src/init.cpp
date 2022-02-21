@@ -39,6 +39,7 @@
 #include "netbase.h"
 #include "net.h"
 #include "net_processing.h"
+#include "node/context.h"
 #include "policy/feerate.h"
 #include "policy/fees.h"
 #include "policy/policy.h"
@@ -84,7 +85,6 @@
 #include "zmq/zmqnotificationinterface.h"
 #endif
 
-#include "util.h"
 #include <compat/sys.h>
 #include <compat/assumptions.h>
 
