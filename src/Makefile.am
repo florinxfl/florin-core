@@ -224,6 +224,7 @@ CORE_H = rpc/accounts.h \
   txmempool.h \
   ui_interface.h \
   undo.h \
+  logging.h \
   util.h \
   util/moneystr.h \
   util/strencodings.h \
@@ -708,6 +709,7 @@ lib_util_a_SOURCES = \
   sync.cpp \
   util/thread.cpp \
   threadinterrupt.cpp \
+  logging.cpp \
   util.cpp \
   util/moneystr.cpp \
   util/strencodings.cpp \
