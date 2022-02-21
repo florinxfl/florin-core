@@ -191,6 +191,7 @@ CORE_H = rpc/accounts.h \
   pow/pow.h \
   protocol.h \
   random.h \
+  randomenv.h \
   reverselock.h \
   rpc/blockchain.h \
   rpc/client.h \
@@ -690,6 +691,7 @@ lib_util_a_SOURCES = \
   compat/strnlen.cpp \
   fs.cpp \
   random.cpp \
+  randomenv.cpp \
   support/cleanse.cpp \
   sync.cpp \
   util/thread.cpp \
