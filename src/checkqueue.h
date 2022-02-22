@@ -1,23 +1,22 @@
-// Copyright (c) 2012-2015 The Bitcoin Core developers
+// Copyright (c) 2012-2021 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef CHECKQUEUE_H
 #define CHECKQUEUE_H
 
-#include "sync.h"
+#include <sync.h>
+#include <tinyformat.h>
+#include <util/syscall_sandbox.h>
 #include <util/threadnames.h>
 
 #include <algorithm>
 #include <vector>
 
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
-
 template <typename T>
 class CCheckQueueControl;
 
-/** 
+/**
  * Queue for verifications that have to be performed.
   * The verifications are represented by a type T, which must provide an
   * operator(), returning a bool.
@@ -124,10 +123,8 @@ private:
             }
             // execute work
             for (T& check : vChecks)
-            {
                 if (fOk)
                     fOk = check();
-            }
             vChecks.clear();
         } while (true);
     }
