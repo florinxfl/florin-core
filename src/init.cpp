@@ -1130,6 +1130,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         return false;
     }
 
+    std::string sha256_algo = SHA256AutoDetect();
+    LogPrintf("Using the '%s' SHA256 implementation\n", sha256_algo);
+    
     //fixme: (SIGMA) Improve.
     // Select optimised algorithms for SIGMA
     selectOptimisedImplementations();
