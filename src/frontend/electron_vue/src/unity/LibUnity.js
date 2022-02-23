@@ -137,13 +137,13 @@ class LibUnity {
       store.dispatch("wallet/SET_ACTIVE_ACCOUNT", accountUUID);
 
       store.dispatch(
-        "wallet/SET_MUTATIONS",
-        libraryController.getMutationHistory()
+        "wallet/SET_RECEIVE_ADDRESS",
+        libraryController.GetReceiveAddress()
       );
 
       store.dispatch(
-        "wallet/SET_RECEIVE_ADDRESS",
-        libraryController.GetReceiveAddress()
+        "wallet/SET_MUTATIONS",
+        libraryController.getMutationHistory()
       );
     };
 
@@ -288,7 +288,6 @@ class LibUnity {
 
     libraryListener.notifyNewMutation = function(/*mutation, self_committed*/) {
       console.log("received: notifyNewMutation");
-
       store.dispatch(
         "wallet/SET_MUTATIONS",
         libraryController.getMutationHistory()
@@ -1883,6 +1882,7 @@ class LibUnity {
         console.log(
           `IPC: accountsController.setActiveAccountAsync(${data.accountUUID})`
         );
+
         try {
           let result = this.accountsController.setActiveAccount(
             data.accountUUID
@@ -2329,6 +2329,9 @@ class LibUnity {
             success: true,
             result: result
           };
+          console.log(
+            "Hey do we get here??? ---------------------------------------"
+          );
         } catch (e) {
           event.returnValue = handleError(e);
         }
