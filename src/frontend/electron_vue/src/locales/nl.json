@@ -1,6 +1,6 @@
 {
   "accounts_section": {
-    "accounts": "Rekeningen",
+    "accounts": "Accounts",
     "categories": {
       "spending": "Spending",
       "holding": "Holding"
@@ -13,13 +13,13 @@
   "add_holding_account": {
     "daily": "per dag",
     "estimated_earnings": "Geschatte opbrengst",
-    "funding_account": "Financieringsrekening",
+    "funding_account": "Financieringsaccount",
     "lock_for": "Vastzetten voor",
     "overall": "Totaal",
-    "title": "Holding rekening aanmaken"
+    "title": "Holding account aanmaken"
   },
   "add_spending_account": {
-    "title": "Betaalrekening aanmaken"
+    "title": "Betaalaccount aanmaken"
   },
   "buttons": {
     "back": "Terug",
@@ -29,7 +29,7 @@
     "clear": "Wissen",
     "confirm": "Bevestig",
     "change_password": "Verander wachtwoord",
-    "create_mining_account": "Mining rekening aanmaken",
+    "create_mining_account": "Mining account aanmaken",
     "finish": "Klaar",
     "lock": "Vastzetten",
     "next": "Volgende",
@@ -51,17 +51,17 @@
     "copied_to_clipboard": "Gekopieërd naar klembord"
   },
   "common": {
-    "account_name": "Rekeningnaam",
+    "account_name": "Accountnaam",
     "amount": "Bedrag",
     "enter_your_password": "Voer jouw wachtwoord in",
     "important": "Belangrijk",
     "information": "Informatie",
     "months": "Maanden",
-    "on": "aan",
-    "off": "uit",
+    "on": "Aan",
+    "off": "Uit",
     "password": "Wachtwoord",
     "receiving_address": "Ontvangstadres",
-    "days": "days"
+    "days": "Dagen"
   },
   "new_wallet": {
     "title": "Welkom bij jouw Florin portemonnee",
@@ -82,7 +82,7 @@
     "expected_earnings_frequency": "Verwachte beloningstijd",
     "account_weight": "Gewicht",
     "network_weight": "Netwerk gewicht",
-    "empty": "Deze holding rekening is leeg"
+    "empty": "Dit holding account is leeg"
   },
   "loader": {
     "shutdown": "Bezig met afsluiten...",
@@ -129,7 +129,7 @@
   },
   "setup_mining": {
     "title": "Mining instellen",
-    "information": "Voordat je kunt beginnen met minen van Florin moet een mining rekening worden aangemaakt. Voer je wachtwoord in om je portemonnee te ontgrendelen en een mining rekening aan te maken."
+    "information": "Voordat je kunt beginnen met het minen van Florin moet een mining account worden aangemaakt. Voer je wachtwoord in om je portemonnee te ontgrendelen en een mining account aan te maken."
   },
   "transaction_details": {
     "title": {
@@ -156,9 +156,9 @@
     "funding_account": "Betaal vergoeding van account"
   },
   "link_holding_account": {
-    "title": "Jouw holding sleutel",
-    "information": "Deze sleutel kan worden gekoppeld aan een cloud service of een tweede wallet op een ander apparaat waarmee het deze service/wallet toe wordt gestaan namens jou holding acties uit te voeren.",
-    "warn": "Deze sleutel geeft geen toegang tot jouw vastgezette Florin, maar bewaar deze zorgvuldig aangezien het wel toegang geeft tot jouw ontvangen beloningen.\nLaat deze sleutel niet zien in het openbaar waar meegekeken kan worden op uw scherm of waar mogelijk schermopnames worden gemaakt.",
-    "no_funds": "Holding rekening moet worden gevuld met vastgezette Florin voordat het mogelijk is om deze te koppelen met andere portemonnees."
+    "title": "Jouw holding key",
+    "information": "Deze holding key kan worden gekoppeld aan een cloud service of een tweede wallet op een ander apparaat waarmee het deze service/wallet toe wordt gestaan namens jou holding acties uit te voeren.",
+    "warn": "Deze holding key geeft geen toegang tot jouw vastgezette Florin, maar bewaar deze zorgvuldig aangezien het wel toegang geeft tot jouw ontvangen beloningen.\nLaat deze holding key niet zien in het openbaar waar meegekeken kan worden op uw scherm of waar mogelijk opnames van uw scherm worden gemaakt.",
+    "no_funds": "Holding account moet worden gevuld met vastgezette Florin voordat het mogelijk is om deze te koppelen met andere portemonnees."
   }
 }
