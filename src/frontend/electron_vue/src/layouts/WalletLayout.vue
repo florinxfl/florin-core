@@ -52,6 +52,7 @@ import AccountsSection from "./AccountsSection";
 import WalletPasswordDialog from "../components/WalletPasswordDialog";
 import EventBus from "../EventBus";
 import UIConfig from "../../ui-config.json";
+import { AccountsController, LibraryController } from "../unity/Controllers"; 
 
 export default {
   name: "WalletLayout",
@@ -68,7 +69,7 @@ export default {
   },
   computed: {
     ...mapState("app", ["progress", "rate"]),
-    ...mapState("wallet", ["activeAccount", "walletPassword"]),
+    ...mapState("wallet", ["activeAccount", "unlocked"]),
     ...mapGetters("wallet", ["totalBalance", "miningAccount"]),
     walletLayoutClasses() {
       let classes = [];
@@ -79,7 +80,7 @@ export default {
       return classes;
     },
     lockIcon() {
-      return this.walletPassword ? "unlock" : "lock";
+      return this.unlocked ? "unlock" : "lock";
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
@@ -113,8 +114,32 @@ export default {
           params: { id: this.miningAccount.UUID }
         });
       } else {
-        if (this.$route.name === "setup-mining") return;
-        this.$router.push({ name: "setup-mining" });
+        EventBus.$emit('unlock-wallet', { 
+          callback: (e) => this.trySetupMining(e),
+          title: 'setup_mining.title',
+          message: 'setup_mining.information',
+          timeout: 5
+        });
+      }
+    },
+    trySetupMining(e) {
+       let uuid = null;
+
+      try {
+        // NOTE:
+        // Dont' know if it is actually needed to show the activity indicator when unlockking the wallet and creating the account,
+        // but for now I leave it here.
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
+        uuid = AccountsController.CreateAccount("Florin Mining", "Mining");
+      } finally {
+        // route to the new account when we have a uuid
+        if (uuid) {
+          // activity indicator is set to true in the router, so no need to remove it here
+          this.$router.push({ name: "account", params: { id: uuid } });
+        } else {
+          // remove the activity indicator
+          this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+        }
       }
     },
     routeTo(route) {
@@ -130,14 +155,10 @@ export default {
       this.$router.push({ name: "settings" });
     },
     changeLockSettings() {
-      if (this.walletPassword) {
-        this.$store.dispatch("wallet/SET_WALLET_PASSWORD", null);
+      if (this.unlocked) {
+        EventBus.$emit('lock-wallet');
       } else {
-        EventBus.$emit("show-dialog", {
-          title: this.$t("password_dialog.unlock_wallet"),
-          component: WalletPasswordDialog,
-          showButtons: false
-        });
+        EventBus.$emit('unlock-wallet');
       }
     },
     closeRightSidebar() {
