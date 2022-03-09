@@ -8,7 +8,7 @@ const wallet = {
     receiveAddress: null,
     walletBalance: null,
     walletPassword: null,
-    unlocked: false,
+    unlocked: false
   },
   mutations: {
     SET_ACCOUNTS(state, accounts) {

@@ -49,10 +49,9 @@
 import { mapState, mapGetters } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
 import AccountsSection from "./AccountsSection";
-import WalletPasswordDialog from "../components/WalletPasswordDialog";
 import EventBus from "../EventBus";
 import UIConfig from "../../ui-config.json";
-import { AccountsController, LibraryController } from "../unity/Controllers"; 
+import { AccountsController } from "../unity/Controllers";
 
 export default {
   name: "WalletLayout",
@@ -114,16 +113,18 @@ export default {
           params: { id: this.miningAccount.UUID }
         });
       } else {
-        EventBus.$emit('unlock-wallet', { 
-          callback: (e) => this.trySetupMining(e),
-          title: 'setup_mining.title',
-          message: 'setup_mining.information',
-          timeout: 5
+        EventBus.$emit("unlock-wallet", {
+          callback: e => this.trySetupMining(e),
+          title: "Setup new mining account",
+          message: "Before you can start a new mining account needs to be created. Your wallet must be unlocked to create an account.",
+          timeout: 1
         });
       }
     },
     trySetupMining(e) {
-       let uuid = null;
+      if (!e) return;
+
+      let uuid = null;
 
       try {
         // NOTE:
@@ -156,9 +157,9 @@ export default {
     },
     changeLockSettings() {
       if (this.unlocked) {
-        EventBus.$emit('lock-wallet');
+        EventBus.$emit("lock-wallet");
       } else {
-        EventBus.$emit('unlock-wallet');
+        EventBus.$emit("unlock-wallet");
       }
     },
     closeRightSidebar() {
