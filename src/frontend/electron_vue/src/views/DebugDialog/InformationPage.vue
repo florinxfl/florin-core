@@ -13,15 +13,11 @@
       </div>
       <div class="flex-row">
         <div>Data dir</div>
-        <div class="pointer" title="Open the Florin data directory." @click="openDataDir">{{ clientInfo.datadir_path }}</div>
+        <div class="selectable">{{ clientInfo.datadir_path }}</div>
       </div>
       <div class="flex-row">
         <div>Log file</div>
-        <div
-          class="pointer"
-          title="Open the Florin debug log file from the current data directory. This can take a few seconds for large log files."
-          @click="openLogFile"
-        >
+        <div class="selectable">
           {{ clientInfo.logfile_path }}
         </div>
       </div>
@@ -74,7 +70,6 @@
 </template>
 
 <script>
-import { shell } from "electron";
 import { LibraryController } from "../../unity/Controllers";
 let timeout;
 
@@ -88,10 +83,10 @@ export default {
   name: "InformationPage",
   computed: {
     startupTime() {
-      return new Date(this.clientInfo.startup_timestamp * 1000).toLocaleString();
+      return this.formatDate(this.clientInfo.startup_timestamp);
     },
     lastBlockTime() {
-      return new Date(this.clientInfo.chain_tip_time * 1000);
+      return this.formatDate(this.clientInfo.chain_tip_time);
     },
     numberOfConnections() {
       let connections_in = parseInt(this.clientInfo.num_connections_in);
@@ -125,11 +120,17 @@ export default {
         this.updateClientInfo();
       }
     },
-    openDataDir() {
-      shell.openPath(this.clientInfo.datadir_path);
-    },
-    openLogFile() {
-      shell.openPath(this.clientInfo.logfile_path);
+    formatDate(timestamp) {
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleString(this.$i18n.locale, {
+        weekday: "short",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
     }
   }
 };
@@ -161,7 +162,7 @@ export default {
   }
 }
 
-.pointer {
-  cursor: pointer;
+.selectable {
+  user-select: all;
 }
 </style>

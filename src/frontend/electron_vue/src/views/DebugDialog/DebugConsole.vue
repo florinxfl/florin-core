@@ -88,7 +88,7 @@ export default {
       }, 0);
     },
     getIcon(type) {
-      return ["fal", `angle-double-${type === "command" ? "right" : "left"}`];
+      return ["fal", `angle-double-${type === "command" ? "left" : "right"}`];
     },
     async onRpcInputKeyDown(e) {
       this.autocomplete.disabled = false;
@@ -158,10 +158,15 @@ export default {
     },
     filterAutocompleteList() {
       if (this.autocomplete.disabled) return;
-      const listToFilter =
-        this.autocomplete.command == null || !this.command.startsWith(this.autocomplete.command) ? this.autocomplete.all : this.autocomplete.filtered;
-      this.autocomplete.filtered = listToFilter.filter(x => x.startsWith(this.command));
-      this.autocomplete.command = this.command;
+
+      let filteredList = [];
+      const command = this.command && this.command.trim().length > 0 ? this.command.trim() : null;
+      if (command) {
+        filteredList = command.startsWith(this.autocomplete.command) ? this.autocomplete.filtered : this.autocomplete.all;
+      }
+
+      this.autocomplete.filtered = filteredList.filter(x => x.startsWith(command));
+      this.autocomplete.command = command;
     }
   }
 };
@@ -215,6 +220,10 @@ export default {
   & > .icon {
     flex: 0 0 20px;
   }
+}
+
+.row:last-of-type {
+  margin-bottom: 10px;
 }
 
 pre {
