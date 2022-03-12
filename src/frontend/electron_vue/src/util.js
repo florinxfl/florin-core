@@ -1,6 +1,6 @@
 import store from "./store";
 
-export function formatMoneyForDisplay(monetaryAmount, isFiat) {
+export function formatMoneyForDisplay(monetaryAmount, isFiat = false, minimumAmountOfDecimals = null) {
   //fixme: This should truncate not round
   let decimalPlaces = 2;
 
@@ -8,6 +8,10 @@ export function formatMoneyForDisplay(monetaryAmount, isFiat) {
     decimalPlaces = 2;
   } else {
     decimalPlaces = store.state.app.decimals;
+  }
+
+  if (decimalPlaces < minimumAmountOfDecimals) {
+    decimalPlaces = minimumAmountOfDecimals;
   }
 
   return (monetaryAmount / 100000000).toFixed(decimalPlaces);
