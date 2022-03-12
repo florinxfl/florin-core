@@ -20,6 +20,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faAngleDoubleLeft,
+  faAngleDoubleRight,
   faArrowFromBottom,
   faArrowLeft,
   faArrowToBottom,
@@ -55,6 +56,7 @@ import { faListUl, faLongArrowDown } from "@fortawesome/pro-regular-svg-icons";
 
 library.add([
   faAngleDoubleLeft,
+  faAngleDoubleRight,
   faArrowFromBottom,
   faArrowLeft,
   faArrowToBottom,
