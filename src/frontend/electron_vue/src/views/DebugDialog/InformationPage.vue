@@ -5,23 +5,29 @@
 
       <div class="flex-row">
         <div>Client version</div>
-        <div class="ellipsis">{{ clientInfo.client_version }}</div>
+        <div>{{ clientInfo.client_version }}</div>
       </div>
       <div class="flex-row">
         <div>Useragent</div>
-        <div class="ellipsis">{{ clientInfo.user_agent }}</div>
+        <div>{{ clientInfo.user_agent }}</div>
       </div>
       <div class="flex-row">
         <div>Data dir</div>
-        <div class="ellipsis">{{ clientInfo.datadir_path }}</div>
+        <div class="pointer" title="Open the Florin data directory." @click="openDataDir">{{ clientInfo.datadir_path }}</div>
       </div>
       <div class="flex-row">
         <div>Log file</div>
-        <div class="ellipsis">{{ clientInfo.logfile_path }}</div>
+        <div
+          class="pointer"
+          title="Open the Florin debug log file from the current data directory. This can take a few seconds for large log files."
+          @click="openLogFile"
+        >
+          {{ clientInfo.logfile_path }}
+        </div>
       </div>
       <div class="flex-row">
         <div>Startup time</div>
-        <div class="ellipsis">{{ startupTime }}</div>
+        <div>{{ startupTime }}</div>
       </div>
     </app-section>
 
@@ -68,6 +74,7 @@
 </template>
 
 <script>
+import { shell } from "electron";
 import { LibraryController } from "../../unity/Controllers";
 let timeout;
 
@@ -81,7 +88,7 @@ export default {
   name: "InformationPage",
   computed: {
     startupTime() {
-      return new Date(this.clientInfo.startup_timestamp * 1000);
+      return new Date(this.clientInfo.startup_timestamp * 1000).toLocaleString();
     },
     lastBlockTime() {
       return new Date(this.clientInfo.chain_tip_time * 1000);
@@ -117,6 +124,12 @@ export default {
         this.enableTimeout = true;
         this.updateClientInfo();
       }
+    },
+    openDataDir() {
+      shell.openPath(this.clientInfo.datadir_path);
+    },
+    openLogFile() {
+      shell.openPath(this.clientInfo.logfile_path);
     }
   }
 };
@@ -126,15 +139,29 @@ export default {
 .information-page {
   width: 100%;
   height: 100%;
+
   & h4 {
-    margin: 0 0 10px 0;
+    margin-bottom: 5px;
   }
+  & h4:not(:first) {
+    margin-top: 5px;
+  }
+
   & .flex-row > div {
-    font-size: 0.95em;
+    font-size: 0.85rem;
     line-height: 20px;
   }
   & .flex-row :first-child {
-    min-width: 180px;
+    flex: 0 0 180px;
   }
+  & .flex-row :last-child {
+    flex: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}
+
+.pointer {
+  cursor: pointer;
 }
 </style>
