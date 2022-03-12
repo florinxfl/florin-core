@@ -30,7 +30,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { displayToMonetary, formatMoneyForDisplay } from "../../../util.js";
+import { formatMoneyForDisplay } from "../../../util.js";
 import { LibraryController, AccountsController } from "../../../unity/Controllers";
 import ConfirmTransactionDialog from "../SpendingAccount/ConfirmTransactionDialog";
 import EventBus from "@/EventBus";
@@ -85,31 +85,24 @@ export default {
       this.isPasswordInvalid = false;
     },
     showConfirmation() {
-      /*
-       todo:
-        - replace amount input by custom amount input (this one is too basic)
-        - improve notifications / messages on success and error
-       */
+      // use the original spendable amount to validate because when you convert the displayed amount back to monetary it can be higher than the original amount!
+      const amount = this.account.spendable;
 
-      // validate amount
-      let accountBalance = AccountsController.GetActiveAccountBalance();
-      let amountInvalid = accountBalance.availableExcludingLocked < displayToMonetary(this.amount);
-      // validate address
+      // validate the address
       let address = AccountsController.GetReceiveAddress(this.fundingAccount.UUID);
       let addressInvalid = !LibraryController.IsValidNativeAddress(address);
 
-      // wallet needs to be unlocked to make a payment
-      if (LibraryController.UnlockWallet(this.computedPassword) === false) {
-        this.isPasswordInvalid = true;
-      }
+      // validate password (confirmation dialog unlocks/locks when user confirms so don't leave it unlocked here)
+      this.isPasswordInvalid = !this.isPasswordValid(this.computedPassword);
 
-      if (amountInvalid || addressInvalid) return;
+      // fixme: when address is invalid the user does not know what's wrong because we don't show an error
+      if (addressInvalid || this.isPasswordInvalid) return;
 
       EventBus.$emit("show-dialog", {
         title: this.$t("send_coins.confirm_transaction"),
         component: ConfirmTransactionDialog,
         componentProps: {
-          amount: this.amount,
+          amount: amount,
           address: address,
           password: this.password,
           subtractFee: true
@@ -119,6 +112,12 @@ export default {
     },
     onTransactionSucceeded() {
       this.$router.push({ name: "account" });
+    },
+    isPasswordValid(password) {
+      // validation can only be done by unlocking the wallet, but make sure to lock the wallet afterwards
+      const isValid = LibraryController.UnlockWallet(password);
+      LibraryController.LockWallet();
+      return isValid;
     }
   }
 };

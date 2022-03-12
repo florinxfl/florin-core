@@ -130,25 +130,20 @@ export default {
       this.$refs.amount.focus();
     },
     showConfirmation() {
-      /*
-       todo:
-        - replace amount input by custom amount input (this one is too basic)
-        - improve notifications / messages on success and error
-       */
+      // use the original spendable amount to validate because when you convert the displayed amount back to monetary it can be higher than the original amount!
+      const amount = displayToMonetary(this.amount);
 
       // validate amount
       let accountBalance = AccountsController.GetActiveAccountBalance();
-      if (accountBalance.availableExcludingLocked < displayToMonetary(this.amount)) {
+      if (accountBalance.availableExcludingLocked < amount) {
         this.isAmountInvalid = true;
       }
 
       // validate address
       this.isAddressInvalid = !LibraryController.IsValidNativeAddress(this.address);
 
-      // wallet needs to be unlocked to make a payment
-      if (LibraryController.UnlockWallet(this.computedPassword) === false) {
-        this.isPasswordInvalid = true;
-      }
+      // validate password (confirmation dialog unlocks/locks when user confirms so don't leave it unlocked here)
+      this.isPasswordInvalid = !this.validatePassword(this.computedPassword);
 
       if (this.hasErrors) return;
 
@@ -156,7 +151,7 @@ export default {
         title: this.$t("send_coins.confirm_transaction"),
         component: ConfirmTransactionDialog,
         componentProps: {
-          amount: this.amount,
+          amount: amount,
           address: this.address,
           password: this.password,
           subtractFee: false
@@ -166,6 +161,12 @@ export default {
     },
     onTransactionSucceeded() {
       this.$router.push({ name: "transactions" });
+    },
+    validatePassword(password) {
+      // validation can only be done by unlocking the wallet, but make sure to lock the wallet afterwards
+      const isValid = LibraryController.UnlockWallet(password);
+      LibraryController.LockWallet();
+      return isValid;
     }
   }
 };
