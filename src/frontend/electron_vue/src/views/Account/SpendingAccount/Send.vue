@@ -4,17 +4,25 @@
       {{ $t("buttons.send") }}
     </portal>
     <div class="main">
-      <input
-        v-model="amount"
-        ref="amount"
-        type="number"
-        step="0.01"
-        placeholder="0.00"
-        :class="amountClass"
-        min="0"
-        :max="maxAmount"
-        @change="isAmountInvalid = false"
-      />
+      <div class="flex flex-row">
+        <input
+          v-model="amount"
+          ref="amount"
+          type="number"
+          step="0.00000001"
+          :placeholder="computedAmountPlaceholder"
+          min="0"
+          :readonly="computedAmountReadonly"
+        />
+        <div v-if="maxAmount > 0" class="max" @click="setUseMax">
+          <span>MAX</span>
+        </div>
+      </div>
+      <content-wrapper>
+        <p>
+          {{ this.useMax ? $t("send_coins.fee_will_be_subtracted") : "&nbsp;" }}
+        </p>
+      </content-wrapper>
       <input v-model="address" type="text" :placeholder="$t('send_coins.enter_coins_address')" :class="addressClass" @keydown="isAddressInvalid = false" />
       <input v-model="label" type="text" :placeholder="$t('send_coins.enter_label')" />
       <input
@@ -42,8 +50,8 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { displayToMonetary } from "../../../util.js";
-import { LibraryController, AccountsController } from "@/unity/Controllers";
+import { displayToMonetary, formatMoneyForDisplay } from "../../../util.js";
+import { LibraryController } from "@/unity/Controllers";
 import ConfirmTransactionDialog from "./ConfirmTransactionDialog";
 import EventBus from "@/EventBus";
 import { BackendUtilities } from "@/unity/Controllers";
@@ -58,21 +66,28 @@ export default {
       address: null,
       label: null,
       password: null,
-      isAmountInvalid: false,
       isAddressInvalid: false,
       isPasswordInvalid: false,
       sellDisabled: false,
+      useMax: false,
       UIConfig: UIConfig
     };
   },
   computed: {
     ...mapState("wallet", ["walletPassword"]),
+    ...mapState("app", ["decimals"]),
     ...mapGetters("wallet", ["account"]),
+    computedAmountReadonly() {
+      return this.maxAmount === 0 || this.useMax;
+    },
     computedPassword() {
       return this.walletPassword ? this.walletPassword : this.password || "";
     },
-    amountClass() {
-      return this.isAmountInvalid ? "error" : "";
+    computedAmountPlaceholder() {
+      return `0.${"0".repeat(this.decimals || 2)}`;
+    },
+    computedMaxForDisplay() {
+      return formatMoneyForDisplay(this.maxAmount);
     },
     addressClass() {
       return this.isAddressInvalid ? "error" : "";
@@ -81,7 +96,7 @@ export default {
       return this.isPasswordInvalid ? "error" : "";
     },
     hasErrors() {
-      return this.isAmountInvalid || this.isAddressInvalid || this.isPasswordInvalid;
+      return this.isAddressInvalid || this.isPasswordInvalid;
     },
     disableClearButton() {
       if (this.amount !== null && !isNaN(parseFloat(this.amount))) return false;
@@ -96,15 +111,35 @@ export default {
       return false;
     }
   },
-  created() {
-    this.maxAmount = Math.floor(AccountsController.GetActiveAccountBalance().availableExcludingLocked / 1000000) / 100;
-  },
   mounted() {
     this.$refs.amount.focus();
     EventBus.$on("transaction-succeeded", this.onTransactionSucceeded);
   },
   beforeDestroy() {
     EventBus.$off("transaction-succeeded", this.onTransactionSucceeded);
+  },
+  watch: {
+    account: {
+      immediate: true,
+      handler() {
+        this.maxAmount = this.account.spendable;
+      }
+    },
+    maxAmount() {
+      if (this.useMax) {
+        this.amount = this.computedMaxForDisplay;
+      }
+    },
+    amount() {
+      if (displayToMonetary(this.amount) >= this.maxAmount) {
+        this.useMax = true;
+      } else {
+        this.useMax = false;
+      }
+    },
+    useMax() {
+      this.amount = this.useMax ? this.computedMaxForDisplay : null;
+    }
   },
   methods: {
     async sellCoins() {
@@ -124,20 +159,16 @@ export default {
     },
     clearInput() {
       this.amount = null;
+      //this.useMax = false;
       this.address = null;
       this.password = null;
       this.label = null;
       this.$refs.amount.focus();
     },
     showConfirmation() {
-      // use the original spendable amount to validate because when you convert the displayed amount back to monetary it can be higher than the original amount!
-      const amount = displayToMonetary(this.amount);
-
-      // validate amount
-      let accountBalance = AccountsController.GetActiveAccountBalance();
-      if (accountBalance.availableExcludingLocked < amount) {
-        this.isAmountInvalid = true;
-      }
+      // amount is always less then or equal to the floored spendable amount
+      // if useMax is checked, use the maxAmount and subtract the fee from the amount
+      let amount = this.useMax ? this.maxAmount : displayToMonetary(this.amount);
 
       // validate address
       this.isAddressInvalid = !LibraryController.IsValidNativeAddress(this.address);
@@ -154,7 +185,7 @@ export default {
           amount: amount,
           address: this.address,
           password: this.password,
-          subtractFee: false
+          subtractFee: this.useMax
         },
         showButtons: false
       });
@@ -167,6 +198,9 @@ export default {
       const isValid = LibraryController.UnlockWallet(password);
       LibraryController.LockWallet();
       return isValid;
+    },
+    setUseMax() {
+      this.useMax = true;
     }
   }
 };
@@ -189,5 +223,16 @@ button {
 .stretch {
   margin: 0 30px;
   flex: 1;
+}
+
+.max {
+  line-height: 40px;
+  height: 40px;
+  font-weight: 600;
+  font-size: 0.75em;
+  background-color: var(--primary-color);
+  color: #f5f5f5;
+  padding: 0 20px;
+  cursor: pointer;
 }
 </style>

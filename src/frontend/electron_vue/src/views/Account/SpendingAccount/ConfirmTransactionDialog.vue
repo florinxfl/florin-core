@@ -2,16 +2,12 @@
   <div class="confirm-transaction-dialog">
     <div class="tx-amount">{{ computedAmount }}</div>
     <div class="tx-fee">{{ computedFee }}</div>
+    <div class="tx-fee-message" v-if="subtractFee">{{ $t("send_coins.fee_will_be_subtracted") }}</div>
     <div class="tx-to">
       <fa-icon :icon="['far', 'long-arrow-down']" />
     </div>
     <div class="tx-address">{{ address }}</div>
-    <div class="agree-fee" v-if="amountWithFeeExceedsBalance">
-      <div class="warning">The amount you want to send exceeds your balance when the transaction fee is included.</div>
-      <input type="checkbox" id="agree" v-model="agreeSubtractFee" />
-      <label for="agree">I agree to subtract the transaction fee from the amount.</label>
-    </div>
-    <button @click="confirm" :disabled="computedButtonDisabled" class="button">
+    <button @click="confirm" class="button">
       {{ $t("buttons.confirm") }}
     </button>
   </div>
@@ -20,31 +16,15 @@
 <script>
 import EventBus from "@/EventBus";
 import { formatMoneyForDisplay } from "../../../util.js";
-import { LibraryController, AccountsController } from "@/unity/Controllers";
+import { LibraryController } from "@/unity/Controllers";
 
 export default {
   name: "ConfirmTransactionDialog",
-  data() {
-    return {
-      fee: 0,
-      amountWithFeeExceedsBalance: false,
-      agreeSubtractFee: false
-    };
-  },
   props: {
     amount: null,
     address: null,
     password: null,
     subtractFee: null
-  },
-  mounted() {
-    this.fee = LibraryController.FeeForRecipient(this.computedRequest);
-
-    // if fee needs to be added it's possible the total amount exceeds the amount which is available for spending.
-    if (!this.subtractFee) {
-      let accountBalance = AccountsController.GetActiveAccountBalance();
-      this.amountWithFeeExceedsBalance = accountBalance.availableExcludingLocked < this.amount + this.fee;
-    }
   },
   computed: {
     computedRequest() {
@@ -61,13 +41,14 @@ export default {
     },
     computedFee() {
       return `${formatMoneyForDisplay(this.fee, false, 8)} ${this.$t("common.ticker_symbol")} FEE`;
-    },
-    computedButtonDisabled() {
-      if (!this.amountWithFeeExceedsBalance) return false;
-      return !this.agreeSubtractFee;
-    },
-    computedSubtractFee() {
-      return this.subtractFee || this.agreeSubtractFee;
+    }
+  },
+  watch: {
+    amount: {
+      immediate: true,
+      handler() {
+        this.fee = LibraryController.FeeForRecipient(this.computedRequest);
+      }
     }
   },
   methods: {
@@ -76,7 +57,7 @@ export default {
       LibraryController.UnlockWallet(this.password);
 
       // try to make the payment
-      let result = LibraryController.PerformPaymentToRecipient(this.computedRequest, this.computedSubtractFee);
+      let result = LibraryController.PerformPaymentToRecipient(this.computedRequest, this.subtractFee);
 
       if (result !== 0) {
         // payment failed, log an error. have to make this more robust
@@ -109,6 +90,10 @@ export default {
 .tx-fee {
   font-size: 0.9em;
 }
+.tx-fee-message {
+  font-size: 0.9em;
+  margin-top: 5px;
+}
 .tx-to {
   margin: 20px 0 10px 0;
   font-size: 1.6em;
@@ -116,18 +101,6 @@ export default {
 .tx-address {
   padding: 10px 0 40px 0;
   font-weight: 500;
-}
-.agree-fee {
-  margin-bottom: 40px;
-
-  & > .warning {
-    color: var(--error-color);
-    margin-bottom: 10px;
-  }
-
-  & > input {
-    margin-right: 5px;
-  }
 }
 .button {
   width: 100%;
