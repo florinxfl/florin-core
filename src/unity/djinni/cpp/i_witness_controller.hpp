@@ -36,4 +36,7 @@ public:
 
     /** Check state of compounding */
     static bool isAccountCompounding(const std::string & witnessAccountUUID);
+
+    /** Get the witness address of the account */
+    static std::string getWitnessAddress(const std::string & witnessAccountUUID);
 };

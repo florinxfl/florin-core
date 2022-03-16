@@ -354,6 +354,8 @@ declare class NJSIWitnessController
     static declare function setAccountCompounding(witnessAccountUUID: string, should_compound: boolean);
     /** Check state of compounding */
     static declare function isAccountCompounding(witnessAccountUUID: string): boolean;
+    /** Get the witness address of the account */
+    static declare function getWitnessAddress(witnessAccountUUID: string): string;
 }
 /** C++ interface to control generation of blocks (proof of work) */
 declare class NJSIGenerationController

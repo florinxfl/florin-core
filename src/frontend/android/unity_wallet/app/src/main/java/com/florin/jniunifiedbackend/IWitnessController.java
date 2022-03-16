@@ -56,6 +56,12 @@ public abstract class IWitnessController {
         return CppProxy.isAccountCompounding(witnessAccountUUID);
     }
 
+    /** Get the witness address of the account */
+    public static String getWitnessAddress(String witnessAccountUUID)
+    {
+        return CppProxy.getWitnessAddress(witnessAccountUUID);
+    }
+
     private static final class CppProxy extends IWitnessController
     {
         private final long nativeRef;
@@ -92,5 +98,7 @@ public abstract class IWitnessController {
         public static native void setAccountCompounding(String witnessAccountUUID, boolean shouldCompound);
 
         public static native boolean isAccountCompounding(String witnessAccountUUID);
+
+        public static native String getWitnessAddress(String witnessAccountUUID);
     }
 }

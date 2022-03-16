@@ -48,5 +48,8 @@ private:
     /** Check state of compounding */
     Napi::Value isAccountCompounding(const Napi::CallbackInfo& info);
 
+    /** Get the witness address of the account */
+    Napi::Value getWitnessAddress(const Napi::CallbackInfo& info);
+
 };
 #endif //DJINNI_GENERATED_NJSIWITNESSCONTROLLER_HPP

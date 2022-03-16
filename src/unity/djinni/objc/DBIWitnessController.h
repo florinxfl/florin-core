@@ -37,4 +37,7 @@
 /** Check state of compounding */
 + (BOOL)isAccountCompounding:(nonnull NSString *)witnessAccountUUID;
 
+/** Get the witness address of the account */
++ (nonnull NSString *)getWitnessAddress:(nonnull NSString *)witnessAccountUUID;
+
 @end

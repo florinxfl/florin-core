@@ -365,3 +365,20 @@ bool IWitnessController::isAccountCompounding(const std::string& witnessAccountU
     }
     return false;
 }
+
+std::string IWitnessController::getWitnessAddress(const std::string& witnessAccountUUID)
+{
+    if (pactiveWallet)
+    {
+        LOCK2(cs_main, pactiveWallet->cs_wallet);
+    
+        auto findIter = pactiveWallet->mapAccounts.find(getUUIDFromString(witnessAccountUUID));
+        if (findIter != pactiveWallet->mapAccounts.end())
+        {
+            CAccount* witnessAccount = findIter->second;
+            
+            return witnessAddressForAccount(pactiveWallet, witnessAccount);
+        }
+    }
+    return "";
+}
