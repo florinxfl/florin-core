@@ -5,18 +5,10 @@
     </portal>
     <div class="main">
       <div class="flex flex-row">
-        <input
-          v-model="amount"
-          ref="amount"
-          type="number"
-          step="0.00000001"
-          :placeholder="computedAmountPlaceholder"
-          min="0"
-          :readonly="computedAmountReadonly"
-        />
-        <div v-if="maxAmount > 0" class="max" @click="setUseMax">
-          <span>MAX</span>
-        </div>
+        <input v-model="amount" ref="amount" type="number" step="0.00000001" :placeholder="computedAmountPlaceholder" min="0" />
+        <button v-if="maxAmount > 0" outlined @click="setUseMax" :disabled="useMax">
+          max
+        </button>
       </div>
       <content-wrapper>
         <p>
@@ -34,17 +26,10 @@
         @keydown="onPasswordKeydown"
       />
     </div>
-    <div class="flex-row">
-      <button @click="clearInput" outlined :disabled="disableClearButton">
-        {{ $t("buttons.clear") }}
-      </button>
-      <button class="stretch" @click="showConfirmation" :disabled="disableSendButton">
-        {{ $t("buttons.send") }}
-      </button>
-      <button @click="sellCoins" :disabled="sellDisabled">
-        {{ $t("buttons.sell_coins") }}
-      </button>
-    </div>
+
+    <button class="send" @click="showConfirmation" :disabled="disableSendButton">
+      {{ $t("buttons.send") }}
+    </button>
   </div>
 </template>
 
@@ -77,17 +62,14 @@ export default {
     ...mapState("wallet", ["walletPassword"]),
     ...mapState("app", ["decimals"]),
     ...mapGetters("wallet", ["account"]),
-    computedAmountReadonly() {
-      return this.maxAmount === 0 || this.useMax;
-    },
     computedPassword() {
       return this.walletPassword ? this.walletPassword : this.password || "";
     },
     computedAmountPlaceholder() {
-      return `0.${"0".repeat(this.decimals || 2)}`;
+      return `0.${"0".repeat(this.decimals)}`;
     },
     computedMaxForDisplay() {
-      return formatMoneyForDisplay(this.maxAmount);
+      return formatMoneyForDisplay(this.maxAmount, false, 8);
     },
     addressClass() {
       return this.isAddressInvalid ? "error" : "";
@@ -97,12 +79,6 @@ export default {
     },
     hasErrors() {
       return this.isAddressInvalid || this.isPasswordInvalid;
-    },
-    disableClearButton() {
-      if (this.amount !== null && !isNaN(parseFloat(this.amount))) return false;
-      if (this.address !== null && this.address.length > 0) return false;
-      if (this.password !== null && this.password.length > 0) return false;
-      return true;
     },
     disableSendButton() {
       if (isNaN(parseFloat(this.amount))) return true;
@@ -131,6 +107,12 @@ export default {
       }
     },
     amount() {
+      // this while prevent entering more decimals than the selected decimals
+      let decimalIdx = this.amount.indexOf(".");
+      if (decimalIdx > -1 && this.amount.length - decimalIdx > 8) {
+        this.amount = this.amount.substr(0, decimalIdx + 8 + 1);
+      }
+
       if (displayToMonetary(this.amount) >= this.maxAmount) {
         this.useMax = true;
       } else {
@@ -138,7 +120,9 @@ export default {
       }
     },
     useMax() {
-      this.amount = this.useMax ? this.computedMaxForDisplay : null;
+      if (this.useMax) {
+        this.amount = this.computedMaxForDisplay;
+      }
     }
   },
   methods: {
@@ -156,14 +140,6 @@ export default {
     },
     onPasswordKeydown() {
       this.isPasswordInvalid = false;
-    },
-    clearInput() {
-      this.amount = null;
-      //this.useMax = false;
-      this.address = null;
-      this.password = null;
-      this.label = null;
-      this.$refs.amount.focus();
     },
     showConfirmation() {
       // amount is always less then or equal to the floored spendable amount
@@ -216,23 +192,11 @@ export default {
   }
 }
 
-button {
-  width: 150px;
+button.send {
+  width: 100%;
 }
 
-.stretch {
-  margin: 0 30px;
-  flex: 1;
-}
-
-.max {
-  line-height: 40px;
-  height: 40px;
-  font-weight: 600;
-  font-size: 0.75em;
-  background-color: var(--primary-color);
-  color: #f5f5f5;
-  padding: 0 20px;
-  cursor: pointer;
+button[outlined] {
+  margin-left: 10px;
 }
 </style>

@@ -37,7 +37,7 @@ export default {
       };
     },
     computedAmount() {
-      return `${formatMoneyForDisplay(this.amount)} ${this.$t("common.ticker_symbol")}`;
+      return `${formatMoneyForDisplay(this.amount, false, 8)} ${this.$t("common.ticker_symbol")}`;
     },
     computedFee() {
       return `${formatMoneyForDisplay(this.fee, false, 8)} ${this.$t("common.ticker_symbol")} FEE`;

@@ -6,7 +6,7 @@
 
     <div class="main">
       <app-form-field>
-        <input v-model="amount" ref="amount" type="text" readonly />
+        <input v-model="computedAmount" ref="amount" type="text" readonly />
       </app-form-field>
       <app-form-field title="send_coins.target_account">
         <select-list :options="fundingAccounts" :default="fundingAccount" v-model="fundingAccount" />
@@ -39,7 +39,6 @@ export default {
   name: "Send",
   data() {
     return {
-      amount: null,
       address: null,
       password: null,
       fundingAccount: null,
@@ -49,6 +48,9 @@ export default {
   computed: {
     ...mapState("wallet", ["walletPassword"]),
     ...mapGetters("wallet", ["accounts", "account"]),
+    computedAmount() {
+      return formatMoneyForDisplay(this.account.spendable, false, 8);
+    },
     computedPassword() {
       return this.walletPassword ? this.walletPassword : this.password || "";
     },
@@ -62,19 +64,13 @@ export default {
       return this.isPasswordInvalid;
     },
     disableSendButton() {
-      if (isNaN(parseFloat(this.amount))) return true;
+      if (this.account.spendable <= 0) return true;
       if (this.computedPassword.trim().length === 0) return true;
       return false;
     }
   },
   mounted() {
     this.$refs.amount.focus();
-    if (this.fundingAccounts.length) {
-      this.fundingAccount = this.fundingAccounts[0];
-    }
-
-    this.amount = formatMoneyForDisplay(this.account.spendable);
-
     EventBus.$on("transaction-succeeded", this.onTransactionSucceeded);
   },
   beforeDestroy() {
