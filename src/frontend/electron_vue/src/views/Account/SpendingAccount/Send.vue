@@ -1,14 +1,9 @@
 <template>
   <div class="send-view flex-col">
-    <portal v-if="UIConfig.showSidebar" to="sidebar-right-title">
-      {{ $t("buttons.send") }}
-    </portal>
     <div class="main">
       <div class="flex flex-row">
         <input v-model="amount" ref="amount" type="number" step="0.00000001" :placeholder="computedAmountPlaceholder" min="0" />
-        <button v-if="maxAmount > 0" outlined @click="setUseMax" :disabled="useMax">
-          max
-        </button>
+        <button v-if="maxAmount > 0" outlined class="max" @click="setUseMax" :disabled="useMax">max</button>
       </div>
       <content-wrapper>
         <p>
@@ -26,10 +21,12 @@
         @keydown="onPasswordKeydown"
       />
     </div>
-
-    <button class="send" @click="showConfirmation" :disabled="disableSendButton">
-      {{ $t("buttons.send") }}
-    </button>
+    <div class="flex-row">
+      <button class="send" @click="showConfirmation" :disabled="disableSendButton">
+        {{ $t("buttons.send") }}
+      </button>
+      <button class="clear" outlined @click="clearInputs" :disabled="disableClearButton">{{ $t("buttons.clear") }}</button>
+    </div>
   </div>
 </template>
 
@@ -40,22 +37,20 @@ import { LibraryController } from "@/unity/Controllers";
 import ConfirmTransactionDialog from "./ConfirmTransactionDialog";
 import EventBus from "@/EventBus";
 import { BackendUtilities } from "@/unity/Controllers";
-import UIConfig from "../../../../ui-config.json";
 
 export default {
   name: "Send",
   data() {
     return {
-      amount: null,
+      amount: "",
       maxAmount: null,
-      address: null,
-      label: null,
-      password: null,
+      address: "",
+      label: "",
+      password: "",
       isAddressInvalid: false,
       isPasswordInvalid: false,
       sellDisabled: false,
-      useMax: false,
-      UIConfig: UIConfig
+      useMax: false
     };
   },
   computed: {
@@ -85,6 +80,9 @@ export default {
       if (this.address === null || this.address.trim().length === 0) return true;
       if (this.computedPassword.trim().length === 0) return true;
       return false;
+    },
+    disableClearButton() {
+      return this.amount === "" && this.address === "" && this.label === "" && this.password === "";
     }
   },
   mounted() {
@@ -107,10 +105,10 @@ export default {
       }
     },
     amount() {
-      // this while prevent entering more decimals than the selected decimals
-      let decimalIdx = this.amount.indexOf(".");
-      if (decimalIdx > -1 && this.amount.length - decimalIdx > 8) {
-        this.amount = this.amount.substr(0, decimalIdx + 8 + 1);
+      // this will prevent entering more than 8 decimals
+      const idx = this.amount.indexOf(".");
+      if (idx !== -1 && idx + 9 < this.amount.length) {
+        this.amount = this.amount.slice(0, idx + 9);
       }
 
       if (displayToMonetary(this.amount) >= this.maxAmount) {
@@ -126,6 +124,13 @@ export default {
     }
   },
   methods: {
+    clearInputs() {
+      this.amount = "";
+      this.address = "";
+      this.label = "";
+      this.password = "";
+      this.$refs.amount.focus();
+    },
     async sellCoins() {
       try {
         this.sellDisabled = true;
@@ -192,11 +197,13 @@ export default {
   }
 }
 
-button.send {
-  width: 100%;
+button.max,
+button.clear {
+  margin-left: 10px;
+  padding: 0 15px;
 }
 
-button[outlined] {
-  margin-left: 10px;
+button.send {
+  width: 100%;
 }
 </style>

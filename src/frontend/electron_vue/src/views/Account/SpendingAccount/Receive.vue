@@ -16,14 +16,6 @@
       <clipboard-field class="address" :value="receiveAddress" confirmation="receive_coins.address_copied_to_clipboard"></clipboard-field>
       <div class="flex-1" />
     </div>
-    <div class="flex-1" />
-    <app-button-section>
-      <template v-slot:middle>
-        <button @click="buyCoins" class="buy-coins" :disabled="buyDisabled">
-          {{ $t("buttons.buy_coins") }}
-        </button>
-      </template>
-    </app-button-section>
   </div>
 </template>
 
@@ -31,7 +23,6 @@
 import { mapState } from "vuex";
 import VueQrcode from "vue-qrcode";
 import { clipboard, nativeImage } from "electron";
-import { BackendUtilities } from "@/unity/Controllers";
 import UIConfig from "../../../../ui-config.json";
 import ContentWrapper from "../../../components/layout/ContentWrapper.vue";
 
@@ -43,7 +34,6 @@ export default {
   },
   data() {
     return {
-      buyDisabled: false,
       UIConfig: UIConfig
     };
   },
@@ -51,18 +41,6 @@ export default {
     ...mapState("wallet", ["receiveAddress"])
   },
   methods: {
-    async buyCoins() {
-      try {
-        this.buyDisabled = true;
-        let url = await BackendUtilities.GetBuySessionUrl();
-        if (!url) {
-          url = "https://florin.org/buy";
-        }
-        window.open(url, "buy-florin");
-      } finally {
-        this.buyDisabled = false;
-      }
-    },
     copyQr() {
       let img = nativeImage.createFromDataURL(this.$refs.qrcode.$el.src);
       clipboard.writeImage(img);

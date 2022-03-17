@@ -1,35 +1,36 @@
 <template>
   <div class="account-header">
-    <div v-if="!editMode" class="display-mode" @click="editName">
-      <div class="flex flex-row">
-        <div class="name ellipsis flex-1">
-          {{ name }}
+    <div class="flex-row" v-if="!editMode">
+      <div class="left-colum" @click="editName">
+        <div class="flex-row flex-1">
+          <div class="accountname ellipsis">{{ name }}</div>
+          <fa-icon class="pen" :icon="['fal', 'fa-pen']" />
         </div>
-        <div class="icon-bar">
-          <fa-icon :icon="['fal', 'fa-pen']" />
+        <div class="balance-row">
+          <span>{{ balanceForDisplay }}</span>
+          <span>{{ totalBalanceFiat }}</span>
         </div>
       </div>
-      <div class="balance ellipsis">
-        {{ balance }}
-      </div>
+      <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">buy</button>
+      <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">sell</button>
     </div>
-    <div v-else class="flex flex-row">
-      <input class="flex-1" ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" />
-    </div>
+    <input v-else ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" @blur="cancelEdit" />
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import { AccountsController } from "../unity/Controllers";
 import { formatMoneyForDisplay } from "../util.js";
+import { AccountsController, BackendUtilities } from "@/unity/Controllers";
 
 export default {
   name: "AccountHeader",
   data() {
     return {
       editMode: false,
-      newAccountName: null
+      newAccountName: null,
+      buyDisabled: false,
+      sellDisabled: false
     };
   },
   props: {
@@ -39,7 +40,7 @@ export default {
     }
   },
   computed: {
-    ...mapState("app", ["rate", "activityIndicator"]),
+    ...mapState("app", ["rate"]),
     name() {
       return this.account.label;
     },
@@ -48,10 +49,7 @@ export default {
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
-      return `€ ${formatMoneyForDisplay(
-        this.account.balance * this.rate,
-        true
-      )}`;
+      return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
     },
     balanceForDisplay() {
       if (this.account.balance == null) return "";
@@ -89,35 +87,90 @@ export default {
         AccountsController.RenameAccount(this.account.UUID, this.newAccountName);
       }
       this.editMode = false;
+    },
+    cancelEdit() {
+      this.editMode = false;
+    },
+    async sellCoins() {
+      try {
+        this.sellDisabled = true;
+        let url = await BackendUtilities.GetSellSessionUrl();
+        if (!url) {
+          url = "https://florin.org/sell";
+        }
+        window.open(url, "sell-florin");
+      } finally {
+        this.sellDisabled = false;
+      }
+    },
+    async buyCoins() {
+      try {
+        this.buyDisabled = true;
+        let url = await BackendUtilities.GetBuySessionUrl();
+        if (!url) {
+          url = "https://florin.org/buy";
+        }
+        window.open(url, "buy-florin");
+      } finally {
+        this.buyDisabled = false;
+      }
     }
   }
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .account-header {
   width: 100%;
   height: var(--header-height);
-  line-height: 20px;
+  line-height: 40px;
   padding: calc((var(--header-height) - 40px) / 2) 0;
 }
 
-.display-mode {
+.left-colum {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  height: 40px;
   cursor: pointer;
+  position: relative;
 }
 
-.name {
-  font-size: 1.1em;
+.balance-row {
+  line-height: 20px;
+  font-size: 0.9em;
+
+  & :first-child {
+    margin-right: 10px;
+  }
+}
+
+button.small {
+  height: 20px;
+  line-height: 20px;
+  font-size: 10px;
+  padding: 0 10px;
+  margin-left: 5px;
+}
+
+.accountname {
+  flex: 1;
+  font-size: 1em;
   font-weight: 500;
+  line-height: 20px;
+  margin-right: 30px;
+}
+
+.pen {
+  display: none;
+  position: absolute;
+  right: 5px;
   line-height: 20px;
 }
 
-.account-header:hover .icon-bar {
+.left-colum:hover .pen {
   display: block;
-}
-
-.icon-bar {
-  display: none;
-  cursor: pointer;
 }
 </style>
