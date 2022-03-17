@@ -8,6 +8,33 @@
 
     <app-section v-if="isMiningView">
       <div v-if="!isActive">
+        <div>
+          <app-form-field title="mining.address">
+            <div class="address-container">
+              <div @click="editAddress" v-if="!editMiningAddress" class="address-row">
+                <p class="address-value">{{ miningAddress }}</p>
+              </div>
+              <div v-else class="flex flex-row" style="width: 100%">
+                <input :class="computedStatus" ref="miningAddressInput" type="text" v-model="newMiningAddress" @keydown="onKeydown" />
+              </div>
+              <div class="action-row" v-if="!editMiningAddress">
+                <div @click="copyToClipboard" class="action-icon">
+                  <fa-icon :icon="['fal', 'copy']" />
+                </div>
+                <div @click="resetOverrideAddress" class="action-icon" v-if="usingOverride">
+                  <fa-icon :icon="['fal', 'undo']" />
+                </div>
+                <div @click="editAddress" class="action-icon">
+                  <fa-icon :icon="['fal', 'pen']" />
+                </div>
+              </div>
+            </div>
+            <div style="height: 10px">
+              <span class="copy-confirmation" v-if="confirmCopy"> {{ $t(confirmation) }} </span>
+            </div>
+          </app-form-field>
+        </div>
+
         <app-form-field title="mining.number_of_threads">
           <div class="flex-row">
             <vue-slider :min="1" :max="availableCores" :value="currentThreadCount" v-model="currentThreadCount" class="slider" :disabled="isActive" />
@@ -113,14 +140,18 @@
 <script>
 import { mapState } from "vuex";
 import { formatMoneyForDisplay } from "../../../util.js";
-import { GenerationController } from "../../../unity/Controllers";
-
+import { GenerationController, LibraryController } from "../../../unity/Controllers";
+import { clipboard } from "electron";
 import Send from "./Send";
 
 export default {
   name: "MiningAccount",
   props: {
-    account: null
+    account: null,
+    confirmation: {
+      type: String,
+      default: "clipboard_field.copied_to_clipboard"
+    }
   },
   data() {
     return {
@@ -131,7 +162,13 @@ export default {
       minimumMemory: 0,
       maximumMemory: 0,
       generationButtonDisabled: false,
-      rightSidebar: null
+      rightSidebar: null,
+      miningAddress: null,
+      editMiningAddress: false,
+      newMiningAddress: null,
+      addressInvalid: false,
+      usingOverride: false,
+      confirmCopy: false
     };
   },
   created() {
@@ -143,6 +180,14 @@ export default {
     this.minimumMemory = 1; // for now just use 1 Gb as a minimum
     this.maximumMemory = Math.floor(GenerationController.GetMaximumMemory() / 1024);
     this.currentMemorySize = this.settings.memorySize || this.maximumMemory;
+    const overrideAddress = GenerationController.GetGenerationOverrideAddress();
+    if (overrideAddress) {
+      this.miningAddress = overrideAddress;
+      this.usingOverride = true;
+    } else {
+      this.miningAddress = GenerationController.GetGenerationAddress();
+      this.usingOverride = false;
+    }
   },
   computed: {
     ...mapState("mining", {
@@ -176,6 +221,9 @@ export default {
     },
     rightSidebarProps() {
       return null;
+    },
+    computedStatus() {
+      return this.addressInvalid ? "error" : "";
     }
   },
   watch: {
@@ -220,6 +268,58 @@ export default {
       const current = stats[which];
       const result = /[a-z]/i.exec(current);
       return result === null ? `${current}${postfix}` : `${current.substr(0, result.index)} ${current.substr(result.index)}${postfix}`;
+    },
+    editAddress() {
+      this.newMiningAddress = this.miningAddress;
+      this.editMiningAddress = true;
+      this.$nextTick(() => {
+        this.$refs["miningAddressInput"].focus();
+      });
+    },
+    onKeydown(e) {
+      switch (e.keyCode) {
+        case 13:
+          this.changeAccountAddress();
+          break;
+        case 27:
+          this.editMiningAddress = false;
+          break;
+      }
+    },
+    changeAccountAddress() {
+      if (this.newMiningAddress === "") {
+        this.resetOverrideAddress();
+        return;
+      }
+      if (this.newMiningAddress === this.miningAddress) {
+        return;
+      }
+
+      this.addressInvalid = !LibraryController.IsValidNativeAddress(this.newMiningAddress);
+
+      if (this.addressInvalid) {
+        return;
+      }
+
+      GenerationController.SetGenerationOverrideAddress(this.newMiningAddress);
+      this.miningAddress = this.newMiningAddress;
+      this.usingOverride = true;
+      this.editMiningAddress = false;
+    },
+    resetOverrideAddress() {
+      GenerationController.SetGenerationOverrideAddress("");
+      this.miningAddress = GenerationController.GetGenerationAddress();
+      this.usingOverride = false;
+      this.editMiningAddress = false;
+    },
+    copyToClipboard() {
+      clipboard.writeText(this.miningAddress);
+      if (this.confirmation) {
+        this.confirmCopy = true;
+        setTimeout(() => {
+          this.confirmCopy = false;
+        }, 1500);
+      }
     }
   }
 };
@@ -230,6 +330,54 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.address-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 40px;
+}
+
+.address-row {
+  height: 40px;
+  margin: 0 -10px;
+  padding: 10px;
+  flex: 1;
+}
+
+.address-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.action-row {
+  width: 100px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+}
+
+.action-icon:hover {
+  color: var(--primary-color);
+  background: var(--hover-color);
+}
+
+.copy-confirmation {
+  width: calc(100%) !important;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .slider {
