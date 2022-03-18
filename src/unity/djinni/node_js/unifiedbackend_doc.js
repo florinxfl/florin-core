@@ -161,6 +161,7 @@ declare class NJSIWalletController
 /** Interface to receive wallet level events */
 declare class NJSIWalletListener
 {
+    /** Notification of change in overall wallet balance */
     declare function notifyBalanceChange(new_balance: BalanceRecord);
     /**
      * Notification of new mutations.
@@ -180,6 +181,14 @@ declare class NJSIWalletListener
      * Therefore it is necessary to first fetch the full mutation history before starting to listen for this event.
      */
     declare function notifyUpdatedTransaction(transaction: TransactionRecord);
+    /** Wallet unlocked */
+    declare function notifyWalletUnlocked();
+    /** Wallet locked */
+    declare function notifyWalletLocked();
+    /** Core wants the wallet to unlock; UI should respond to this by calling 'UnlockWallet' */
+    declare function notifyCoreWantsUnlock(reason: string);
+    /** Core wants display info to the user, type can be one of "MSG_ERROR", "MSG_WARNING", "MSG_INFORMATION"; caption is the suggested caption and message the suggested message to display */
+    declare function notifyCoreInfo(type: string, caption: string, message: string);
 }
 /** Monitoring events */
 declare class NJSMonitorListener

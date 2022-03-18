@@ -316,7 +316,9 @@ i_wallet_controller = interface +c {
 
 # Interface to receive wallet level events
 i_wallet_listener = interface +j +o +n {
+    # Notification of change in overall wallet balance
     notifyBalanceChange(new_balance : balance_record): &;
+    
     # Notification of new mutations.
     # If self_committed it is due to a call to performPaymentToRecipient, else it is because of a transaction
     # reached us in another way. In general this will be because we received funds from someone, hower there are
@@ -332,6 +334,18 @@ i_wallet_listener = interface +j +o +n {
     # Note that no notifyUpdatedTransaction events will fire until after 'notifySyncDone'
     # Therefore it is necessary to first fetch the full mutation history before starting to listen for this event.
     notifyUpdatedTransaction(transaction : transaction_record): &;
+    
+    # Wallet unlocked
+    notifyWalletUnlocked(): &;
+    
+    # Wallet locked
+    notifyWalletLocked(): &;
+    
+    # Core wants the wallet to unlock; UI should respond to this by calling 'UnlockWallet'
+    notifyCoreWantsUnlock(reason : string): &;
+    
+    # Core wants display info to the user, type can be one of "MSG_ERROR", "MSG_WARNING", "MSG_INFORMATION"; caption is the suggested caption and message the suggested message to display
+    notifyCoreInfo(type : string, caption : string, message : string): &;
 }
 
 # monitoring stats
