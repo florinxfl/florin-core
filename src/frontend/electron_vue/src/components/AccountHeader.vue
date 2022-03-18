@@ -11,8 +11,10 @@
           <span>{{ totalBalanceFiat }}</span>
         </div>
       </div>
-      <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">buy</button>
-      <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">sell</button>
+      <div v-if="isSpending">
+        <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">buy</button>
+        <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">sell</button>
+      </div>
     </div>
     <input v-else ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" @blur="cancelEdit" />
   </div>
@@ -54,6 +56,9 @@ export default {
     balanceForDisplay() {
       if (this.account.balance == null) return "";
       return formatMoneyForDisplay(this.account.balance);
+    },
+    isSpending() {
+      return this.account.type === "Desktop";
     }
   },
   watch: {
