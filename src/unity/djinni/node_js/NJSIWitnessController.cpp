@@ -223,8 +223,8 @@ Napi::Value NJSIWitnessController::getAccountWitnessStatistics(const Napi::Callb
         arg_1.Set("account_estimated_witness_period_in_blocks", arg_1_13);
         auto arg_1_14 = Napi::Value::From(env, result.account_initial_lock_creation_block_height);
         arg_1.Set("account_initial_lock_creation_block_height", arg_1_14);
-        auto arg_1_15 = Napi::Value::From(env, result.account_is_compounding);
-        arg_1.Set("account_is_compounding", arg_1_15);
+        auto arg_1_15 = Napi::Value::From(env, result.compounding_percent);
+        arg_1.Set("compounding_percent", arg_1_15);
 
 
         return arg_1;
@@ -252,7 +252,7 @@ void NJSIWitnessController::setAccountCompounding(const Napi::CallbackInfo& info
 
     //Check if parameters have correct types
     std::string arg_0 = info[0].As<Napi::String>();
-    auto arg_1 = info[1].ToBoolean().Value();
+    auto arg_1 = info[1].ToNumber().Int32Value();
     try
     {
         IWitnessController::setAccountCompounding(arg_0,arg_1);

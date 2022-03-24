@@ -45,7 +45,7 @@ private:
     /** Turn compounding on/off */
     void setAccountCompounding(const Napi::CallbackInfo& info);
 
-    /** Check state of compounding */
+    /** Check state of compounding; returns a percentage between 1 and 100, or 0 if not compounding */
     Napi::Value isAccountCompounding(const Napi::CallbackInfo& info);
 
     /** Get the witness address of the account */

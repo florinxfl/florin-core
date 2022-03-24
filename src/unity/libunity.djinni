@@ -584,8 +584,8 @@ witness_account_statistics_record = record {
     # Height at which the account lock first entered the chain
     account_initial_lock_creation_block_height : i64;
 
-    # Is this account currently set to compound
-    account_is_compounding : bool;
+    # How much of the reward that this account earns is set to be compound
+    compounding_percent : i32;
 } deriving(parcelable)
 
 # C++ interface to control witness accounts
@@ -606,10 +606,10 @@ i_witness_controller = interface +c {
     static getAccountWitnessStatistics(witnessAccountUUID : string) : witness_account_statistics_record;
     
     # Turn compounding on/off
-    static setAccountCompounding(witnessAccountUUID : string, should_compound : bool);
+    static setAccountCompounding(witnessAccountUUID : string, percent_to_compount : i32);
     
-    # Check state of compounding
-    static isAccountCompounding(witnessAccountUUID : string) : bool;
+    # Check state of compounding; returns a percentage between 1 and 100, or 0 if not compounding
+    static isAccountCompounding(witnessAccountUUID : string) : i32;
     
     # Get the witness address of the account
     static getWitnessAddress(witnessAccountUUID : string): string;

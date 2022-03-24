@@ -46,7 +46,7 @@ void NotifyRequestUnlockS(CWallet* wallet, std::string reason)
     }
 }
 
-static void NotifyRequestUnlockWithCallbackS(CWallet* wallet, std::string reason, std::function<void (void)> successCallback)
+void NotifyRequestUnlockWithCallbackS(CWallet* wallet, std::string reason, std::function<void (void)> successCallback)
 {
     if (walletListener)
     {

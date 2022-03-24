@@ -360,9 +360,9 @@ declare class NJSIWitnessController
     /** Get information on account weight and other witness statistics for account */
     static declare function getAccountWitnessStatistics(witnessAccountUUID: string): WitnessAccountStatisticsRecord;
     /** Turn compounding on/off */
-    static declare function setAccountCompounding(witnessAccountUUID: string, should_compound: boolean);
-    /** Check state of compounding */
-    static declare function isAccountCompounding(witnessAccountUUID: string): boolean;
+    static declare function setAccountCompounding(witnessAccountUUID: string, percent_to_compount: number);
+    /** Check state of compounding; returns a percentage between 1 and 100, or 0 if not compounding */
+    static declare function isAccountCompounding(witnessAccountUUID: string): number;
     /** Get the witness address of the account */
     static declare function getWitnessAddress(witnessAccountUUID: string): string;
 }
