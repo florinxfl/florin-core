@@ -207,9 +207,9 @@ public abstract class ILibraryController {
         return CppProxy.LockWallet();
     }
 
-    public static boolean IsWalletLocked()
+    public static WalletLockStatus GetWalletLockStatus()
     {
-        return CppProxy.IsWalletLocked();
+        return CppProxy.GetWalletLockStatus();
     }
 
     /** Change the wallet password */
@@ -446,7 +446,7 @@ public abstract class ILibraryController {
 
         public static native boolean LockWallet();
 
-        public static native boolean IsWalletLocked();
+        public static native WalletLockStatus GetWalletLockStatus();
 
         public static native boolean ChangePassword(String oldPassword, String newPassword);
 

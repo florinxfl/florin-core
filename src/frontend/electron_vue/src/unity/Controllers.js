@@ -146,12 +146,12 @@ class LibraryController {
     return handleError(ipc.sendSync("NJSILibraryController.LockWallet"));
   }
 
-  static async IsWalletLockedAsync() {
-    return handleError(await ipc.callMain("NJSILibraryController.IsWalletLockedAsync"));
+  static async GetWalletLockStatusAsync() {
+    return handleError(await ipc.callMain("NJSILibraryController.GetWalletLockStatusAsync"));
   }
 
-  static IsWalletLocked() {
-    return handleError(ipc.sendSync("NJSILibraryController.IsWalletLocked"));
+  static GetWalletLockStatus() {
+    return handleError(ipc.sendSync("NJSILibraryController.GetWalletLockStatus"));
   }
 
   static async ChangePasswordAsync(oldPassword, newPassword) {

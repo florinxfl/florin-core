@@ -125,6 +125,11 @@ mnemonic_record = record {
     birth_number : i64;
 }
 
+wallet_lock_status = record {
+    locked : bool;
+    lock_timeout : i64;
+}
+
 # The library controller is used to Init/Terminate the library, and other similar tasks.
 # It is also home to various generic utility functions that don't (yet) have a place in more specific controllers
 # Specific functionality should go in specific controllers; account related functionality -> accounts_controller, network related functionality -> network_controller and so on
@@ -212,7 +217,7 @@ i_library_controller = interface +c {
     # Forcefully lock wallet again
     static LockWallet(): bool;
     
-    static IsWalletLocked() : bool;
+    static GetWalletLockStatus() : wallet_lock_status;
 
     # Change the wallet password
     static ChangePassword(oldPassword: string, newPassword: string) : bool;

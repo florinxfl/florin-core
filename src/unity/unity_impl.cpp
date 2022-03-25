@@ -47,6 +47,7 @@
 #include "monitor_listener.hpp"
 #include "payment_result_status.hpp"
 #include "mnemonic_record.hpp"
+#include "wallet_lock_status.hpp"
 #ifdef __ANDROID__
 #include "djinni_support.hpp"
 #endif
@@ -1195,15 +1196,19 @@ bool ILibraryController::LockWallet()
     return dynamic_cast<CExtWallet*>(pactiveWallet)->Lock();
 }
 
-bool ILibraryController::IsWalletLocked()
+WalletLockStatus ILibraryController::GetWalletLockStatus()
 {
+    WalletLockStatus status(false, 0);
     if (!pactiveWallet)
     {
-        LogPrintf("LockWallet: No active wallet");
-        return false;
+        LogPrintf("WalletLockStatus: No active wallet");
+        return status;
     }
 
-    return dynamic_cast<CExtWallet*>(pactiveWallet)->IsLocked();
+    status.locked = dynamic_cast<CExtWallet*>(pactiveWallet)->IsLocked();
+    status.lock_timeout = pactiveWallet->nRelockTime;
+    
+    return status;
 }
 
 bool ILibraryController::ChangePassword(const std::string& oldPassword, const std::string& newPassword)

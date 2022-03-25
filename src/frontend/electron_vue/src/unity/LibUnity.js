@@ -836,10 +836,10 @@ class LibUnity {
       }
     });
 
-    ipc.answerRenderer("NJSILibraryController.IsWalletLockedAsync", async () => {
-      console.log(`IPC: libraryController.IsWalletLockedAsync()`);
+    ipc.answerRenderer("NJSILibraryController.GetWalletLockStatusAsync", async () => {
+      console.log(`IPC: libraryController.GetWalletLockStatusAsync()`);
       try {
-        let result = this.libraryController.IsWalletLocked();
+        let result = this.libraryController.GetWalletLockStatus();
         return {
           success: true,
           result: result
@@ -849,10 +849,10 @@ class LibUnity {
       }
     });
 
-    ipc.on("NJSILibraryController.IsWalletLocked", event => {
-      console.log(`IPC: libraryController.IsWalletLocked()`);
+    ipc.on("NJSILibraryController.GetWalletLockStatus", event => {
+      console.log(`IPC: libraryController.GetWalletLockStatus()`);
       try {
-        let result = this.libraryController.IsWalletLocked();
+        let result = this.libraryController.GetWalletLockStatus();
         event.returnValue = {
           success: true,
           result: result

@@ -74,7 +74,7 @@ declare class NJSILibraryController
     static declare function UnlockWallet(password: string, timeout_in_seconds: number): boolean;
     /** Forcefully lock wallet again */
     static declare function LockWallet(): boolean;
-    static declare function IsWalletLocked(): boolean;
+    static declare function GetWalletLockStatus(): WalletLockStatus;
     /** Change the wallet password */
     static declare function ChangePassword(oldPassword: string, newPassword: string): boolean;
     /** Rescan blockchain for wallet transactions */

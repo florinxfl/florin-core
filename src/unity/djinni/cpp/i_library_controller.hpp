@@ -30,6 +30,7 @@ struct QrCodeRecord;
 struct TransactionRecord;
 struct UriRecipient;
 struct UriRecord;
+struct WalletLockStatus;
 
 /**
  * The library controller is used to Init/Terminate the library, and other similar tasks.
@@ -134,7 +135,7 @@ public:
     /** Forcefully lock wallet again */
     static bool LockWallet();
 
-    static bool IsWalletLocked();
+    static WalletLockStatus GetWalletLockStatus();
 
     /** Change the wallet password */
     static bool ChangePassword(const std::string & oldPassword, const std::string & newPassword);
