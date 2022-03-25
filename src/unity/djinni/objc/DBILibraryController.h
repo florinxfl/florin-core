@@ -135,8 +135,9 @@ extern int32_t const DBILibraryControllerVersion;
  */
 + (nonnull NSArray<NSString *> *)GetMnemonicDictionary;
 
-/** Unlock wallet */
-+ (BOOL)UnlockWallet:(nonnull NSString *)password;
+/** Unlock wallet; wallet will automatically relock after "timeoutInSeconds" */
++ (BOOL)UnlockWallet:(nonnull NSString *)password
+    timeoutInSeconds:(int64_t)timeoutInSeconds;
 
 /** Forcefully lock wallet again */
 + (BOOL)LockWallet;

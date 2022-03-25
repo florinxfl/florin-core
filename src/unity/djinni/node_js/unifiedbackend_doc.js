@@ -70,8 +70,8 @@ declare class NJSILibraryController
      * This function should only be used for input validation/auto-completion
      */
     static declare function GetMnemonicDictionary(): Array<string>;
-    /** Unlock wallet */
-    static declare function UnlockWallet(password: string): boolean;
+    /** Unlock wallet; wallet will automatically relock after "timeout_in_seconds" */
+    static declare function UnlockWallet(password: string, timeout_in_seconds: number): boolean;
     /** Forcefully lock wallet again */
     static declare function LockWallet(): boolean;
     static declare function IsWalletLocked(): boolean;

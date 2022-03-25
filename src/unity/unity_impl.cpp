@@ -1164,8 +1164,7 @@ std::vector<std::string> ILibraryController::GetMnemonicDictionary()
 }
 
 
-//fixme: (UNITY) HIGH - take a timeout value and always lock again after timeout
-bool ILibraryController::UnlockWallet(const std::string& password)
+bool ILibraryController::UnlockWallet(const std::string& password, int64_t lockTimeoutSeconds)
 {
     if (!pactiveWallet)
     {
@@ -1179,7 +1178,7 @@ bool ILibraryController::UnlockWallet(const std::string& password)
         return false;
     }
 
-    return pactiveWallet->Unlock(password.c_str());
+    return pactiveWallet->UnlockWithTimeout(password.c_str(), lockTimeoutSeconds);
 }
 
 bool ILibraryController::LockWallet()

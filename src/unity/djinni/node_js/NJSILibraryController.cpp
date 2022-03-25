@@ -811,22 +811,23 @@ Napi::Value NJSILibraryController::UnlockWallet(const Napi::CallbackInfo& info) 
 
 
     //Check if method called with right number of arguments
-    if(info.Length() != 1)
+    if(info.Length() != 2)
     {
-        Napi::Error::New(env, "NJSILibraryController::UnlockWallet needs 1 arguments").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "NJSILibraryController::UnlockWallet needs 2 arguments").ThrowAsJavaScriptException();
     }
 
     //Check if parameters have correct types
     std::string arg_0 = info[0].As<Napi::String>();
+    auto arg_1 = info[1].ToNumber().Int64Value();
 
     try
     {
-        auto result = ILibraryController::UnlockWallet(arg_0);
+        auto result = ILibraryController::UnlockWallet(arg_0,arg_1);
 
         //Wrap result in node object
-        auto arg_1 = Napi::Value::From(env, result);
+        auto arg_2 = Napi::Value::From(env, result);
 
-        return arg_1;
+        return arg_2;
     }
     catch (std::exception& e)
     {

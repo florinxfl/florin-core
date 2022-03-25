@@ -194,10 +194,11 @@ public abstract class ILibraryController {
         return CppProxy.GetMnemonicDictionary();
     }
 
-    /** Unlock wallet */
-    public static boolean UnlockWallet(String password)
+    /** Unlock wallet; wallet will automatically relock after "timeoutInSeconds" */
+    public static boolean UnlockWallet(String password, long timeoutInSeconds)
     {
-        return CppProxy.UnlockWallet(password);
+        return CppProxy.UnlockWallet(password,
+                                     timeoutInSeconds);
     }
 
     /** Forcefully lock wallet again */
@@ -441,7 +442,7 @@ public abstract class ILibraryController {
 
         public static native ArrayList<String> GetMnemonicDictionary();
 
-        public static native boolean UnlockWallet(String password);
+        public static native boolean UnlockWallet(String password, long timeoutInSeconds);
 
         public static native boolean LockWallet();
 

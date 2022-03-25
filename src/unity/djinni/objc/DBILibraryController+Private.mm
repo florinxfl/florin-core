@@ -250,9 +250,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (BOOL)UnlockWallet:(nonnull NSString *)password {
++ (BOOL)UnlockWallet:(nonnull NSString *)password
+    timeoutInSeconds:(int64_t)timeoutInSeconds {
     try {
-        auto objcpp_result_ = ::ILibraryController::UnlockWallet(::djinni::String::toCpp(password));
+        auto objcpp_result_ = ::ILibraryController::UnlockWallet(::djinni::String::toCpp(password),
+                                                                 ::djinni::I64::toCpp(timeoutInSeconds));
         return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

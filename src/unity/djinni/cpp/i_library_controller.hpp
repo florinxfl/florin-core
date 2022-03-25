@@ -128,8 +128,8 @@ public:
      */
     static std::vector<std::string> GetMnemonicDictionary();
 
-    /** Unlock wallet */
-    static bool UnlockWallet(const std::string & password);
+    /** Unlock wallet; wallet will automatically relock after "timeout_in_seconds" */
+    static bool UnlockWallet(const std::string & password, int64_t timeout_in_seconds);
 
     /** Forcefully lock wallet again */
     static bool LockWallet();

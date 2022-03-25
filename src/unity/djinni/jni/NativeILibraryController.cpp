@@ -261,11 +261,12 @@ CJNIEXPORT jobject JNICALL Java_com_florin_jniunifiedbackend_ILibraryController_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jboolean JNICALL Java_com_florin_jniunifiedbackend_ILibraryController_00024CppProxy_UnlockWallet(JNIEnv* jniEnv, jobject /*this*/, jstring j_password)
+CJNIEXPORT jboolean JNICALL Java_com_florin_jniunifiedbackend_ILibraryController_00024CppProxy_UnlockWallet(JNIEnv* jniEnv, jobject /*this*/, jstring j_password, jlong j_timeoutInSeconds)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
-        auto r = ::ILibraryController::UnlockWallet(::djinni::String::toCpp(jniEnv, j_password));
+        auto r = ::ILibraryController::UnlockWallet(::djinni::String::toCpp(jniEnv, j_password),
+                                                    ::djinni::I64::toCpp(jniEnv, j_timeoutInSeconds));
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

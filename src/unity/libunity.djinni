@@ -206,8 +206,8 @@ i_library_controller = interface +c {
     # This function should only be used for input validation/auto-completion
     static GetMnemonicDictionary(): list<string>;
 
-    # Unlock wallet
-    static UnlockWallet(password: string): bool;
+    # Unlock wallet; wallet will automatically relock after "timeout_in_seconds"
+    static UnlockWallet(password: string, timeout_in_seconds: i64): bool;
 
     # Forcefully lock wallet again
     static LockWallet(): bool;
