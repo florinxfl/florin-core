@@ -388,7 +388,7 @@ bool CWallet::UnlockWithTimeout(const SecureString& strWalletPassphrase, int64_t
             }
         },  boost::chrono::system_clock::time_point(boost::chrono::seconds(nRelockTime)));
     }
-    return false;
+    return ret;
 }
     
 bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase)

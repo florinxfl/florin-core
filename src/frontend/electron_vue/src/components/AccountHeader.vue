@@ -48,10 +48,7 @@ export default {
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
-      return `€ ${formatMoneyForDisplay(
-        this.account.balance * this.rate,
-        true
-      )}`;
+      return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
     },
     balanceForDisplay() {
       if (this.account.balance == null) return "";

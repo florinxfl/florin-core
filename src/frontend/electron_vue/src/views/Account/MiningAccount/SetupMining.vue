@@ -64,7 +64,7 @@ export default {
         // Dont' know if it is actually needed to show the activity indicator when unlockking the wallet and creating the account,
         // but for now I leave it here.
         this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
-        if (LibraryController.UnlockWallet(password) === false) {
+        if (LibraryController.UnlockWallet(password, 120) === false) {
           this.isPasswordInvalid = true;
           return;
         }

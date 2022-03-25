@@ -785,9 +785,9 @@ class LibUnity {
     });
 
     ipc.answerRenderer("NJSILibraryController.UnlockWalletAsync", async data => {
-      console.log(`IPC: libraryController.UnlockWalletAsync(${data.password})`);
+      console.log(`IPC: libraryController.UnlockWalletAsync(${data.password}, ${data.timeout_in_seconds})`);
       try {
-        let result = this.libraryController.UnlockWallet(data.password);
+        let result = this.libraryController.UnlockWallet(data.password, data.timeout_in_seconds);
         return {
           success: true,
           result: result
@@ -797,10 +797,10 @@ class LibUnity {
       }
     });
 
-    ipc.on("NJSILibraryController.UnlockWallet", (event, password) => {
-      console.log(`IPC: libraryController.UnlockWallet(${password})`);
+    ipc.on("NJSILibraryController.UnlockWallet", (event, password, timeout_in_seconds) => {
+      console.log(`IPC: libraryController.UnlockWallet(${password}, ${timeout_in_seconds})`);
       try {
-        let result = this.libraryController.UnlockWallet(password);
+        let result = this.libraryController.UnlockWallet(password, timeout_in_seconds);
         event.returnValue = {
           success: true,
           result: result
@@ -2177,9 +2177,9 @@ class LibUnity {
     });
 
     ipc.answerRenderer("NJSIWitnessController.setAccountCompoundingAsync", async data => {
-      console.log(`IPC: witnessController.setAccountCompoundingAsync(${data.witnessAccountUUID}, ${data.should_compound})`);
+      console.log(`IPC: witnessController.setAccountCompoundingAsync(${data.witnessAccountUUID}, ${data.percent_to_compount})`);
       try {
-        let result = this.witnessController.setAccountCompounding(data.witnessAccountUUID, data.should_compound);
+        let result = this.witnessController.setAccountCompounding(data.witnessAccountUUID, data.percent_to_compount);
         return {
           success: true,
           result: result
@@ -2189,10 +2189,10 @@ class LibUnity {
       }
     });
 
-    ipc.on("NJSIWitnessController.setAccountCompounding", (event, witnessAccountUUID, should_compound) => {
-      console.log(`IPC: witnessController.setAccountCompounding(${witnessAccountUUID}, ${should_compound})`);
+    ipc.on("NJSIWitnessController.setAccountCompounding", (event, witnessAccountUUID, percent_to_compount) => {
+      console.log(`IPC: witnessController.setAccountCompounding(${witnessAccountUUID}, ${percent_to_compount})`);
       try {
-        let result = this.witnessController.setAccountCompounding(witnessAccountUUID, should_compound);
+        let result = this.witnessController.setAccountCompounding(witnessAccountUUID, percent_to_compount);
         event.returnValue = {
           success: true,
           result: result
@@ -2219,6 +2219,32 @@ class LibUnity {
       console.log(`IPC: witnessController.isAccountCompounding(${witnessAccountUUID})`);
       try {
         let result = this.witnessController.isAccountCompounding(witnessAccountUUID);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIWitnessController.getWitnessAddressAsync", async data => {
+      console.log(`IPC: witnessController.getWitnessAddressAsync(${data.witnessAccountUUID})`);
+      try {
+        let result = this.witnessController.getWitnessAddress(data.witnessAccountUUID);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIWitnessController.getWitnessAddress", (event, witnessAccountUUID) => {
+      console.log(`IPC: witnessController.getWitnessAddress(${witnessAccountUUID})`);
+      try {
+        let result = this.witnessController.getWitnessAddress(witnessAccountUUID);
         event.returnValue = {
           success: true,
           result: result

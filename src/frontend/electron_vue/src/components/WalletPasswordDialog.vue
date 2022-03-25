@@ -46,7 +46,7 @@ export default {
       if (event.keyCode === 13) this.validatePassword();
     },
     validatePassword() {
-      if (LibraryController.UnlockWallet(this.password)) {
+      if (LibraryController.UnlockWallet(this.password, 120)) {
         LibraryController.LockWallet();
         this.$store.dispatch("wallet/SET_WALLET_PASSWORD", this.password);
         EventBus.$emit("close-dialog");

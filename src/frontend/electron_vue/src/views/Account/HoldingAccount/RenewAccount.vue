@@ -75,7 +75,7 @@ export default {
        */
 
       // wallet needs to be unlocked to make a payment
-      if (LibraryController.UnlockWallet(this.computedPassword) === false) {
+      if (LibraryController.UnlockWallet(this.computedPassword, 120) === false) {
         this.isPasswordInvalid = true;
       }
 

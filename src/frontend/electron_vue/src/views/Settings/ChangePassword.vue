@@ -115,7 +115,7 @@ export default {
       if (event.keyCode === 13 && this.passwordsValidated) this.nextStep();
     },
     validatePassword() {
-      if (LibraryController.UnlockWallet(this.passwordold)) {
+      if (LibraryController.UnlockWallet(this.passwordold, 120)) {
         LibraryController.LockWallet();
         this.current++;
         this.$nextTick(() => {
