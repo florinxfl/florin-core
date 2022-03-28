@@ -4,10 +4,14 @@
       <section class="header flex-row">
         <div class="logo" />
         <div class="total-balance flex-row">
-          <div class="coin">
-            {{ balanceForDisplay }}
-          </div>
-          <div class="fiat">{{ totalBalanceFiat }}</div>
+          <account-tooltip type="Wallet" :account="accounts">
+            <div class="flex-row">
+              <div class="coin">
+                {{ balanceForDisplay }}
+              </div>
+              <div class="fiat">{{ totalBalanceFiat }}</div>
+            </div>
+          </account-tooltip>
         </div>
       </section>
       <accounts-section v-if="UIConfig.showSidebar" class="accounts" />
@@ -52,6 +56,7 @@ import AccountsSection from "./AccountsSection";
 import WalletPasswordDialog from "../components/WalletPasswordDialog";
 import EventBus from "../EventBus";
 import UIConfig from "../../ui-config.json";
+import AccountTooltip from "../components/AccountTooltip.vue";
 
 export default {
   name: "WalletLayout",
@@ -64,12 +69,13 @@ export default {
     };
   },
   components: {
-    AccountsSection
+    AccountsSection,
+    AccountTooltip
   },
   computed: {
     ...mapState("app", ["progress", "rate"]),
     ...mapState("wallet", ["activeAccount", "walletPassword"]),
-    ...mapGetters("wallet", ["totalBalance", "miningAccount"]),
+    ...mapGetters("wallet", ["totalBalance", "miningAccount", "accounts"]),
     walletLayoutClasses() {
       let classes = [];
       if (this.isHeaderSlotEmpty) classes.push("no-header");

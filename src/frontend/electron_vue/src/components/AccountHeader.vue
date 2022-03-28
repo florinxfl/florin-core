@@ -1,17 +1,19 @@
 <template>
   <div class="account-header">
     <div v-if="!editMode" class="display-mode" @click="editName">
-      <div class="flex flex-row">
-        <div class="name ellipsis flex-1">
-          {{ name }}
+      <account-tooltip type="Account" :account="account">
+        <div class="flex flex-row">
+          <div class="name ellipsis flex-1">
+            {{ name }}
+          </div>
+          <div class="icon-bar">
+            <fa-icon :icon="['fal', 'fa-pen']" />
+          </div>
         </div>
-        <div class="icon-bar">
-          <fa-icon :icon="['fal', 'fa-pen']" />
+        <div class="balance ellipsis">
+          {{ balance }}
         </div>
-      </div>
-      <div class="balance ellipsis">
-        {{ balance }}
-      </div>
+      </account-tooltip>
     </div>
     <div v-else class="flex flex-row">
       <input class="flex-1" ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" />
@@ -23,8 +25,10 @@
 import { mapState } from "vuex";
 import { AccountsController } from "../unity/Controllers";
 import { formatMoneyForDisplay } from "../util.js";
+import AccountTooltip from "./AccountTooltip.vue";
 
 export default {
+  components: { AccountTooltip },
   name: "AccountHeader",
   data() {
     return {
@@ -48,10 +52,7 @@ export default {
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
-      return `€ ${formatMoneyForDisplay(
-        this.account.balance * this.rate,
-        true
-      )}`;
+      return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
     },
     balanceForDisplay() {
       if (this.account.balance == null) return "";
