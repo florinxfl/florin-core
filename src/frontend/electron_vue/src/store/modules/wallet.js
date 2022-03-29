@@ -79,6 +79,26 @@ const wallet = {
       if (balance === undefined || balance === null) return null;
       return balance.availableIncludingLocked + balance.unconfirmedIncludingLocked + balance.immatureIncludingLocked;
     },
+    lockedBalance: state => {
+      let balance = state.walletBalance;
+      if (balance === undefined || balance === null) return null;
+      return balance.totalLocked;
+    },
+    spendableBalance: state => {
+      let balance = state.walletBalance;
+      if (balance === undefined || balance === null) return null;
+      return balance.availableExcludingLocked;
+    },
+    pendingBalance: state => {
+      let balance = state.walletBalance;
+      if (balance === undefined || balance === null) return null;
+      return balance.unconfirmedExcludingLocked;
+    },
+    immatureBalance: state => {
+      let balance = state.walletBalance;
+      if (balance === undefined || balance === null) return null;
+      return balance.immatureIncludingLocked;
+    },
     accounts: state => {
       return state.accounts
         .filter(x => x.state === "Normal")

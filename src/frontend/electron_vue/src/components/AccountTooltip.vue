@@ -8,19 +8,19 @@
         <div>
           <div class="tooltip-row">
             <div class="tooltip-content" style="flex: 1">Total</div>
-            <div class="tooltip-content">{{ accountObject.total }} XFL</div>
+            <div class="tooltip-content">{{ accountObject.total }}</div>
           </div>
           <div v-if="account.type === 'Holding' || type === 'Wallet'" class="tooltip-row">
             <div class="tooltip-content" style="flex: 1">Locked</div>
-            <div class="tooltip-content">{{ accountObject.locked }} XFL</div>
+            <div class="tooltip-content">{{ accountObject.locked }}</div>
           </div>
           <div class="tooltip-row">
             <div class="tooltip-content" style="flex: 1">Spendable</div>
-            <div class="tooltip-content">{{ accountObject.spendable }} XFL</div>
+            <div class="tooltip-content">{{ accountObject.spendable }}</div>
           </div>
           <div class="tooltip-row">
             <div class="tooltip-content" style="flex: 1">Pending</div>
-            <div class="tooltip-content">{{ accountObject.pending }} XFL</div>
+            <div class="tooltip-content">{{ accountObject.pending }}</div>
           </div>
         </div>
       </div>
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
 export default {
   name: "AccountTooltip",
@@ -37,6 +38,9 @@ export default {
       show: false,
       accountObject: {}
     };
+  },
+  computed: {
+    ...mapGetters("wallet", ["totalBalance", "lockedBalance", "spendableBalance", "pendingBalance", "immatureBalance"]),
   },
   props: {
     account: {
@@ -66,27 +70,18 @@ export default {
         total: formatMoneyForDisplay(locked + spendable + pending + immature)
       };
     } else {
-      let locked = 0;
-      let spendable = 0;
-      let pending = 0;
-      let immature = 0;
+      const locked = this.lockedBalance || 0;
+      const spendable = this.spendableBalance || 0;
+      const pending = this.pendingBalance || 0;
+      const immature = this.immatureBalance || 0;
 
-      this.account.forEach((item, index) => {
-        locked = locked + item.allBalances.totalLocked || 0;
-        spendable = spendable + item.allBalances.availableExcludingLocked || 0;
-        pending = pending + item.allBalances.unconfirmedExcludingLocked || 0;
-        immature = immature + item.allBalances.immatureExcludingLocked || 0;
-
-        if (index === this.account.length - 1) {
-          this.accountObject = {
-            locked: formatMoneyForDisplay(locked),
-            spendable: formatMoneyForDisplay(spendable),
-            pending: formatMoneyForDisplay(pending),
-            immature: formatMoneyForDisplay(immature),
-            total: formatMoneyForDisplay(locked + spendable + pending + immature)
-          };
-        }
-      });
+      this.accountObject = {
+        locked: formatMoneyForDisplay(locked),
+        spendable: formatMoneyForDisplay(spendable),
+        pending: formatMoneyForDisplay(pending),
+        immature: formatMoneyForDisplay(immature),
+        total: formatMoneyForDisplay(locked + spendable + pending + immature)
+      };
     }
   }
 };
