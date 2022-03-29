@@ -86,6 +86,7 @@ class LibUnity {
       let currentBalance = accountBalances[key];
 
       currentAccount.balance = currentBalance.availableIncludingLocked + currentBalance.immatureIncludingLocked;
+      currentAccount.allBalances = currentBalance;
 
       // make sure spendable is always 0 or more
       currentAccount.spendable = Math.max(currentBalance.availableExcludingLocked, 0);
