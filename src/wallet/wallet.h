@@ -1048,7 +1048,9 @@ bool CWallet::DummySignTx(std::vector<CKeyStore*>& accountsToTry, CMutableTransa
         if (!ProduceSignature(DummySignatureCreator(accountsToTry), coin.txout, sigdata, type, txNew.nVersion))
         {
             return false;
-        } else {
+        }
+        else
+        {
             UpdateTransaction(txNew, nIn, sigdata);
         }
 
