@@ -40,7 +40,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("wallet", ["totalBalance", "lockedBalance", "spendableBalance", "pendingBalance", "immatureBalance"]),
+    ...mapGetters("wallet", ["totalBalance", "lockedBalance", "spendableBalance", "pendingBalance", "immatureBalance"])
   },
   props: {
     account: {
@@ -53,36 +53,42 @@ export default {
   methods: {
     showTooltip: function() {
       this.show = !this.show;
+      if (this.show) {
+        this.getValues();
+      }
+    },
+    getValues() {
+      if (this.type === "Account") {
+        const locked = this.account.allBalances.totalLocked || 0;
+        const spendable = this.account.allBalances.availableExcludingLocked || 0;
+        const pending = this.account.allBalances.unconfirmedExcludingLocked || 0;
+        const immature = this.account.allBalances.immatureExcludingLocked || 0;
+
+        this.accountObject = {
+          locked: formatMoneyForDisplay(locked),
+          spendable: formatMoneyForDisplay(spendable),
+          pending: formatMoneyForDisplay(pending),
+          immature: formatMoneyForDisplay(immature),
+          total: formatMoneyForDisplay(locked + spendable + pending + immature)
+        };
+      } else {
+        const locked = this.lockedBalance || 0;
+        const spendable = this.spendableBalance || 0;
+        const pending = this.pendingBalance || 0;
+        const immature = this.immatureBalance || 0;
+
+        this.accountObject = {
+          locked: formatMoneyForDisplay(locked),
+          spendable: formatMoneyForDisplay(spendable),
+          pending: formatMoneyForDisplay(pending),
+          immature: formatMoneyForDisplay(immature),
+          total: formatMoneyForDisplay(locked + spendable + pending + immature)
+        };
+      }
     }
   },
   mounted() {
-    if (this.type === "Account") {
-      const locked = this.account.allBalances.totalLocked || 0;
-      const spendable = this.account.allBalances.availableExcludingLocked || 0;
-      const pending = this.account.allBalances.unconfirmedExcludingLocked || 0;
-      const immature = this.account.allBalances.immatureExcludingLocked || 0;
-
-      this.accountObject = {
-        locked: formatMoneyForDisplay(locked),
-        spendable: formatMoneyForDisplay(spendable),
-        pending: formatMoneyForDisplay(pending),
-        immature: formatMoneyForDisplay(immature),
-        total: formatMoneyForDisplay(locked + spendable + pending + immature)
-      };
-    } else {
-      const locked = this.lockedBalance || 0;
-      const spendable = this.spendableBalance || 0;
-      const pending = this.pendingBalance || 0;
-      const immature = this.immatureBalance || 0;
-
-      this.accountObject = {
-        locked: formatMoneyForDisplay(locked),
-        spendable: formatMoneyForDisplay(spendable),
-        pending: formatMoneyForDisplay(pending),
-        immature: formatMoneyForDisplay(immature),
-        total: formatMoneyForDisplay(locked + spendable + pending + immature)
-      };
-    }
+    this.getValues();
   }
 };
 </script>
