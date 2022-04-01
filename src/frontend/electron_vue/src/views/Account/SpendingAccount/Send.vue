@@ -1,20 +1,15 @@
 <template>
   <div class="send-view flex-col">
-    <portal v-if="UIConfig.showSidebar" to="sidebar-right-title">
-      {{ $t("buttons.send") }}
-    </portal>
     <div class="main">
-      <input
-        v-model="amount"
-        ref="amount"
-        type="number"
-        step="0.01"
-        placeholder="0.00"
-        :class="amountClass"
-        min="0"
-        :max="maxAmount"
-        @change="isAmountInvalid = false"
-      />
+      <div class="flex flex-row">
+        <input v-model="amount" ref="amount" type="number" step="0.00000001" :placeholder="computedAmountPlaceholder" min="0" />
+        <button v-if="maxAmount > 0" outlined class="max" @click="setUseMax" :disabled="useMax">max</button>
+      </div>
+      <content-wrapper>
+        <p>
+          {{ this.useMax ? $t("send_coins.fee_will_be_subtracted") : "&nbsp;" }}
+        </p>
+      </content-wrapper>
       <input v-model="address" type="text" :placeholder="$t('send_coins.enter_coins_address')" :class="addressClass" @keydown="isAddressInvalid = false" />
       <input v-model="label" type="text" :placeholder="$t('send_coins.enter_label')" />
       <input
@@ -27,52 +22,49 @@
       />
     </div>
     <div class="flex-row">
-      <button @click="clearInput" outlined :disabled="disableClearButton">
-        {{ $t("buttons.clear") }}
-      </button>
-      <button class="stretch" @click="showConfirmation" :disabled="disableSendButton">
+      <button class="send" @click="showConfirmation" :disabled="disableSendButton">
         {{ $t("buttons.send") }}
       </button>
-      <button @click="sellCoins" :disabled="sellDisabled">
-        {{ $t("buttons.sell_coins") }}
-      </button>
+      <button class="clear" outlined @click="clearInputs" :disabled="disableClearButton">{{ $t("buttons.clear") }}</button>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { displayToMonetary } from "../../../util.js";
-import { LibraryController, AccountsController } from "@/unity/Controllers";
+import { displayToMonetary, formatMoneyForDisplay } from "../../../util.js";
+import { LibraryController } from "@/unity/Controllers";
 import ConfirmTransactionDialog from "./ConfirmTransactionDialog";
 import EventBus from "@/EventBus";
 import { BackendUtilities } from "@/unity/Controllers";
-import UIConfig from "../../../../ui-config.json";
 
 export default {
   name: "Send",
   data() {
     return {
-      amount: null,
+      amount: "",
       maxAmount: null,
-      address: null,
-      label: null,
-      password: null,
-      isAmountInvalid: false,
+      address: "",
+      label: "",
+      password: "",
       isAddressInvalid: false,
       isPasswordInvalid: false,
       sellDisabled: false,
-      UIConfig: UIConfig
+      useMax: false
     };
   },
   computed: {
     ...mapState("wallet", ["walletPassword"]),
+    ...mapState("app", ["decimals"]),
     ...mapGetters("wallet", ["account"]),
     computedPassword() {
       return this.walletPassword ? this.walletPassword : this.password || "";
     },
-    amountClass() {
-      return this.isAmountInvalid ? "error" : "";
+    computedAmountPlaceholder() {
+      return `0.${"0".repeat(this.decimals)}`;
+    },
+    computedMaxForDisplay() {
+      return formatMoneyForDisplay(this.maxAmount, false, 8);
     },
     addressClass() {
       return this.isAddressInvalid ? "error" : "";
@@ -81,23 +73,17 @@ export default {
       return this.isPasswordInvalid ? "error" : "";
     },
     hasErrors() {
-      return this.isAmountInvalid || this.isAddressInvalid || this.isPasswordInvalid;
-    },
-    disableClearButton() {
-      if (this.amount !== null && !isNaN(parseFloat(this.amount))) return false;
-      if (this.address !== null && this.address.length > 0) return false;
-      if (this.password !== null && this.password.length > 0) return false;
-      return true;
+      return this.isAddressInvalid || this.isPasswordInvalid;
     },
     disableSendButton() {
       if (isNaN(parseFloat(this.amount))) return true;
       if (this.address === null || this.address.trim().length === 0) return true;
       if (this.computedPassword.trim().length === 0) return true;
       return false;
+    },
+    disableClearButton() {
+      return this.amount === "" && this.address === "" && this.label === "" && this.password === "";
     }
-  },
-  created() {
-    this.maxAmount = Math.floor(AccountsController.GetActiveAccountBalance().availableExcludingLocked / 1000000) / 100;
   },
   mounted() {
     this.$refs.amount.focus();
@@ -106,7 +92,45 @@ export default {
   beforeDestroy() {
     EventBus.$off("transaction-succeeded", this.onTransactionSucceeded);
   },
+  watch: {
+    account: {
+      immediate: true,
+      handler() {
+        this.maxAmount = this.account.spendable;
+      }
+    },
+    maxAmount() {
+      if (this.useMax) {
+        this.amount = this.computedMaxForDisplay;
+      }
+    },
+    amount() {
+      // this will prevent entering more than 8 decimals
+      const idx = this.amount.indexOf(".");
+      if (idx !== -1 && idx + 9 < this.amount.length) {
+        this.amount = this.amount.slice(0, idx + 9);
+      }
+
+      if (displayToMonetary(this.amount) >= this.maxAmount) {
+        this.useMax = true;
+      } else {
+        this.useMax = false;
+      }
+    },
+    useMax() {
+      if (this.useMax) {
+        this.amount = this.computedMaxForDisplay;
+      }
+    }
+  },
   methods: {
+    clearInputs() {
+      this.amount = "";
+      this.address = "";
+      this.label = "";
+      this.password = "";
+      this.$refs.amount.focus();
+    },
     async sellCoins() {
       try {
         this.sellDisabled = true;
@@ -122,33 +146,16 @@ export default {
     onPasswordKeydown() {
       this.isPasswordInvalid = false;
     },
-    clearInput() {
-      this.amount = null;
-      this.address = null;
-      this.password = null;
-      this.label = null;
-      this.$refs.amount.focus();
-    },
     showConfirmation() {
-      /*
-       todo:
-        - replace amount input by custom amount input (this one is too basic)
-        - improve notifications / messages on success and error
-       */
-
-      // validate amount
-      let accountBalance = AccountsController.GetActiveAccountBalance();
-      if (accountBalance.availableExcludingLocked < displayToMonetary(this.amount)) {
-        this.isAmountInvalid = true;
-      }
+      // amount is always less then or equal to the floored spendable amount
+      // if useMax is checked, use the maxAmount and subtract the fee from the amount
+      let amount = this.useMax ? this.maxAmount : displayToMonetary(this.amount);
 
       // validate address
       this.isAddressInvalid = !LibraryController.IsValidNativeAddress(this.address);
 
-      // wallet needs to be unlocked to make a payment
-      if (LibraryController.UnlockWallet(this.computedPassword, 120) === false) {
-        this.isPasswordInvalid = true;
-      }
+      // validate password (confirmation dialog unlocks/locks when user confirms so don't leave it unlocked here)
+      this.isPasswordInvalid = !this.validatePassword(this.computedPassword);
 
       if (this.hasErrors) return;
 
@@ -156,16 +163,23 @@ export default {
         title: this.$t("send_coins.confirm_transaction"),
         component: ConfirmTransactionDialog,
         componentProps: {
-          amount: this.amount,
+          amount: amount,
           address: this.address,
           password: this.password,
-          subtractFee: false
+          subtractFee: this.useMax
         },
         showButtons: false
       });
     },
     onTransactionSucceeded() {
       this.$router.push({ name: "transactions" });
+    },
+    validatePassword(password) {
+      // validation can only be done by unlocking the wallet, but make sure to lock the wallet afterwards
+      return LibraryController.UnlockWallet(password, 0);
+    },
+    setUseMax() {
+      this.useMax = true;
     }
   }
 };
@@ -181,12 +195,13 @@ export default {
   }
 }
 
-button {
-  width: 150px;
+button.max,
+button.clear {
+  margin-left: 10px;
+  padding: 0 15px;
 }
 
-.stretch {
-  margin: 0 30px;
-  flex: 1;
+button.send {
+  width: 100%;
 }
 </style>

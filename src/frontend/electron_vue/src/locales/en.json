@@ -156,7 +156,8 @@
     "enter_label": "Enter label",
     "enter_coins_address": "Enter Florin address",
     "confirm_transaction": "Confirm transaction",
-    "target_account": "Send to account"
+    "target_account": "Send to account",
+    "fee_will_be_subtracted": "fee will be subtracted from the amount"
   },
   "renew_holding_account": {
     "funding_account": "Pay renewal fee from account"

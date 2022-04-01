@@ -154,7 +154,8 @@
     "enter_label": "Voer label in",
     "enter_coins_address": "Voer Florin adres in",
     "confirm_transaction": "Bevestig transactie",
-    "target_account": "Verstuur naar account"
+    "target_account": "Verstuur naar account",
+    "fee_will_be_subtracted": "De transactie fee wordt van het bedrag afgehaald"
   },
   "renew_holding_account": {
     "funding_account": "Betaal vergoeding van account"
