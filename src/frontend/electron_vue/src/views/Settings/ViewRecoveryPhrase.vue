@@ -89,7 +89,7 @@ export default {
       if (event.keyCode === 13) this.getRecoveryPhrase();
     },
     getRecoveryPhrase() {
-      if (LibraryController.UnlockWallet(this.password)) {
+      if (LibraryController.UnlockWallet(this.password, 120)) {
         this.recoveryPhrase = LibraryController.GetRecoveryPhrase().phrase;
         LibraryController.LockWallet();
       } else {

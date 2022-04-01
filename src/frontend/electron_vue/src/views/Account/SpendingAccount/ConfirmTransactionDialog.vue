@@ -54,7 +54,7 @@ export default {
   methods: {
     confirm() {
       // at this point the password should already be validated
-      LibraryController.UnlockWallet(this.password);
+      LibraryController.UnlockWallet(this.password, 120);
 
       // try to make the payment
       let result = LibraryController.PerformPaymentToRecipient(this.computedRequest, this.subtractFee);

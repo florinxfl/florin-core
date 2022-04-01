@@ -111,9 +111,7 @@ export default {
     },
     isPasswordValid(password) {
       // validation can only be done by unlocking the wallet, but make sure to lock the wallet afterwards
-      const isValid = LibraryController.UnlockWallet(password);
-      LibraryController.LockWallet();
-      return isValid;
+      return LibraryController.UnlockWallet(password, 0);
     }
   }
 };

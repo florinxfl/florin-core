@@ -1,21 +1,24 @@
 <template>
   <div class="account-header">
     <div class="flex-row" v-if="!editMode">
-      <div class="left-colum" @click="editName">
-        <div class="flex-row flex-1">
-          <div class="accountname ellipsis">{{ name }}</div>
-          <fa-icon class="pen" :icon="['fal', 'fa-pen']" />
+      <account-tooltip type="Account" :account="account" class="flex-1">
+        <div class="left-colum" @click="editName">
+          <div class="flex-row flex-1">
+            <div class="accountname ellipsis">{{ name }}</div>
+            <fa-icon class="pen" :icon="['fal', 'fa-pen']" />
+          </div>
+          <div class="balance-row">
+            <span>{{ balanceForDisplay }}</span>
+            <span>{{ totalBalanceFiat }}</span>
+          </div>
         </div>
-        <div class="balance-row">
-          <span>{{ balanceForDisplay }}</span>
-          <span>{{ totalBalanceFiat }}</span>
-        </div>
-      </div>
+      </account-tooltip>
       <div v-if="isSpending">
         <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">buy</button>
         <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">sell</button>
       </div>
     </div>
+
     <input v-else ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" @blur="cancelEdit" />
   </div>
 </template>
@@ -24,8 +27,10 @@
 import { mapState } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
 import { AccountsController, BackendUtilities } from "@/unity/Controllers";
+import AccountTooltip from "./AccountTooltip.vue";
 
 export default {
+  components: { AccountTooltip },
   name: "AccountHeader",
   data() {
     return {

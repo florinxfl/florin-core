@@ -59,7 +59,7 @@ export default {
       this.isPasswordInvalid = false;
     },
     addSpendingAccount() {
-      if (LibraryController.UnlockWallet(this.computedPassword) === false) {
+      if (LibraryController.UnlockWallet(this.computedPassword, 120) === false) {
         this.isPasswordInvalid = true;
       }
 

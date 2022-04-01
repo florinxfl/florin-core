@@ -101,7 +101,8 @@
     "thread": "thread | threads",
     "settings": "Settings",
     "current_of_max": "{current} of {max}",
-    "warning_performance": "Performance is degraded due to reduced memory usage"
+    "warning_performance": "Performance is degraded due to reduced memory usage",
+    "address": "My Mining Address"
   },
   "password_dialog": {
     "unlock_wallet": "Unlock wallet"

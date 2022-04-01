@@ -92,7 +92,7 @@ export default {
       if (e.keyCode === 13 && this.password.length > 0) this.unLockAccount();
     },
     unLockAccount() {
-      if (LibraryController.UnlockWallet(this.password)) {
+      if (LibraryController.UnlockWallet(this.password, 120)) {
         this.getWitnessKey();
         setTimeout(function() {
           LibraryController.LockWallet();
