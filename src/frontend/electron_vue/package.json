@@ -38,7 +38,7 @@
     "vue-router": "^3.5.1",
     "vue-slider-component": "^3.2.11",
     "vuex": "^3.6.2",
-    "vuex-electron": "https://github.com/devlz303/vuex-electron.git"
+    "vuex-electron": "https://github.com/devlz303/vuex-electron.git#v1.0.4"
   },
   "devDependencies": {
     "@oshell/vue-cli-plugin-electron-builder-notarize": "^1.0.2",
@@ -90,7 +90,7 @@
     }
   },
   "prettier": {
-      "printWidth": 160
+    "printWidth": 160
   },
   "browserslist": [
     "Electron >= 17.1.0"
