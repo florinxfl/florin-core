@@ -724,6 +724,7 @@ lib_generic_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES)
 lib_generic_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 lib_generic_a_SOURCES = \
   unity/generic/logging.cpp \
+  unity/generic/init_generic.cpp \
   core_read.cpp \
   core_write.cpp \
   $(CORE_H)
