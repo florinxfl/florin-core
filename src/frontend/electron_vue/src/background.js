@@ -2,6 +2,7 @@
 /* global __static */
 
 import { app, protocol, Menu, BrowserWindow, shell } from "electron";
+import settings from "electron-settings";
 import {
   createProtocol
   /* installVueDevtools */
@@ -72,11 +73,15 @@ if (isDevelopment) {
 protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { secure: true, standard: true } }]);
 
 function createMainWindow() {
-  console.log("createMainWindow");
+  // Get window state
+  const mainWindowStateKeeper = windowStateKeeper("main");
+
   let options = {
-    width: 800,
+    x: store.state.app.screenPositions.x || null,
+    y: store.state.app.screenPositions.y || null,
+    width: store.state.app.screenPositions.width || 800,
+    height: store.state.app.screenPositions.height || 600,
     minWidth: 800,
-    height: 600,
     minHeight: 600,
     show: false,
     title: "Florin",
@@ -87,12 +92,15 @@ function createMainWindow() {
       contextIsolation: false
     }
   };
+
   if (os.platform() === "linux") {
     options = Object.assign({}, options, {
       icon: path.join(__static, "icon.png")
     });
   }
   winMain = new BrowserWindow(options);
+
+  mainWindowStateKeeper.track(winMain);
 
   var menuTemplate = [
     {
@@ -317,3 +325,50 @@ function focusMainWindow() {
     winMain.focus();
   }
 }
+
+export const windowStateKeeper = windowName => {
+  let window, windowState;
+
+  const setBounds = () => {
+    // Restore from appConfig
+    if (settings.has(`windowState.${windowName}`)) {
+      windowState = settings.get(`windowState.${windowName}`);
+      return;
+    }
+
+    // Default
+    windowState = {
+      x: undefined,
+      y: undefined,
+      width: 800,
+      height: 600
+    };
+  };
+
+  const saveState = () => {
+    if (!windowState.isMaximized) {
+      windowState = window.getBounds();
+    }
+    windowState.isMaximized = window.isMaximized();
+    settings.set(`windowState.${windowName}`, windowState);
+    store.dispatch("app/SET_SCREEN_POSITION", windowState);
+  };
+
+  const track = win => {
+    window = win;
+    ["resize", "move", "close"].forEach(event => {
+      win.on(event, saveState);
+    });
+  };
+
+  setBounds();
+
+  return {
+    x: windowState.x || null,
+    y: windowState.y || null,
+    width: windowState.width,
+    height: windowState.height,
+    isMaximized: windowState.isMaximized,
+    track
+  };
+};

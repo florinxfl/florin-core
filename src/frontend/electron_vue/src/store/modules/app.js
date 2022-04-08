@@ -24,7 +24,8 @@ const app = {
     walletVersion: null,
     rate: null,
     language: "en",
-    decimals: 2
+    decimals: 2,
+    screenPositions: { x: null, y: null, width: 800, height: 600 }
   },
   mutations: {
     SET_CORE_READY(state) {
@@ -60,6 +61,9 @@ const app = {
     },
     SET_DECIMALS(state, decimal) {
       state.decimals = decimal;
+    },
+    SET_SCREEN_POSITION(state, screenPositions) {
+      state.screenPositions = screenPositions;
     }
   },
   actions: {
@@ -91,6 +95,9 @@ const app = {
     },
     SET_DECIMALS({ commit }, decimal) {
       commit("SET_DECIMALS", decimal);
+    },
+    SET_SCREEN_POSITION({ commit }, screenPositions) {
+      commit("SET_SCREEN_POSITION", screenPositions);
     },
     SET_WALLET_EXISTS({ commit }, walletExists) {
       let status = walletExists ? AppStatus.synchronize : AppStatus.setup;
