@@ -22,6 +22,7 @@ if (process.type !== "renderer") {
       // only store the paths listed below
       "mining.settings",
       "app.language",
+      "app.screenPositions",
       "app.decimals"
     ],
     ignoredCommits: [
@@ -30,7 +31,8 @@ if (process.type !== "renderer") {
       "mining/SET_THREAD_COUNT",
       "mining/SET_ARENA_THREAD_COUNT",
       "app/SET_LANGUAGE",
-      "app/SET_DECIMALS"
+      "app/SET_DECIMALS",
+      "app/SET_SCREEN_POSITION"
     ]
   });
 }

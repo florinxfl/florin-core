@@ -945,10 +945,10 @@
     ajv "^6.12.0"
     ajv-keywords "^3.4.1"
 
-"@electron/get@^1.13.0":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.13.1.tgz#42a0aa62fd1189638bd966e23effaebb16108368"
-  integrity sha512-U5vkXDZ9DwXtkPqlB45tfYnnYBN8PePp1z/XDCupnSpdrxT8/ThCv9WCwPLf9oqiSGZTkH6dx2jDUPuoXpjkcA==
+"@electron/get@^1.0.1":
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
+  integrity sha512-BrZYyL/6m0ZXz/lDxy/nlVhQz+WF+iPS6qXolEU8atw7h6v1aYkjwJZ63m+bJMBTxDE66X+r2tPS4a/8C82sZw==
   dependencies:
     debug "^4.1.1"
     env-paths "^2.2.0"
@@ -4731,6 +4731,18 @@ electron-publish@22.14.13:
     lazy-val "^1.0.5"
     mime "^2.5.2"
 
+electron-settings@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/electron-settings/-/electron-settings-4.0.2.tgz#26ef242397393e0e69119f6fb879fc2287d0f508"
+  integrity sha512-WnUlrnBsO784oXcag0ym+A3ySoIwonz5GhYFsWroMHVzslzmsP+81f/Fof41T9UrRUxuPPKiZPZMwGO+yvWChg==
+  dependencies:
+    lodash.get "^4.4.2"
+    lodash.has "^4.5.2"
+    lodash.set "^4.3.2"
+    lodash.unset "^4.5.2"
+    mkdirp "^1.0.4"
+    write-file-atomic "^3.0.3"
+
 electron-store@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/electron-store/-/electron-store-2.0.0.tgz#1035cca2a95409d1f54c7466606345852450d64a"
@@ -4751,12 +4763,12 @@ electron-to-chromium@^1.4.71:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.75.tgz#d1ad9bb46f2f1bf432118c2be21d27ffeae82fdd"
   integrity sha512-LxgUNeu3BVU7sXaKjUDD9xivocQLxFtq6wgERrutdY/yIOps3ODOZExK1jg8DTEg4U8TUCb5MLGeWFOYuxjF3Q==
 
-electron@^17.1.0:
-  version "17.1.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-17.1.0.tgz#7539937d294413af8efba69dc370cf7d2b0cdc72"
-  integrity sha512-X/qdldmQ8lA15NmeraubWCTtMeTO8K9Ser0wtSCgOXVh53Sr1Ea0VQQ7Q9LuGgWRVz4qtr40cntuEdM8icdmTw==
+electron@^12.2.3:
+  version "12.2.3"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-12.2.3.tgz#d426a7861e3c722f92c32153f11f7bbedf65b000"
+  integrity sha512-B27c7eqx1bC5kea6An8oVhk1pShNC4VGqWarHMhD47MDtmg54KepHO5AbAvmKKZK/jWN7NTC7wyCYTDElJNtQA==
   dependencies:
-    "@electron/get" "^1.13.0"
+    "@electron/get" "^1.0.1"
     "@types/node" "^14.6.2"
     extract-zip "^1.0.3"
 
@@ -7431,6 +7443,16 @@ lodash.defaultsdeep@^4.6.1:
   resolved "https://registry.yarnpkg.com/lodash.defaultsdeep/-/lodash.defaultsdeep-4.6.1.tgz#512e9bd721d272d94e3d3a63653fa17516741ca6"
   integrity sha512-3j8wdDzYuWO3lM3Reg03MuQR957t287Rpcxp1njpEa8oDrikb+FwGdW3n+FELh/A6qib6yPit0j/pv9G/yeAqA==
 
+lodash.get@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
+  integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
+
+lodash.has@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/lodash.has/-/lodash.has-4.5.2.tgz#d19f4dc1095058cccbe2b0cdf4ee0fe4aa37c862"
+  integrity sha1-0Z9NwQlQWMzL4rDN9O4P5Ko3yGI=
+
 lodash.kebabcase@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/lodash.kebabcase/-/lodash.kebabcase-4.1.1.tgz#8489b1cb0d29ff88195cceca448ff6d6cc295c36"
@@ -7451,6 +7473,11 @@ lodash.merge@^4.6.1:
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
+lodash.set@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/lodash.set/-/lodash.set-4.3.2.tgz#d8757b1da807dde24816b0d6a84bea1a76230b23"
+  integrity sha1-2HV7HagH3eJIFrDWqEvqGnYjCyM=
+
 lodash.transform@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/lodash.transform/-/lodash.transform-4.6.0.tgz#12306422f63324aed8483d3f38332b5f670547a0"
@@ -7460,6 +7487,11 @@ lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
+
+lodash.unset@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/lodash.unset/-/lodash.unset-4.5.2.tgz#370d1d3e85b72a7e1b0cdf2d272121306f23e4ed"
+  integrity sha1-Nw0dPoW3Kn4bDN8tJyEhMG8j5O0=
 
 lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.3:
   version "4.17.21"
@@ -11750,7 +11782,7 @@ write-file-atomic@^2.3.0:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.2"
 
-write-file-atomic@^3.0.0:
+write-file-atomic@^3.0.0, write-file-atomic@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-3.0.3.tgz#56bd5c5a5c70481cd19c571bd39ab965a5de56e8"
   integrity sha512-AvHcyZ5JnSfq3ioSyjrBkH9yW4m7Ayk8/9My/DD9onKeu/94fwrMocemO2QAJFAlnnDN+ZDS+ZjAR5ua1/PV/Q==
