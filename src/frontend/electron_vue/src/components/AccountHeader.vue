@@ -1,33 +1,50 @@
 <template>
   <div class="account-header">
-    <div class="flex-row" v-if="!editMode">
-      <account-tooltip type="Account" :account="account" class="flex-1">
-        <div class="left-colum" @click="editName">
+    <div v-if="!editMode" class="flex-row">
+      <div v-if="isSingleAccount" class="flex-row flex-1">
+        <div class="logo" />
+        <div class="balance-row flex-1">
+          <span>{{ balanceForDisplay }}</span>
+          <span>{{ totalBalanceFiat }}</span>
+        </div>
+      </div>
+      <div v-else class="left-colum" @click="editName">
+        <account-tooltip type="Account" :account="account">
           <div class="flex-row flex-1">
             <div class="accountname ellipsis">{{ name }}</div>
             <fa-icon class="pen" :icon="['fal', 'fa-pen']" />
           </div>
+
           <div class="balance-row">
             <span>{{ balanceForDisplay }}</span>
             <span>{{ totalBalanceFiat }}</span>
           </div>
+        </account-tooltip>
+      </div>
+      <div v-if="showBuySellButtons">
+        <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">{{ $t("buttons.buy") }}</button>
+        <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">{{ $t("buttons.sell") }}</button>
+      </div>
+      <div v-if="isSingleAccount" class="flex-row icon-buttons">
+        <div class="icon-button">
+          <fa-icon :icon="['fal', 'cog']" @click="showSettings" />
         </div>
-      </account-tooltip>
-      <div v-if="isSpending">
-        <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">buy</button>
-        <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">sell</button>
+        <div class="icon-button">
+          <fa-icon :icon="['fal', lockIcon]" @click="changeLockSettings" />
+        </div>
       </div>
     </div>
-
     <input v-else ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" @blur="cancelEdit" />
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import { AccountsController, BackendUtilities } from "../unity/Controllers";
 import { formatMoneyForDisplay } from "../util.js";
-import { AccountsController, BackendUtilities } from "@/unity/Controllers";
 import AccountTooltip from "./AccountTooltip.vue";
+import EventBus from "../EventBus";
+import WalletPasswordDialog from "../components/WalletPasswordDialog";
 
 export default {
   components: { AccountTooltip },
@@ -44,26 +61,31 @@ export default {
     account: {
       type: Object,
       default: () => {}
+    },
+    isSingleAccount: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
     ...mapState("app", ["rate"]),
+    ...mapState("wallet", ["walletPassword"]),
     name() {
-      return this.account.label;
-    },
-    balance() {
-      return `${this.balanceForDisplay} ${this.totalBalanceFiat}`;
+      return this.account ? this.account.label : null;
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
       return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
     },
     balanceForDisplay() {
-      if (this.account.balance == null) return "";
+      if (!this.account || this.account.balance === undefined) return "";
       return formatMoneyForDisplay(this.account.balance);
     },
-    isSpending() {
-      return this.account.type === "Desktop";
+    showBuySellButtons() {
+      return !this.account || (this.account.type === "Desktop" && !this.editMode);
+    },
+    lockIcon() {
+      return this.walletPassword ? "unlock" : "lock";
     }
   },
   watch: {
@@ -104,11 +126,8 @@ export default {
     async sellCoins() {
       try {
         this.sellDisabled = true;
-        let url = await BackendUtilities.GetSellSessionUrl();
-        if (!url) {
-          url = "https://florin.org/sell";
-        }
-        window.open(url, "sell-florin");
+        const url = await BackendUtilities.GetSellSessionUrl();
+        window.open(url, "sell-coins");
       } finally {
         this.sellDisabled = false;
       }
@@ -116,13 +135,25 @@ export default {
     async buyCoins() {
       try {
         this.buyDisabled = true;
-        let url = await BackendUtilities.GetBuySessionUrl();
-        if (!url) {
-          url = "https://florin.org/buy";
-        }
-        window.open(url, "buy-florin");
+        const url = await BackendUtilities.GetBuySessionUrl();
+        window.open(url, "buy-coins");
       } finally {
         this.buyDisabled = false;
+      }
+    },
+    showSettings() {
+      if (this.$route.path === "/settings/") return;
+      this.$router.push({ name: "settings" });
+    },
+    changeLockSettings() {
+      if (this.walletPassword) {
+        this.$store.dispatch("wallet/SET_WALLET_PASSWORD", null);
+      } else {
+        EventBus.$emit("show-dialog", {
+          title: this.$t("password_dialog.unlock_wallet"),
+          component: WalletPasswordDialog,
+          showButtons: false
+        });
       }
     }
   }
@@ -133,8 +164,12 @@ export default {
 .account-header {
   width: 100%;
   height: var(--header-height);
-  line-height: 40px;
-  padding: calc((var(--header-height) - 40px) / 2) 0;
+  line-height: var(--header-height);
+
+  & > div {
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .left-colum {
@@ -158,10 +193,10 @@ export default {
 }
 
 button.small {
-  height: 20px;
-  line-height: 20px;
-  font-size: 10px;
-  padding: 0 10px;
+  height: 20px !important;
+  line-height: 20px !important;
+  font-size: 10px !important;
+  padding: 0 10px !important;
   margin-left: 5px;
 }
 
@@ -182,5 +217,35 @@ button.small {
 
 .left-colum:hover .pen {
   display: block;
+}
+
+.logo {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  min-height: 22px;
+  background: url("../img/logo-black.svg"), linear-gradient(transparent, transparent);
+  background-size: cover;
+  margin-right: 10px;
+}
+
+.icon-buttons {
+  margin-left: 10px;
+}
+
+.icon-button {
+  display: inline-block;
+  padding: 0 13px;
+  line-height: 40px;
+  height: 40px;
+  font-weight: 500;
+  font-size: 1em;
+  color: var(--primary-color);
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
 }
 </style>

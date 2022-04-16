@@ -1,11 +1,7 @@
 <template>
   <div class="send-coins flex-col">
-    <portal to="sidebar-right-title">
-      {{ $t("buttons.renew") }}
-    </portal>
-
     <div class="main">
-      <app-form-field title="renew_holding_account.funding_account">
+      <app-form-field title="renew_saving_account.funding_account">
         <select-list :options="fundingAccounts" :default="fundingAccount" v-model="fundingAccount" />
       </app-form-field>
 

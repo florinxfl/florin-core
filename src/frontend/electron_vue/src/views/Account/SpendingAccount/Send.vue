@@ -131,18 +131,6 @@ export default {
       this.password = "";
       this.$refs.amount.focus();
     },
-    async sellCoins() {
-      try {
-        this.sellDisabled = true;
-        let url = await BackendUtilities.GetSellSessionUrl();
-        if (!url) {
-          url = "https://florin.org/sell";
-        }
-        window.open(url, "sell-florin");
-      } finally {
-        this.sellDisabled = false;
-      }
-    },
     onPasswordKeydown() {
       this.isPasswordInvalid = false;
     },

@@ -2483,7 +2483,10 @@ class LibUnity {
           result: `https://blockhut.com/buyflorin.php?sessionid=${response.data.sessionid}`
         };
       } catch (e) {
-        event.returnValue = handleError(e);
+        event.returnValue = {
+          success: true,
+          result: "https://florin.org/buy"
+        };
       }
     });
 
@@ -2505,7 +2508,10 @@ class LibUnity {
           result: `https://blockhut.com/sellflorin.php?sessionid=${response.data.sessionid}`
         };
       } catch (e) {
-        event.returnValue = handleError(e);
+        event.returnValue = {
+          success: true,
+          result: "https://florin.org/sell"
+        };
       }
     });
   }

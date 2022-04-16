@@ -1,11 +1,11 @@
 <template>
-  <div class="holding-account">
+  <div class="saving-account">
     <portal to="header-slot">
       <account-header :account="account"></account-header>
     </portal>
 
     <app-section v-if="isAccountView && accountIsFunded" class="align-right">
-      {{ $t("holding_account.compound_earnings") }}
+      {{ $t("saving_account.compound_earnings") }}
       <toggle-button
         :value="isCompounding"
         :color="{ checked: '#c0aa70', unchecked: '#ddd' }"
@@ -21,77 +21,73 @@
       />
     </app-section>
 
-    <app-section v-if="isAccountView && accountIsFunded" class="holding-information">
+    <app-section v-if="isAccountView && accountIsFunded" class="saving-information">
       <h2>{{ $t("common.information") }}</h2>
       <div class="flex-row">
-        <div>{{ $t("holding_account.status") }}</div>
+        <div>{{ $t("saving_account.status") }}</div>
         <div>{{ accountStatus }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.parts") }}</div>
+        <div>{{ $t("saving_account.parts") }}</div>
         <div>{{ accountParts }}</div>
       </div>
 
       <div class="flex-row">
-        <div>{{ $t("holding_account.coins_locked") }}</div>
+        <div>{{ $t("saving_account.coins_locked") }}</div>
         <div>{{ accountAmountLockedAtCreation }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.coins_earned") }}</div>
+        <div>{{ $t("saving_account.coins_earned") }}</div>
         <div>{{ accountAmountEarned }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.locked_from_block") }}</div>
+        <div>{{ $t("saving_account.locked_from_block") }}</div>
         <div>{{ lockedFrom }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.locked_until_block") }}</div>
+        <div>{{ $t("saving_account.locked_until_block") }}</div>
         <div>{{ lockedUntil }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.lock_duration") }}</div>
+        <div>{{ $t("saving_account.lock_duration") }}</div>
         <div>{{ lockDuration }} {{ $t("common.days") }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.remaining_lock_period") }}</div>
+        <div>{{ $t("saving_account.remaining_lock_period") }}</div>
         <div>{{ remainingLockPeriod }} {{ $t("common.days") }}</div>
       </div>
 
       <div class="flex-row">
-        <div>{{ $t("holding_account.required_earnings_frequency") }}</div>
+        <div>{{ $t("saving_account.required_earnings_frequency") }}</div>
         <div>{{ requiredEarningsFrequency }} {{ $t("common.days") }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.expected_earnings_frequency") }}</div>
+        <div>{{ $t("saving_account.expected_earnings_frequency") }}</div>
         <div>{{ expectedEarningsFrequency }} {{ $t("common.days") }}</div>
       </div>
 
       <div class="flex-row">
-        <div>{{ $t("holding_account.account_weight") }}</div>
+        <div>{{ $t("saving_account.account_weight") }}</div>
         <div>{{ accountWeight }}</div>
       </div>
       <div class="flex-row">
-        <div>{{ $t("holding_account.network_weight") }}</div>
+        <div>{{ $t("saving_account.network_weight") }}</div>
         <div>{{ networkWeight }}</div>
       </div>
     </app-section>
 
-    <app-section v-show="isAccountView && !accountIsFunded" class="holding-empty">
-      {{ $t("holding_account.empty") }}
+    <app-section v-show="isAccountView && !accountIsFunded" class="saving-empty">
+      {{ $t("saving_account.empty") }}
     </app-section>
 
     <router-view />
 
     <portal to="footer-slot">
       <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
-      <footer-button title="buttons.holding_key" :icon="['fal', 'key']" routeName="link-holding-account" @click="routeTo" />
+      <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
       <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
       <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
-      <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-holding" @click="routeTo" />
-    </portal>
-
-    <portal to="sidebar-right">
-      <component v-if="rightSidebar" :is="rightSidebar" v-bind="rightSidebarProps" />
+      <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
     </portal>
   </div>
 </template>
@@ -106,7 +102,7 @@ import { mapState } from "vuex";
 let timeout;
 
 export default {
-  name: "HoldingAccount",
+  name: "SavingAccount",
   props: {
     account: null
   },
@@ -115,8 +111,7 @@ export default {
       rightSection: null,
       rightSectionComponent: null,
       statistics: null,
-      isCompounding: false,
-      rightSidebar: null
+      isCompounding: false
     };
   },
   computed: {
@@ -167,12 +162,6 @@ export default {
     accountParts() {
       return this.getStatistics("account_parts");
     },
-    rightSidebarProps() {
-      if (this.rightSidebar === AccountSettings) {
-        return { account: this.account };
-      }
-      return null;
-    },
     renewButtonVisible() {
       return this.accountStatus === "expired";
     },
@@ -185,12 +174,8 @@ export default {
       return formatMoneyForDisplay(this.account.balance);
     }
   },
-  mounted() {
-    EventBus.$on("close-right-sidebar", this.closeRightSidebar);
-  },
   beforeDestroy() {
     clearTimeout(timeout);
-    EventBus.$off("close-right-sidebar", this.closeRightSidebar);
   },
   created() {
     this.initialize();
@@ -223,22 +208,12 @@ export default {
       WitnessController.SetAccountCompounding(this.account.UUID, !this.isCompounding);
       this.isCompounding = !this.isCompounding;
     },
-    setRightSidebar(name) {
-      switch (name) {
-        case "Settings":
-          this.rightSidebar = AccountSettings;
-          break;
-      }
-    },
     getButtonClassNames(route) {
       let classNames = ["button"];
       if (route === this.$route.name) {
         classNames.push("active");
       }
       return classNames;
-    },
-    closeRightSidebar() {
-      this.rightSidebar = null;
     },
     routeTo(route) {
       if (this.$route.name === route) return;
@@ -249,7 +224,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.holding-information {
+.saving-information {
   & .flex-row > div {
     line-height: 18px;
   }

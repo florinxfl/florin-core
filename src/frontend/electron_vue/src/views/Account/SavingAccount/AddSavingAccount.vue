@@ -1,33 +1,33 @@
 <template>
-  <div class="add-holding-account">
+  <div class="add-saving-account">
     <portal to="header-slot">
-      <main-header :title="$t('add_holding_account.title')"></main-header>
+      <main-header :title="$t('add_saving_account.title')"></main-header>
     </portal>
 
     <section class="content">
       <section class="step-1" v-if="current === 1">
-        <app-form-field title="add_holding_account.funding_account">
+        <app-form-field title="add_saving_account.funding_account">
           <select-list :options="fundingAccounts" :default="fundingAccount" v-model="fundingAccount" />
         </app-form-field>
         <app-form-field title="common.amount">
           <input type="number" min="50" v-model="amount" :max="maxAmountForAccount" :class="amountClass" />
         </app-form-field>
-        <app-form-field title="add_holding_account.lock_for">
+        <app-form-field title="add_saving_account.lock_for">
           <div class="flex-row">
             <vue-slider :min="2" :max="36" class="lock-time-slider" :class="lockTimeClass" :value="lockTimeInMonths" v-model="lockTimeInMonths" />
             <div class="lock-time-info">{{ lockTimeInMonths }} {{ $t("common.months") }}</div>
           </div>
         </app-form-field>
 
-        <app-form-field title="add_holding_account.estimated_earnings" v-if="isWeightSufficient">
+        <app-form-field title="add_saving_account.estimated_earnings" v-if="isWeightSufficient">
           <div class="flex-row">
-            <div class="earnings">{{ $t("add_holding_account.daily") }}</div>
+            <div class="earnings">{{ $t("add_saving_account.daily") }}</div>
             <div class="flex-1 align-right">
               {{ this.formatMoneyForDisplay(this.estimatedWeight.estimated_daily_earnings) }}
             </div>
           </div>
           <div class="flex-row">
-            <div class="earnings">{{ $t("add_holding_account.overall") }}</div>
+            <div class="earnings">{{ $t("add_saving_account.overall") }}</div>
             <div class="flex-1 align-right">
               {{ this.formatMoneyForDisplay(this.estimatedWeight.estimated_lifetime_earnings) }}
             </div>
@@ -55,7 +55,7 @@
       <button @click="nextStep" :disabled="!isWeightSufficient" v-if="current === 1">
         {{ $t("buttons.next") }}
       </button>
-      <button @click="createAndFundHoldingAccount" :disabled="disableLockButton" v-else>
+      <button @click="createAndFundSavingAccount" :disabled="disableLockButton" v-else>
         {{ $t("buttons.lock") }}
       </button>
     </app-button-section>
@@ -68,7 +68,7 @@ import { formatMoneyForDisplay, displayToMonetary } from "../../../util.js";
 import { WitnessController, LibraryController, AccountsController } from "../../../unity/Controllers";
 
 export default {
-  name: "AddHoldingAccount",
+  name: "AddSavingAccount",
   data() {
     return {
       current: 1,
@@ -145,7 +145,7 @@ export default {
         this.$refs.accountName.focus();
       });
     },
-    createAndFundHoldingAccount() {
+    createAndFundSavingAccount() {
       let result = null;
       let uuid = null;
 
@@ -174,7 +174,7 @@ export default {
         LibraryController.LockWallet();
       } finally {
         if (result.status === "success") {
-          // route to the holding account when successfully created and funded
+          // route to the saving account when successfully created and funded
           this.$router.push({ name: "account", params: { id: uuid } });
         } else {
           // remove the activity indicator
@@ -187,7 +187,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.add-holding-account {
+.add-saving-account {
   display: flex;
   flex-direction: column;
 }

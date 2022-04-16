@@ -3,14 +3,14 @@
     "accounts": "Accounts",
     "categories": {
       "spending": "Spending",
-      "holding": "Holding"
+      "saving": "Holding"
     }
   },
   "account_settings": {
     "title": "Account settings",
     "name": "Name"
   },
-  "add_holding_account": {
+  "add_saving_account": {
     "daily": "daily",
     "estimated_earnings": "Estimated earnings",
     "funding_account": "Funding account",
@@ -23,8 +23,8 @@
   },
   "buttons": {
     "back": "Back",
-    "buy_coins": "Buy Florin",
-    "sell_coins": "Sell Florin",
+    "buy": "Buy",
+    "sell": "Sell",
     "buy_your_first_coins": "Buy Florin",
     "clear": "Clear",
     "confirm": "Confirm",
@@ -44,7 +44,7 @@
     "transactions": "Transactions",
     "unlock": "Unlock",
     "done": "Done",
-    "holding_key": "Holding Key",
+    "saving_key": "Holding Key",
     "info": "Info"
   },
   "clipboard_field": {
@@ -68,7 +68,7 @@
     "title": "Welcome to your Florin wallet",
     "information": "This wallet is only stored on your device.\nNever give anyone else access to your wallet.\nKeep the backup phrase you see at installation in a safe place.\nLose phrase or someone else with access to the phrase = lose Florin."
   },
-  "holding_account": {
+  "saving_account": {
     "compound_earnings": "compound earnings",
     "status": "Status",
     "parts": "Parts",
@@ -111,9 +111,9 @@
     "header": "Settings",
     "change_password": "Change password",
     "view_recovery_phrase": "View recovery phrase",
-    "choose_theme": "Choose theme",
-    "choose_language": "Choose Language",
-    "choose_decimal_places": "Choose Decimal Places",
+    "choose_theme": "Theme",
+    "choose_language": "Language",
+    "choose_decimal_places": "Decimal places",
     "english": "EN",
     "dutch": "NL"
   },
@@ -125,7 +125,7 @@
     "enter_recovery_phrase": "Enter recovery phrase",
     "invalid_recovery_phrase": {
       "title": "Invalid recovery phrase",
-      "message": "This combinatie is not a valid recovery phrase. Correct the error(s) and try again."
+      "message": "This combination is not a valid recovery phrase. Correct the error(s) and try again."
     },
     "recover_existing": "I want to recover my wallet using my recovery phrase",
     "repeat_password": "Repeat password",
@@ -159,10 +159,10 @@
     "target_account": "Send to account",
     "fee_will_be_subtracted": "fee will be subtracted from the amount"
   },
-  "renew_holding_account": {
+  "renew_saving_account": {
     "funding_account": "Pay renewal fee from account"
   },
-  "link_holding_account": {
+  "link_saving_account": {
     "title": "Your holding key",
     "information": "Use your holding key only for trusted cloud holding services. Your holding key provides access to your rewards, so never show it to other people.",
     "no_funds": "Holding account must be funded with locked funds before it is possible to link it with other wallets."

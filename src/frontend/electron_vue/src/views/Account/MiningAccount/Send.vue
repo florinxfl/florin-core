@@ -1,9 +1,5 @@
 <template>
   <div class="send-coins flex-col">
-    <portal to="sidebar-right-title">
-      {{ $t("buttons.send") }}
-    </portal>
-
     <div class="main">
       <app-form-field>
         <input v-model="computedAmount" ref="amount" type="text" readonly />

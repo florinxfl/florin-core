@@ -1,13 +1,13 @@
 <template>
-  <div class="link-witness-view flex-col">
+  <div class="link-saving-account flex-col">
     <div class="main">
-      <content-wrapper v-if="needsUnlock" heading="link_holding_account.title" content="link_holding_account.information">
+      <content-wrapper v-if="needsUnlock" heading="link_saving_account.title" content="link_saving_account.information">
         <app-form-field style="text-align: left;" title="common.password">
           <input v-model="password" type="password" :class="passwordClass" @keydown="onPasswordKeydown" />
         </app-form-field>
       </content-wrapper>
 
-      <content-wrapper v-else heading="link_holding_account.title">
+      <content-wrapper v-else heading="link_saving_account.title">
         <div v-if="account.balance > 0">
           <div class="qr" @click="copyQr">
             <vue-qrcode ref="qrcode" class="qrcode" :width="280" :margin="0" :value="witnessKey" :color="{ dark: `#000000`, light: `#FFFFFF` }" />
@@ -19,12 +19,12 @@
           </div>
         </div>
         <div v-if="account.balance === 0">
-          <p class="information">{{ $t("link_holding_account.no_funds") }}</p>
+          <p class="information">{{ $t("link_saving_account.no_funds") }}</p>
         </div>
       </content-wrapper>
     </div>
     <app-button-section>
-      <button @click="unLockAccount" v-if="needsUnlock">
+      <button @click="unlockAccount" v-if="needsUnlock">
         {{ $t("buttons.next") }}
       </button>
     </app-button-section>
@@ -36,7 +36,7 @@ import { clipboard, nativeImage } from "electron";
 import { LibraryController, AccountsController } from "../../../unity/Controllers";
 import VueQrcode from "vue-qrcode";
 export default {
-  name: "LinkHoldingAccount",
+  name: "LinkSavingAccount",
   components: {
     VueQrcode
   },
@@ -76,7 +76,7 @@ export default {
     this.needsUnlock = true;
     if (this.walletPassword) {
       this.password = this.walletPassword;
-      this.unLockAccount(this.walletPassword);
+      this.unlockAccount(this.walletPassword);
     }
   },
   methods: {
@@ -89,9 +89,9 @@ export default {
       clipboard.writeImage(img);
     },
     onPasswordKeydown(e) {
-      if (e.keyCode === 13 && this.password.length > 0) this.unLockAccount();
+      if (e.keyCode === 13 && this.password.length > 0) this.unlockAccount();
     },
-    unLockAccount() {
+    unlockAccount() {
       if (LibraryController.UnlockWallet(this.password, 120)) {
         this.getWitnessKey();
         setTimeout(function() {
@@ -107,7 +107,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.link-witness-view {
+.link-saving-account {
   height: 100%;
   text-align: center;
 

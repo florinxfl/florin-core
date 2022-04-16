@@ -1,9 +1,5 @@
 <template>
   <div class="receive-view flex-col">
-    <portal v-if="UIConfig.showSidebar" to="sidebar-right-title">
-      {{ $t("buttons.receive") }}
-    </portal>
-
     <div class="main">
       <content-wrapper heading="receive_coins.your_address" content="receive_coins.information"> </content-wrapper>
 

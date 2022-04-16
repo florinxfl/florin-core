@@ -18,7 +18,7 @@
     </content-wrapper>
 
     <div class="flex-1" />
-    <portal v-if="!UIConfig.showSidebar" to="footer-slot">
+    <portal v-if="!isSingleAccount" to="footer-slot">
       <app-button-section>
         <button v-if="current === 1" @click="nextStep" :disabled="isNextDisabled">
           {{ $t("buttons.next") }}
@@ -59,7 +59,7 @@ export default {
       password1: "",
       password2: "",
       isPasswordInvalid: false,
-      UIConfig: UIConfig
+      isSingleAccount: UIConfig.isSingleAccount
     };
   },
   computed: {

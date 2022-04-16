@@ -3,14 +3,14 @@
     <slot></slot>
     <div v-if="show">
       <div class="tooltip-container">
-        <div class="tooltip-heading" v-if="type == 'Account'">Account Balances</div>
+        <div class="tooltip-heading" v-if="type === 'Account'">Account Balances</div>
         <div class="tooltip-heading" v-else>Wallet Balances</div>
         <div>
           <div class="tooltip-row">
             <div class="tooltip-content" style="flex: 1">Total</div>
             <div class="tooltip-content">{{ accountObject.total }}</div>
           </div>
-          <div v-if="account.type === 'Holding' || type === 'Wallet'" class="tooltip-row">
+          <div v-if="account.type === 'Holding' || account.type === 'Witness' || type === 'Wallet'" class="tooltip-row">
             <div class="tooltip-content" style="flex: 1">Locked</div>
             <div class="tooltip-content">{{ accountObject.locked }}</div>
           </div>
