@@ -196,7 +196,7 @@ static bool CreateWitnessSubsidyOutputs(CMutableTransaction& coinbaseTx, const C
     if (fixedTotal > compoundWitnessBlockSubsidy)
         return alert(strprintf("%s, Witness template fixed amounts total (%s) exceed subsidy (%s)", __PRETTY_FUNCTION__, FormatMoney(fixedTotal), FormatMoney(compoundWitnessBlockSubsidy)));
 
-    CAmount percentageSum = rewardTemplate.percentagesSum();
+    double percentageSum = rewardTemplate.percentagesSum();
     if (percentageSum < 0.0 || percentageSum > 1.0)
         return alert(strprintf("%s, Witness template percentage total (%f) out of range [0..100]", __PRETTY_FUNCTION__, percentageSum * 100.0));
 
@@ -365,7 +365,15 @@ static std::pair<bool, CMutableTransaction> CreateWitnessCoinbase(int nWitnessHe
     }
     else
     {
-        if (selectedWitnessAccount->getCompounding() > 0)
+        if (selectedWitnessAccount->getCompoundingPercent() > 0)
+        {
+            auto compoundPercent = selectedWitnessAccount->getCompoundingPercent();
+            // Pay up until requested amount to compound
+            rewardTemplate.destinations.push_back(CWitnessRewardDestination(CWitnessRewardDestination::DestType::Compound, CNativeAddress(), 0, compoundPercent/100.0, false, false));
+            // Any remaining fees/overflow to script
+            rewardTemplate.destinations.push_back(CWitnessRewardDestination(CWitnessRewardDestination::DestType::Account, CNativeAddress(), 0, 0.0, true, true));
+        }
+        else if (selectedWitnessAccount->getCompounding() > 0)
         {
             auto compoundAmount = selectedWitnessAccount->getCompounding();
             if (compoundAmount == MAX_MONEY)
