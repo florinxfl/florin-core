@@ -96,6 +96,7 @@ export default {
 <style lang="less" scoped>
 .tooltip {
   position: relative;
+  z-index: 99;
 }
 .tooltip-container {
   display: flex;
