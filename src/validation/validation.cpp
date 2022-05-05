@@ -2732,10 +2732,18 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
         return state.DoS(20, false, REJECT_INVALID, "time-too-old", "blocks PoW timestamp is too early");
 
     // Check timestamp
-    if (block.GetBlockTime() > nAdjustedTime + (MAX_FUTURE_BLOCK_TIME*2))
-        return state.DoS(100, false, REJECT_INVALID, "time-too-new", "block timestamp way too far in the future");
-    if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
-        return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+    if (nAdjustedTime > 1652097600)
+    {
+        if (block.GetBlockTime() > nAdjustedTime + (MAX_FUTURE_BLOCK_TIME*2))
+            return state.DoS(100, false, REJECT_INVALID, "time-too-new", "block timestamp way too far in the future");
+        if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
+            return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+    }
+    else
+    {
+        if (block.GetBlockTime() > nAdjustedTime + 15 * 60)
+            return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+    }
 
     if (block.nVersionPoW2Witness != 0)
     {
@@ -2743,10 +2751,13 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
         {
             return state.Invalid(false, REJECT_INVALID, "time-too-old", "blocks witness timestamp is too early");
         }
-        if (block.GetBlockTime() > nAdjustedTime + (MAX_FUTURE_BLOCK_TIME*2))
-            return state.DoS(100, false, REJECT_INVALID, "time-too-new", "blocks witness timestamp way too far in the future");
-        if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
-            return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block witness timestamp too far in the future");
+        if (nAdjustedTime > 1652097600)
+        {
+            if (block.nTimePoW2Witness > nAdjustedTime + (MAX_FUTURE_BLOCK_TIME*2))
+                return state.DoS(100, false, REJECT_INVALID, "time-too-new", "blocks witness timestamp way too far in the future");
+            if (block.nTimePoW2Witness > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
+                return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block witness timestamp too far in the future");
+        }
         if (block.hashMerkleRootPoW2Witness == uint256())
         {
             return state.Invalid(false, REJECT_INVALID, "witness-merkle-invalid", "block sets null witness merkle root");
