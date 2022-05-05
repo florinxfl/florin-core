@@ -1,8 +1,7 @@
-2.0.9
+2.0.10
 
 Introduce arm64/M1 macOS builds
 
-UI        - Improve
 UI        - Add buy/sell functionality to header at top of app
 UI        - Introduce ability to change the address a mining account pays rewards into
 UI        - Introduce a "max" button to the send dialog, as well as automatic toggling to max when amount exceeds balance (subtract fee from amount in such instances)
