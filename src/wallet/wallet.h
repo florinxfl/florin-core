@@ -703,6 +703,11 @@ public:
     int64_t nRelockTime;
 
     bool Unlock(const SecureString& strWalletPassphrase);
+    bool UnlockWithTimeout(const SecureString& strWalletPassphrase, int64_t lockTimeoutSeconds);
+    //fixme: (FUT) Handle this better with global scheduler (after we merge latest gulden changes
+    private:
+    CScheduler* schedulerForLock=nullptr;
+    public:
     bool ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase);
     bool EncryptWallet(const SecureString& strWalletPassphrase);
 
@@ -1043,7 +1048,9 @@ bool CWallet::DummySignTx(std::vector<CKeyStore*>& accountsToTry, CMutableTransa
         if (!ProduceSignature(DummySignatureCreator(accountsToTry), coin.txout, sigdata, type, txNew.nVersion))
         {
             return false;
-        } else {
+        }
+        else
+        {
             UpdateTransaction(txNew, nIn, sigdata);
         }
 

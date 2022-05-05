@@ -20,6 +20,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faAngleDoubleLeft,
+  faAngleDoubleRight,
   faArrowFromBottom,
   faArrowLeft,
   faArrowToBottom,
@@ -48,13 +49,15 @@ import {
   faRedoAlt,
   faKey,
   faInfoCircle,
-  faExclamationTriangle
+  faExclamationTriangle,
+  faUndo
 } from "@fortawesome/pro-light-svg-icons";
 
 import { faListUl, faLongArrowDown } from "@fortawesome/pro-regular-svg-icons";
 
 library.add([
   faAngleDoubleLeft,
+  faAngleDoubleRight,
   faArrowFromBottom,
   faArrowLeft,
   faArrowToBottom,
@@ -85,7 +88,8 @@ library.add([
   faLongArrowDown,
   faListUl,
   faInfoCircle,
-  faExclamationTriangle
+  faExclamationTriangle,
+  faUndo
 ]);
 
 Vue.component("fa-icon", FontAwesomeIcon);

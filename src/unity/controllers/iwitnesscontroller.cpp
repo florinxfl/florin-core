@@ -303,6 +303,16 @@ WitnessAccountStatisticsRecord IWitnessController::getAccountWitnessStatistics(c
         case WitnessStatus::Expired: accountStatus = "expired"; break;
         case WitnessStatus::Emptying: accountStatus = "emptying"; break;
     }
+    int64_t compoundingPercent = 0;
+    if (witnessAccount->getCompounding() != 0)
+    {
+        compoundingPercent = 100;
+    }
+    else
+    {
+        compoundingPercent = witnessAccount->getCompoundingPercent();
+    }
+            
     return WitnessAccountStatisticsRecord(
         "success",                                                      //request_status
         accountStatus,                                                  //account_status
@@ -318,12 +328,12 @@ WitnessAccountStatisticsRecord IWitnessController::getAccountWitnessStatistics(c
         infoForAccount.nExpectedWitnessBlockPeriod,                     //account_expected_witness_period_in_blocks
         infoForAccount.nEstimatedWitnessBlockPeriod,                    //account_estimated_witness_period_in_blocks
         infoForAccount.nOriginBlock,                                    //account_initial_lock_creation_block_height
-        (witnessAccount->getCompounding() != 0)                         //account_is_compounding
+        compoundingPercent                                              //compounding_percent
     );
 }
 
 
-void IWitnessController::setAccountCompounding(const std::string& witnessAccountUUID, bool shouldCompound)
+void IWitnessController::setAccountCompounding(const std::string& witnessAccountUUID, int32_t percentToCompound)
 {
     if (pactiveWallet)
     {
@@ -335,19 +345,17 @@ void IWitnessController::setAccountCompounding(const std::string& witnessAccount
             CAccount* witnessAccount = findIter->second;
             
             CWalletDB db(*pactiveWallet->dbw);
-            if (!shouldCompound)
+            if (percentToCompound > 0)
             {
+                // erase any regular compounding setting
                 witnessAccount->setCompounding(0, &db);
             }
-            else
-            {
-                witnessAccount->setCompounding(MAX_MONEY, &db); // Attempt to compound as much as the network will allow.
-            }
+            witnessAccount->setCompoundingPercent(percentToCompound, &db);
         }
     }
 }
 
-bool IWitnessController::isAccountCompounding(const std::string& witnessAccountUUID)
+int32_t IWitnessController::isAccountCompounding(const std::string& witnessAccountUUID)
 {
     if (pactiveWallet)
     {
@@ -359,9 +367,30 @@ bool IWitnessController::isAccountCompounding(const std::string& witnessAccountU
             CAccount* witnessAccount = findIter->second;
             if (witnessAccount->getCompounding() != 0)
             {
-                return true;
+                return 100;
+            }
+            else
+            {
+                return witnessAccount->getCompoundingPercent();
             }
         }
     }
-    return false;
+    return 0;
+}
+
+std::string IWitnessController::getWitnessAddress(const std::string& witnessAccountUUID)
+{
+    if (pactiveWallet)
+    {
+        LOCK2(cs_main, pactiveWallet->cs_wallet);
+    
+        auto findIter = pactiveWallet->mapAccounts.find(getUUIDFromString(witnessAccountUUID));
+        if (findIter != pactiveWallet->mapAccounts.end())
+        {
+            CAccount* witnessAccount = findIter->second;
+            
+            return witnessAddressForAccount(pactiveWallet, witnessAccount);
+        }
+    }
+    return "";
 }

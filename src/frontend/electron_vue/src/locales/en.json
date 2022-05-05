@@ -69,7 +69,7 @@
     "information": "This wallet is only stored on your device.\nNever give anyone else access to your wallet.\nKeep the backup phrase you see at installation in a safe place.\nLose phrase or someone else with access to the phrase = lose Florin."
   },
   "holding_account": {
-    "compound_earnings": "compound earnings",
+    "compound_earnings": "Compound Earnings",
     "status": "Status",
     "parts": "Parts",
     "coins_locked": "Initial amount locked",
@@ -83,7 +83,8 @@
     "expected_earnings_frequency": "Expected earnings frequency",
     "account_weight": "Account weight",
     "network_weight": "Network weight",
-    "empty": "This holding account is empty"
+    "empty": "This holding account is empty",
+    "percent": "%"
   },
   "loader": {
     "shutdown": "Shutting down...",
@@ -101,7 +102,8 @@
     "thread": "thread | threads",
     "settings": "Settings",
     "current_of_max": "{current} of {max}",
-    "warning_performance": "Performance is degraded due to reduced memory usage"
+    "warning_performance": "Performance is degraded due to reduced memory usage",
+    "address": "My Mining Address"
   },
   "password_dialog": {
     "unlock_wallet": "Unlock wallet"
@@ -155,7 +157,8 @@
     "enter_label": "Enter label",
     "enter_coins_address": "Enter Florin address",
     "confirm_transaction": "Confirm transaction",
-    "target_account": "Send to account"
+    "target_account": "Send to account",
+    "fee_will_be_subtracted": "fee will be subtracted from the amount"
   },
   "renew_holding_account": {
     "funding_account": "Pay renewal fee from account"

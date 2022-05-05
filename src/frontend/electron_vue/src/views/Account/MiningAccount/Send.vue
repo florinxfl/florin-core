@@ -6,7 +6,7 @@
 
     <div class="main">
       <app-form-field>
-        <input v-model="amount" ref="amount" type="text" readonly />
+        <input v-model="computedAmount" ref="amount" type="text" readonly />
       </app-form-field>
       <app-form-field title="send_coins.target_account">
         <select-list :options="fundingAccounts" :default="fundingAccount" v-model="fundingAccount" />
@@ -30,7 +30,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { displayToMonetary, formatMoneyForDisplay } from "../../../util.js";
+import { formatMoneyForDisplay } from "../../../util.js";
 import { LibraryController, AccountsController } from "../../../unity/Controllers";
 import ConfirmTransactionDialog from "../SpendingAccount/ConfirmTransactionDialog";
 import EventBus from "@/EventBus";
@@ -39,7 +39,6 @@ export default {
   name: "Send",
   data() {
     return {
-      amount: null,
       address: null,
       password: null,
       fundingAccount: null,
@@ -49,6 +48,9 @@ export default {
   computed: {
     ...mapState("wallet", ["walletPassword"]),
     ...mapGetters("wallet", ["accounts", "account"]),
+    computedAmount() {
+      return formatMoneyForDisplay(this.account.spendable, false, 8);
+    },
     computedPassword() {
       return this.walletPassword ? this.walletPassword : this.password || "";
     },
@@ -62,19 +64,13 @@ export default {
       return this.isPasswordInvalid;
     },
     disableSendButton() {
-      if (isNaN(parseFloat(this.amount))) return true;
+      if (this.account.spendable <= 0) return true;
       if (this.computedPassword.trim().length === 0) return true;
       return false;
     }
   },
   mounted() {
     this.$refs.amount.focus();
-    if (this.fundingAccounts.length) {
-      this.fundingAccount = this.fundingAccounts[0];
-    }
-
-    this.amount = formatMoneyForDisplay(this.account.spendable);
-
     EventBus.$on("transaction-succeeded", this.onTransactionSucceeded);
   },
   beforeDestroy() {
@@ -85,31 +81,24 @@ export default {
       this.isPasswordInvalid = false;
     },
     showConfirmation() {
-      /*
-       todo:
-        - replace amount input by custom amount input (this one is too basic)
-        - improve notifications / messages on success and error
-       */
+      // use the original spendable amount to validate because when you convert the displayed amount back to monetary it can be higher than the original amount!
+      const amount = this.account.spendable;
 
-      // validate amount
-      let accountBalance = AccountsController.GetActiveAccountBalance();
-      let amountInvalid = accountBalance.availableExcludingLocked < displayToMonetary(this.amount);
-      // validate address
+      // validate the address
       let address = AccountsController.GetReceiveAddress(this.fundingAccount.UUID);
       let addressInvalid = !LibraryController.IsValidNativeAddress(address);
 
-      // wallet needs to be unlocked to make a payment
-      if (LibraryController.UnlockWallet(this.computedPassword) === false) {
-        this.isPasswordInvalid = true;
-      }
+      // validate password (confirmation dialog unlocks/locks when user confirms so don't leave it unlocked here)
+      this.isPasswordInvalid = !this.isPasswordValid(this.computedPassword);
 
-      if (amountInvalid || addressInvalid) return;
+      // fixme: when address is invalid the user does not know what's wrong because we don't show an error
+      if (addressInvalid || this.isPasswordInvalid) return;
 
       EventBus.$emit("show-dialog", {
         title: this.$t("send_coins.confirm_transaction"),
         component: ConfirmTransactionDialog,
         componentProps: {
-          amount: this.amount,
+          amount: amount,
           address: address,
           password: this.password,
           subtractFee: true
@@ -119,6 +108,10 @@ export default {
     },
     onTransactionSucceeded() {
       this.$router.push({ name: "account" });
+    },
+    isPasswordValid(password) {
+      // validation can only be done by unlocking the wallet, but make sure to lock the wallet afterwards
+      return LibraryController.UnlockWallet(password, 0);
     }
   }
 };
