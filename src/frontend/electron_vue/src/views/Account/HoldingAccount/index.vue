@@ -4,7 +4,7 @@
       <account-header :account="account"></account-header>
     </portal>
     
-    <div>
+    <div v-if="isAccountView && accountIsFunded">
       <app-form-field title="holding_account.compound_earnings">
         <div class="flex-row">
           <vue-slider :min="0" :max="100" :value="compoundingPercent" v-model="compoundingPercent" class="slider" />
