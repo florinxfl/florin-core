@@ -704,8 +704,12 @@ void static GuldenWitness()
             std::vector<CBlockIndex*> candidateOrphans;
             if (cacheAlreadySeenWitnessCandidates.find(pindexTip) == cacheAlreadySeenWitnessCandidates.end())
             {
-                LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from chain tip [%s]\n", pindexTip->GetBlockHashPoW2().ToString());
-                candidateOrphans.push_back(pindexTip);
+                // Belt and suspender check, don't witness blocks with a timestamp that the chain will consider invalid
+                if (pindexTip->GetBlockTime() < (GetAdjustedTime() + MAX_FUTURE_BLOCK_TIME))
+                {
+                    LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from chain tip [%s]\n", pindexTip->GetBlockHashPoW2().ToString());
+                    candidateOrphans.push_back(pindexTip);
+                }
             }
             if (candidateOrphans.size() == 0)
             {
@@ -713,8 +717,12 @@ void static GuldenWitness()
                 {
                     if (cacheAlreadySeenWitnessCandidates.find(candidateIter) == cacheAlreadySeenWitnessCandidates.end())
                     {
-                        LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from top level pow orphans [%s]\n", candidateIter->GetBlockHashPoW2().ToString());
-                        candidateOrphans.push_back(candidateIter);
+                        // Belt and suspender check, don't witness blocks with a timestamp that the chain will consider invalid
+                        if (candidateIter->GetBlockTime() < (GetAdjustedTime() + MAX_FUTURE_BLOCK_TIME))
+                        {
+                            LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from top level pow orphans [%s]\n", candidateIter->GetBlockHashPoW2().ToString());
+                            candidateOrphans.push_back(candidateIter);
+                        }
                     }
                 }
                 if (cacheAlreadySeenWitnessCandidates.size() > 100000)
