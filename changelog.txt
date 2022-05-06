@@ -1,12 +1,12 @@
-2.0.10
+2.0.11
 
 Introduce arm64/M1 macOS builds
 
 UI        - Add buy/sell functionality to header at top of app
 UI        - Introduce ability to change the address a mining account pays rewards into
 UI        - Introduce a "max" button to the send dialog, as well as automatic toggling to max when amount exceeds balance (subtract fee from amount in such instances)
-UI        - Allow holding account compouding to be adjusted as a percentage instead of just on/off behaviour (e.g. compound 50% of reward pay out the rest)
-UI        - Display a tooltip with more detaild balance when hovering mouse over wallet/account balances
+UI        - Allow holding account compounding to be adjusted as a percentage instead of just on/off behaviour (e.g. compound 50% of reward pay out the rest)
+UI        - Display a tooltip with more detailed balance when hovering mouse over wallet/account balances
 UI        - Persist window size/position across app runs
 CORE/UI   - Improve the way wallet unlock/lock is handled
 CORE      - Flag peers sending blocks with future timestamps for DoS so that rogue miners can't DoS the network as much as they have been doing
