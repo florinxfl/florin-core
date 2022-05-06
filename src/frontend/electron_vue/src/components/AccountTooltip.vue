@@ -101,7 +101,7 @@ export default {
 .tooltip-container {
   display: flex;
   flex-direction: column;
-  margin-top: 6fpx;
+  margin-top: 6px;
   padding: 5px;
   border-radius: 2px;
   background-color: #fff;
@@ -114,10 +114,12 @@ export default {
   font-weight: bold;
   margin-bottom: 12px;
   color: #000;
+  line-height: 22px;
 }
 .tooltip-content {
   font-size: 0.85em;
   color: #000;
+  line-height: 22px;
 }
 .tooltip-row {
   display: flex;
