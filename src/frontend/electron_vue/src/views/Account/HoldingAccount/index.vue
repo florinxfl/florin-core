@@ -3,7 +3,7 @@
     <portal to="header-slot">
       <account-header :account="account"></account-header>
     </portal>
-    
+
     <div v-if="isAccountView && accountIsFunded">
       <app-form-field title="holding_account.compound_earnings">
         <div class="flex-row">

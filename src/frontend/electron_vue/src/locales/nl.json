@@ -164,5 +164,13 @@
     "title": "Jouw holding key",
     "information": "Gebruik je holding key alleen voor vertrouwde cloud holding services. Jouw holding key geeft toegang tot jouw beloningen, laat deze dus nooit aan andere mensen zien.",
     "no_funds": "Holding account moet worden gevuld met vastgezette Florin voordat het mogelijk is om deze te koppelen met andere wallets."
+  },
+  "tooltip": {
+    "account_balance": "Account balans",
+    "wallet_balance": "Portemonnee balans",
+    "total": "Totaal",
+    "locked": "Vastgezet",
+    "spendable": "Te spenderen",
+    "pending": "In afwachting"
   }
 }

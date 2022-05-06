@@ -3,23 +3,23 @@
     <slot></slot>
     <div v-if="show">
       <div class="tooltip-container">
-        <div class="tooltip-heading" v-if="type == 'Account'">Account Balances</div>
-        <div class="tooltip-heading" v-else>Wallet Balances</div>
+        <div class="tooltip-heading" v-if="type == 'Account'">{{ $t("tooltip.account_balance") }}</div>
+        <div class="tooltip-heading" v-else>{{ $t("tooltip.wallet_balance") }}</div>
         <div>
           <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Total</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.total") }}</div>
             <div class="tooltip-content">{{ accountObject.total }}</div>
           </div>
           <div v-if="account.type === 'Holding' || type === 'Wallet'" class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Locked</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.locked") }}</div>
             <div class="tooltip-content">{{ accountObject.locked }}</div>
           </div>
           <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Spendable</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.spendable") }}</div>
             <div class="tooltip-content">{{ accountObject.spendable }}</div>
           </div>
           <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Pending</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.pending") }}</div>
             <div class="tooltip-content">{{ accountObject.pending }}</div>
           </div>
         </div>
