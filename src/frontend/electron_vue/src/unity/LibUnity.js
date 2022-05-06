@@ -36,6 +36,8 @@ class LibUnity {
 
     this.rpcController = new libUnity.NJSIRpcController();
 
+    this.p2pNetworkController = new libUnity.NJSIP2pNetworkController();
+
     let buildInfo = this.libraryController.BuildInfo();
 
     store.dispatch("app/SET_UNITY_VERSION", buildInfo.substr(1, buildInfo.indexOf("-") - 1));
