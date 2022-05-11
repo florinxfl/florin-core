@@ -4,22 +4,17 @@
       <account-header :account="account"></account-header>
     </portal>
 
-    <app-section v-if="isAccountView && accountIsFunded" class="align-right">
-      {{ $t("holding_account.compound_earnings") }}
-      <toggle-button
-        :value="isCompounding"
-        :color="{ checked: '#c0aa70', unchecked: '#ddd' }"
-        :labels="{
-          checked: $t('common.on'),
-          unchecked: $t('common.off')
-        }"
-        :sync="true"
-        :speed="0"
-        :height="20"
-        :width="54"
-        @change="toggleCompounding"
-      />
-    </app-section>
+    <div v-if="isAccountView && accountIsFunded">
+      <app-form-field title="holding_account.compound_earnings">
+        <div class="flex-row">
+          <vue-slider :min="0" :max="100" :value="compoundingPercent" v-model="compoundingPercent" class="slider" />
+          <div class="slider-info">
+            {{ compoundingPercent }}
+            {{ $tc("holding_account.percent") }}
+          </div>
+        </div>
+      </app-form-field>
+    </div>
 
     <app-section v-if="isAccountView && accountIsFunded" class="holding-information">
       <h2>{{ $t("common.information") }}</h2>
@@ -116,7 +111,8 @@ export default {
       rightSectionComponent: null,
       statistics: null,
       isCompounding: false,
-      rightSidebar: null
+      rightSidebar: null,
+      compoundingPercent: 0
     };
   },
   computed: {
@@ -198,13 +194,16 @@ export default {
   watch: {
     account() {
       this.initialize();
+    },
+    compoundingPercent() {
+      WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
     }
   },
   methods: {
     initialize() {
       this.updateStatistics();
 
-      this.isCompounding = WitnessController.IsAccountCompounding(this.account.UUID);
+      this.compoundingPercent = WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent || 0;
     },
     getStatistics(which) {
       return this.statistics[which] || null;
@@ -218,10 +217,6 @@ export default {
           resolve();
         }
       });
-    },
-    toggleCompounding() {
-      WitnessController.SetAccountCompounding(this.account.UUID, !this.isCompounding);
-      this.isCompounding = !this.isCompounding;
     },
     setRightSidebar(name) {
       switch (name) {
@@ -256,5 +251,14 @@ export default {
   & .flex-row :first-child {
     min-width: 220px;
   }
+}
+.slider {
+  width: calc(100% - 60px) !important;
+  display: inline-block;
+}
+.slider-info {
+  text-align: right;
+  line-height: 18px;
+  flex: 1;
 }
 </style>

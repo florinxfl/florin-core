@@ -196,7 +196,7 @@ static bool CreateWitnessSubsidyOutputs(CMutableTransaction& coinbaseTx, const C
     if (fixedTotal > compoundWitnessBlockSubsidy)
         return alert(strprintf("%s, Witness template fixed amounts total (%s) exceed subsidy (%s)", __PRETTY_FUNCTION__, FormatMoney(fixedTotal), FormatMoney(compoundWitnessBlockSubsidy)));
 
-    CAmount percentageSum = rewardTemplate.percentagesSum();
+    double percentageSum = rewardTemplate.percentagesSum();
     if (percentageSum < 0.0 || percentageSum > 1.0)
         return alert(strprintf("%s, Witness template percentage total (%f) out of range [0..100]", __PRETTY_FUNCTION__, percentageSum * 100.0));
 
@@ -365,7 +365,15 @@ static std::pair<bool, CMutableTransaction> CreateWitnessCoinbase(int nWitnessHe
     }
     else
     {
-        if (selectedWitnessAccount->getCompounding() > 0)
+        if (selectedWitnessAccount->getCompoundingPercent() > 0)
+        {
+            auto compoundPercent = selectedWitnessAccount->getCompoundingPercent();
+            // Pay up until requested amount to compound
+            rewardTemplate.destinations.push_back(CWitnessRewardDestination(CWitnessRewardDestination::DestType::Compound, CNativeAddress(), 0, compoundPercent/100.0, false, false));
+            // Any remaining fees/overflow to script
+            rewardTemplate.destinations.push_back(CWitnessRewardDestination(CWitnessRewardDestination::DestType::Account, CNativeAddress(), 0, 0.0, true, true));
+        }
+        else if (selectedWitnessAccount->getCompounding() > 0)
         {
             auto compoundAmount = selectedWitnessAccount->getCompounding();
             if (compoundAmount == MAX_MONEY)
@@ -696,8 +704,12 @@ void static GuldenWitness()
             std::vector<CBlockIndex*> candidateOrphans;
             if (cacheAlreadySeenWitnessCandidates.find(pindexTip) == cacheAlreadySeenWitnessCandidates.end())
             {
-                LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from chain tip [%s]\n", pindexTip->GetBlockHashPoW2().ToString());
-                candidateOrphans.push_back(pindexTip);
+                // Belt and suspender check, don't witness blocks with a timestamp that the chain will consider invalid
+                if (pindexTip->GetBlockTime() < (GetAdjustedTime() + MAX_FUTURE_BLOCK_TIME))
+                {
+                    LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from chain tip [%s]\n", pindexTip->GetBlockHashPoW2().ToString());
+                    candidateOrphans.push_back(pindexTip);
+                }
             }
             if (candidateOrphans.size() == 0)
             {
@@ -705,8 +717,12 @@ void static GuldenWitness()
                 {
                     if (cacheAlreadySeenWitnessCandidates.find(candidateIter) == cacheAlreadySeenWitnessCandidates.end())
                     {
-                        LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from top level pow orphans [%s]\n", candidateIter->GetBlockHashPoW2().ToString());
-                        candidateOrphans.push_back(candidateIter);
+                        // Belt and suspender check, don't witness blocks with a timestamp that the chain will consider invalid
+                        if (candidateIter->GetBlockTime() < (GetAdjustedTime() + MAX_FUTURE_BLOCK_TIME))
+                        {
+                            LogPrint(BCLog::WITNESS, "GuldenWitness: Add witness candidate from top level pow orphans [%s]\n", candidateIter->GetBlockHashPoW2().ToString());
+                            candidateOrphans.push_back(candidateIter);
+                        }
                     }
                 }
                 if (cacheAlreadySeenWitnessCandidates.size() > 100000)
