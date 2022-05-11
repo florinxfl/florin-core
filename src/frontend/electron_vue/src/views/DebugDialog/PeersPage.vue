@@ -38,9 +38,10 @@ export default {
   methods: {
     getPeers() {
       const peers = P2pNetworkController.GetPeerInfo();
-      const bannedPeers = P2pNetworkController.listBannedPeers();
+      console.log(peers);
+      // const bannedPeers = P2pNetworkController.listBannedPeers();
       this.peers = peers;
-      this.bannedPeers = bannedPeers;
+      // this.bannedPeers = bannedPeers;
     },
     showPeerDetails(peer) {
       EventBus.$emit("show-dialog", {
