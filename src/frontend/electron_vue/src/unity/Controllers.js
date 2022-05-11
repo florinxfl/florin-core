@@ -390,6 +390,46 @@ class P2pNetworkController {
   static GetPeerInfo() {
     return handleError(ipc.sendSync("NJSIP2pNetworkController.getPeerInfo"));
   }
+
+  static async ListBannedPeersAsync() {
+    return handleError(await ipc.callMain("NJSIP2pNetworkController.listBannedPeersAsync"));
+  }
+
+  static ListBannedPeers() {
+    return handleError(ipc.sendSync("NJSIP2pNetworkController.listBannedPeers"));
+  }
+
+  static async BanPeerAsync(address, banTimeInSeconds) {
+    return handleError(await ipc.callMain("NJSIP2pNetworkController.banPeerAsync", { address, banTimeInSeconds }));
+  }
+
+  static BanPeer(address, banTimeInSeconds) {
+    return handleError(ipc.sendSync("NJSIP2pNetworkController.banPeer", address, banTimeInSeconds));
+  }
+
+  static async UnbanPeerAsync(address) {
+    return handleError(await ipc.callMain("NJSIP2pNetworkController.unbanPeerAsync", { address }));
+  }
+
+  static UnbanPeer(address) {
+    return handleError(ipc.sendSync("NJSIP2pNetworkController.unbanPeer", address));
+  }
+
+  static async DisconnectPeerAsync(nodeid) {
+    return handleError(await ipc.callMain("NJSIP2pNetworkController.disconnectPeerAsync", { nodeid }));
+  }
+
+  static DisconnectPeer(nodeid) {
+    return handleError(ipc.sendSync("NJSIP2pNetworkController.disconnectPeer", nodeid));
+  }
+
+  static async ClearBannedAsync() {
+    return handleError(await ipc.callMain("NJSIP2pNetworkController.ClearBannedAsync"));
+  }
+
+  static ClearBanned() {
+    return handleError(ipc.sendSync("NJSIP2pNetworkController.ClearBanned"));
+  }
 }
 
 class AccountsController {
