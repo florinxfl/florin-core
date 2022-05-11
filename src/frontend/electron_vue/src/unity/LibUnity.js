@@ -1596,6 +1596,136 @@ class LibUnity {
       }
     });
 
+    ipc.answerRenderer("NJSIP2pNetworkController.listBannedPeersAsync", async () => {
+      console.log(`IPC: p2pNetworkController.listBannedPeersAsync()`);
+      try {
+        let result = this.p2pNetworkController.listBannedPeers();
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIP2pNetworkController.listBannedPeers", event => {
+      console.log(`IPC: p2pNetworkController.listBannedPeers()`);
+      try {
+        let result = this.p2pNetworkController.listBannedPeers();
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIP2pNetworkController.banPeerAsync", async data => {
+      console.log(`IPC: p2pNetworkController.banPeerAsync(${data.address}, ${data.banTimeInSeconds})`);
+      try {
+        let result = this.p2pNetworkController.banPeer(data.address, data.banTimeInSeconds);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIP2pNetworkController.banPeer", (event, address, banTimeInSeconds) => {
+      console.log(`IPC: p2pNetworkController.banPeer(${address}, ${banTimeInSeconds})`);
+      try {
+        let result = this.p2pNetworkController.banPeer(address, banTimeInSeconds);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIP2pNetworkController.unbanPeerAsync", async data => {
+      console.log(`IPC: p2pNetworkController.unbanPeerAsync(${data.address})`);
+      try {
+        let result = this.p2pNetworkController.unbanPeer(data.address);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIP2pNetworkController.unbanPeer", (event, address) => {
+      console.log(`IPC: p2pNetworkController.unbanPeer(${address})`);
+      try {
+        let result = this.p2pNetworkController.unbanPeer(address);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIP2pNetworkController.disconnectPeerAsync", async data => {
+      console.log(`IPC: p2pNetworkController.disconnectPeerAsync(${data.nodeid})`);
+      try {
+        let result = this.p2pNetworkController.disconnectPeer(data.nodeid);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIP2pNetworkController.disconnectPeer", (event, nodeid) => {
+      console.log(`IPC: p2pNetworkController.disconnectPeer(${nodeid})`);
+      try {
+        let result = this.p2pNetworkController.disconnectPeer(nodeid);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIP2pNetworkController.ClearBannedAsync", async () => {
+      console.log(`IPC: p2pNetworkController.ClearBannedAsync()`);
+      try {
+        let result = this.p2pNetworkController.ClearBanned();
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIP2pNetworkController.ClearBanned", event => {
+      console.log(`IPC: p2pNetworkController.ClearBanned()`);
+      try {
+        let result = this.p2pNetworkController.ClearBanned();
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
     // Register NJSIAccountsController ipc handlers
     ipc.answerRenderer("NJSIAccountsController.listAccountsAsync", async () => {
       console.log(`IPC: accountsController.listAccountsAsync()`);
