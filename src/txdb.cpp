@@ -47,6 +47,7 @@ static const char DB_POW2_PHASE5 = '5';
 
 // Additional v2 format
 static const char DB_COIN_REF = 'r';
+static const char DB_TXINDEX_REF = 'T';
 
 namespace
 {
@@ -405,11 +406,25 @@ bool CBlockTreeDB::ReadTxIndex(const uint256 &txid, CDiskTxPos &pos)
     return Read(std::pair(DB_TXINDEX, txid), pos);
 }
 
-bool CBlockTreeDB::WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> >&vect)
+uint256 CBlockTreeDB::ReadTxIndexRef(uint64_t nBlockHeight, uint64_t nPos)
+{
+    uint256 correspondingHash;
+    if (!Read(std::pair(DB_TXINDEX_REF, std::pair(nBlockHeight, nPos)), correspondingHash))
+    {
+        correspondingHash.SetNull();
+    }
+    return correspondingHash;
+}
+
+bool CBlockTreeDB::WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> >&vect, uint64_t nHeight)
 {
     CDBBatch batch(*this);
+    uint64_t i=0;
     for (std::vector<std::pair<uint256,CDiskTxPos> >::const_iterator it=vect.begin(); it!=vect.end(); it++)
+    {
         batch.Write(std::pair(DB_TXINDEX, it->first), it->second);
+        batch.Write(std::pair(DB_TXINDEX_REF, std::pair(nHeight,i++)), it->first);
+    }
     return WriteBatch(batch);
 }
 

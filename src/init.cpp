@@ -185,6 +185,12 @@ void CoreInterrupt(boost::thread_group& threadGroup)
     LogPrintf("Core interrupt: done.\n");
 }
 
+//NB! This is only for RPC code and similar (display purposes) and only works when txindex is enabled. DO NOT call this in any validation or similar code
+uint256 getHashFromTxIndexRef(uint64_t blockHeight, uint64_t txIndex)
+{
+    return pblocktree->ReadTxIndexRef(blockHeight, txIndex);
+}
+
 extern void ServerShutdown(boost::thread_group& threadGroup);
 void CoreShutdown(boost::thread_group& threadGroup)
 {

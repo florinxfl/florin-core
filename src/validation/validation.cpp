@@ -1363,7 +1363,7 @@ bool ConnectBlock(CChain& chain, const CBlock& block, CValidationState& state, C
     }
 
     if (fTxIndex)
-        if (!pblocktree->WriteTxIndex(vPos))
+        if (!pblocktree->WriteTxIndex(vPos, pindex->nHeight))
             return AbortNode(state, "Failed to write transaction index");
 
     // add this block to the view's block chain

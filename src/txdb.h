@@ -166,7 +166,9 @@ public:
     bool WriteReindexing(bool fReindex);
     bool ReadReindexing(bool &fReindex);
     bool ReadTxIndex(const uint256 &txid, CDiskTxPos &pos);
-    bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> > &list);
+    //NB! This is only for RPC code and similar (display purposes) and only works when txindex is enabled. DO NOT call this in any validation or similar code
+    uint256 ReadTxIndexRef(uint64_t nBlockHeight, uint64_t nPos);
+    bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> > &list, uint64_t nHeight);
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
     bool LoadBlockIndexGuts(std::function<CBlockIndex*(const uint256&)> insertBlockIndex);
