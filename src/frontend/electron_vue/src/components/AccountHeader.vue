@@ -169,6 +169,7 @@ export default {
   & > div {
     align-items: center;
     justify-content: center;
+    height: var(--header-height);
   }
 }
 
