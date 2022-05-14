@@ -1,27 +1,27 @@
 <template>
-  <div @mouseenter="showTooltip" @mouseleave="showTooltip" class="tooltip">
-    <slot></slot>
-    <div v-if="show">
-      <div class="tooltip-container">
-        <div class="tooltip-heading" v-if="type == 'Account'">{{ $t("tooltip.account_balance") }}</div>
-        <div class="tooltip-heading" v-else>{{ $t("tooltip.wallet_balance") }}</div>
-        <div>
-          <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.total") }}</div>
-            <div class="tooltip-content">{{ accountObject.total }}</div>
-          </div>
-          <div v-if="account.type === 'Holding' || account.type === 'Witness' || type === 'Wallet'" class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.locked") }}</div>
-            <div class="tooltip-content">{{ accountObject.locked }}</div>
-          </div>
-          <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.spendable") }}</div>
-            <div class="tooltip-content">{{ accountObject.spendable }}</div>
-          </div>
-          <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.pending") }}</div>
-            <div class="tooltip-content">{{ accountObject.pending }}</div>
-          </div>
+  <div class="tooltip" @mouseleave="hideTooltip">
+    <div @mouseenter="showTooltip">
+      <slot></slot>
+    </div>
+    <div @mouseenter="showTooltip" class="tooltip-container" v-if="show">
+      <div class="tooltip-heading" v-if="type == 'Account'">{{ $t("tooltip.account_balance") }}</div>
+      <div class="tooltip-heading" v-else>{{ $t("tooltip.wallet_balance") }}</div>
+      <div>
+        <div class="tooltip-row">
+          <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.total") }}</div>
+          <div class="tooltip-content">{{ accountObject.total }}</div>
+        </div>
+        <div v-if="account.type === 'Holding' || account.type === 'Witness' || type === 'Wallet'" class="tooltip-row">
+          <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.locked") }}</div>
+          <div class="tooltip-content">{{ accountObject.locked }}</div>
+        </div>
+        <div class="tooltip-row">
+          <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.spendable") }}</div>
+          <div class="tooltip-content">{{ accountObject.spendable }}</div>
+        </div>
+        <div class="tooltip-row">
+          <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.pending") }}</div>
+          <div class="tooltip-content">{{ accountObject.pending }}</div>
         </div>
       </div>
     </div>
@@ -31,6 +31,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
+
 export default {
   name: "AccountTooltip",
   data() {
@@ -48,14 +49,22 @@ export default {
     },
     type: {
       type: String
+    },
+    timeout: {
+      type: Number
     }
   },
   methods: {
     showTooltip: function() {
-      this.show = !this.show;
-      if (this.show) {
-        this.getValues();
-      }
+      clearTimeout(this.timeout);
+      this.show = true;
+      this.getValues();
+    },
+    hideTooltip() {
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        this.show = false;
+      }, 100);
     },
     getValues() {
       if (this.type === "Account") {
@@ -99,6 +108,8 @@ export default {
   z-index: 99;
 }
 .tooltip-container {
+  position: fixed;
+  z-index: 9990;
   display: flex;
   flex-direction: column;
   margin-top: 6px;
