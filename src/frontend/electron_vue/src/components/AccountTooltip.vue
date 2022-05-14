@@ -37,7 +37,8 @@ export default {
   data() {
     return {
       show: false,
-      accountObject: {}
+      accountObject: {},
+      timeout: undefined
     };
   },
   computed: {
@@ -49,9 +50,6 @@ export default {
     },
     type: {
       type: String
-    },
-    timeout: {
-      type: Number
     }
   },
   methods: {
