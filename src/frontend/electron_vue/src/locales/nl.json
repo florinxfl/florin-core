@@ -69,7 +69,7 @@
     "information": "Deze wallet staat alleen op jouw apparaat.\nGeef nooit iemand anders toegang tot jouw wallet.\nBewaar de herstelzin die je te zien krijgt tijdens installatie op een veilige plek.\nHerstelzin kwijt of iemand toegang tot je herstelzin = Florin weg."
   },
   "saving_account": {
-    "compound_earnings": "cumulatieve inkomsten",
+    "compound_earnings": "Cumulatieve Inkomsten",
     "status": "Status",
     "parts": "Delen",
     "coins_locked": "Primair vastgezette aantal",
@@ -83,7 +83,8 @@
     "expected_earnings_frequency": "Verwachte beloningstijd",
     "account_weight": "Gewicht",
     "network_weight": "Netwerk gewicht",
-    "empty": "Deze holding rekening is leeg"
+    "empty": "Deze holding rekening is leeg",
+    "percent": "%"
   },
   "loader": {
     "shutdown": "Bezig met afsluiten...",
@@ -166,5 +167,13 @@
     "title": "Jouw holding key",
     "information": "Gebruik je holding key alleen voor vertrouwde cloud holding services. Jouw holding key geeft toegang tot jouw beloningen, laat deze dus nooit aan andere mensen zien.",
     "no_funds": "Holding rekening moet worden gevuld met vastgezette Florin voordat het mogelijk is om deze te koppelen met andere wallets."
+  },
+  "tooltip": {
+    "account_balance": "Account balans",
+    "wallet_balance": "Portemonnee balans",
+    "total": "Totaal",
+    "locked": "Vastgezet",
+    "spendable": "Te spenderen",
+    "pending": "In afwachting"
   }
 }

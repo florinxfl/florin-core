@@ -19,6 +19,7 @@
 #include "i_p2p_network_controller.hpp"
 #include "i_p2p_network_listener.hpp"
 #include "peer_record.hpp"
+#include "banned_peer_record.hpp"
 
 std::shared_ptr<IP2pNetworkListener> networkListener;
 boost::signals2::connection enabledConn;
@@ -88,26 +89,108 @@ std::vector<PeerRecord> IP2pNetworkController::getPeerInfo()
         {
             int64_t nSyncedHeight = 0;
             int64_t nCommonHeight = 0;
+            int64_t nMisbehavior = 0;
             CNodeStateStats stateStats;
             TRY_LOCK(cs_main, lockMain);
             if (lockMain && GetNodeStateStats(nstat.nodeid, stateStats))
             {
                 nSyncedHeight = stateStats.nSyncHeight;
                 nCommonHeight = stateStats.nCommonHeight;
+                nMisbehavior = stateStats.nMisbehavior;
             }
 
-            PeerRecord rec(nstat.nodeid,
+            PeerRecord rec((int64_t)nstat.nodeid,
                            nstat.addr.ToString(),
                            nstat.addr.HostnameLookup(),
-                           nstat.nStartingHeight,
-                           nSyncedHeight,
-                           nCommonHeight,
-                           int32_t(nstat.dPingTime * 1000),
+                           nstat.addrLocal,
+                           nstat.addrBind.IsValid()?nstat.addrBind.ToString():"",
+                           (int64_t)nstat.nStartingHeight,
+                           (int64_t)nSyncedHeight,
+                           (int64_t)nCommonHeight,
+                           (int64_t)nstat.nTimeConnected,
+                           (int64_t)nstat.nTimeOffset,
+                           (int64_t)(nstat.dPingTime * 1000),
+                           (int64_t)nstat.nLastSend,
+                           (int64_t)nstat.nLastRecv,
+                           (int64_t)nstat.nSendBytes,
+                           (int64_t)nstat.nRecvBytes,
                            nstat.cleanSubVer,
-                           nstat.nVersion);
+                           (int64_t)nstat.nVersion,
+                           (int64_t)nstat.nServices,
+                           nstat.fInbound,
+                           nstat.fWhitelisted,
+                           nstat.fAddnode,
+                           nstat.fRelayTxes,
+                           (int64_t)nMisbehavior
+                           );
             ret.emplace_back(rec);
         }
     }
 
     return ret;
+}
+
+std::vector<BannedPeerRecord> IP2pNetworkController::listBannedPeers()
+{
+    std::vector<BannedPeerRecord> ret;
+    
+    if (g_connman)
+    {   
+        banmap_t banMap;
+        g_connman->GetBanned(banMap);
+        for (const auto& [subNet, banEntry] : banMap)
+        {
+            BannedPeerRecord rec(subNet.ToString(), banEntry.nBanUntil, banEntry.nCreateTime, banEntry.banReasonToString());
+            ret.push_back(rec);
+        }
+    }
+    return ret;
+}
+
+bool IP2pNetworkController::banPeer(const std::string& address, int64_t banTimeInSeconds)
+{
+    if (g_connman)
+    {
+        CNetAddr netAddr;
+        if (!LookupHost(address.c_str(), netAddr, false))
+            return false;
+        
+        g_connman->Ban(netAddr, BanReasonManuallyAdded, banTimeInSeconds, false);
+        return true;
+    }
+    return false;
+}
+
+bool IP2pNetworkController::unbanPeer(const std::string& address)
+{
+    if (g_connman)
+    {
+        CNetAddr netAddr;
+        if (!LookupHost(address.c_str(), netAddr, false))
+            return false;
+        
+        g_connman->Unban(netAddr);
+        return true;
+    }
+    return false;
+}
+
+bool IP2pNetworkController::disconnectPeer(int64_t nodeID)
+{
+    if (g_connman)
+    {        
+        g_connman->DisconnectNode(nodeID);
+        return true;
+    }
+    return false;
+}
+
+bool IP2pNetworkController::ClearBanned()
+{
+    if (g_connman)
+    {
+        g_connman->ClearBanned();
+        return true;
+    }
+    return false;
 }

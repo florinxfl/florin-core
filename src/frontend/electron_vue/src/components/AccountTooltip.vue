@@ -3,23 +3,23 @@
     <slot></slot>
     <div v-if="show">
       <div class="tooltip-container">
-        <div class="tooltip-heading" v-if="type === 'Account'">Account Balances</div>
-        <div class="tooltip-heading" v-else>Wallet Balances</div>
+        <div class="tooltip-heading" v-if="type == 'Account'">{{ $t("tooltip.account_balance") }}</div>
+        <div class="tooltip-heading" v-else>{{ $t("tooltip.wallet_balance") }}</div>
         <div>
           <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Total</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.total") }}</div>
             <div class="tooltip-content">{{ accountObject.total }}</div>
           </div>
           <div v-if="account.type === 'Holding' || account.type === 'Witness' || type === 'Wallet'" class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Locked</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.locked") }}</div>
             <div class="tooltip-content">{{ accountObject.locked }}</div>
           </div>
           <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Spendable</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.spendable") }}</div>
             <div class="tooltip-content">{{ accountObject.spendable }}</div>
           </div>
           <div class="tooltip-row">
-            <div class="tooltip-content" style="flex: 1">Pending</div>
+            <div class="tooltip-content" style="flex: 1">{{ $t("tooltip.pending") }}</div>
             <div class="tooltip-content">{{ accountObject.pending }}</div>
           </div>
         </div>
@@ -96,11 +96,12 @@ export default {
 <style lang="less" scoped>
 .tooltip {
   position: relative;
+  z-index: 99;
 }
 .tooltip-container {
   display: flex;
   flex-direction: column;
-  margin-top: 6fpx;
+  margin-top: 6px;
   padding: 5px;
   border-radius: 2px;
   background-color: #fff;
@@ -113,10 +114,12 @@ export default {
   font-weight: bold;
   margin-bottom: 12px;
   color: #000;
+  line-height: 22px;
 }
 .tooltip-content {
   font-size: 0.85em;
   color: #000;
+  line-height: 22px;
 }
 .tooltip-row {
   display: flex;

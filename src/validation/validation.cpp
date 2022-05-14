@@ -1363,7 +1363,7 @@ bool ConnectBlock(CChain& chain, const CBlock& block, CValidationState& state, C
     }
 
     if (fTxIndex)
-        if (!pblocktree->WriteTxIndex(vPos))
+        if (!pblocktree->WriteTxIndex(vPos, pindex->nHeight))
             return AbortNode(state, "Failed to write transaction index");
 
     // add this block to the view's block chain
@@ -2729,18 +2729,20 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
 
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePastWitness())
-        return state.Invalid(false, REJECT_INVALID, "time-too-old", "blocks PoW timestamp is too early");
+        return state.DoS(20, false, REJECT_INVALID, "time-too-old", "blocks PoW timestamp is too early");
 
     // Check timestamp
-    if (pindexPrev->nHeight > (fTestNet ? 446500 : 437500) )
+    if (nAdjustedTime > 1652097600)
     {
+        if (block.GetBlockTime() > nAdjustedTime + (MAX_FUTURE_BLOCK_TIME*2))
+            return state.DoS(100, false, REJECT_INVALID, "time-too-new", "block timestamp way too far in the future");
         if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
-            return state.Invalid(false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+            return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
     }
     else
     {
         if (block.GetBlockTime() > nAdjustedTime + 15 * 60)
-            return state.Invalid(false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+            return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
     }
 
     if (block.nVersionPoW2Witness != 0)
@@ -2748,6 +2750,13 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
         if (block.nTimePoW2Witness <= pindexPrev->GetMedianTimePastPoW())
         {
             return state.Invalid(false, REJECT_INVALID, "time-too-old", "blocks witness timestamp is too early");
+        }
+        if (nAdjustedTime > 1652097600)
+        {
+            if (block.nTimePoW2Witness > nAdjustedTime + (MAX_FUTURE_BLOCK_TIME*2))
+                return state.DoS(100, false, REJECT_INVALID, "time-too-new", "blocks witness timestamp way too far in the future");
+            if (block.nTimePoW2Witness > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
+                return state.DoS(20, false, REJECT_INVALID, "time-too-new", "block witness timestamp too far in the future");
         }
         if (block.hashMerkleRootPoW2Witness == uint256())
         {

@@ -21,6 +21,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include <txdb.h>
 
 
 std::string FormatScript(const CScript& script)
@@ -173,7 +174,7 @@ void PoW2WitnessToUniv(const CTxOut& txout, UniValue& out, bool fIncludeHex)
     out.pushKV("address", CNativeAddress(CPoW2WitnessDestination(txout.output.witnessDetails.spendingKeyID, txout.output.witnessDetails.witnessKeyID)).ToString());
 }
 
-
+extern uint256 getHashFromTxIndexRef(uint64_t blockHeight, uint64_t txIndex);
 
 void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry)
 {
@@ -208,7 +209,17 @@ void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry)
             else
             {
                 in.pushKV("prevout_type", "index");
-                in.pushKV("txid", "");
+                
+                //NB! This will only work on machines that have a txindex that has been rebuilt with the code where this was added (2.0.12)
+                uint256 correspondingHash = getHashFromTxIndexRef(txin.GetPrevOut().getTransactionBlockNumber(), txin.GetPrevOut().getTransactionIndex());
+                if (!correspondingHash.IsNull())
+                {
+                    in.pushKV("txid", correspondingHash.GetHex());
+                }
+                else
+                {
+                    in.pushKV("txid", "");
+                }
                 in.pushKV("tx_height", txin.GetPrevOut().getTransactionBlockNumber());
                 in.pushKV("tx_index", txin.GetPrevOut().getTransactionIndex());
             }
