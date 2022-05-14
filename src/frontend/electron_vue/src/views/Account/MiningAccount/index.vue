@@ -138,7 +138,6 @@ import { mapState } from "vuex";
 import { formatMoneyForDisplay } from "../../../util.js";
 import { GenerationController, LibraryController } from "../../../unity/Controllers";
 import { clipboard } from "electron";
-import Send from "./Send";
 
 export default {
   name: "MiningAccount",

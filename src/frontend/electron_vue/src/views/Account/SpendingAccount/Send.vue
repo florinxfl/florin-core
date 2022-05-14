@@ -36,7 +36,6 @@ import { displayToMonetary, formatMoneyForDisplay } from "../../../util.js";
 import { LibraryController } from "@/unity/Controllers";
 import ConfirmTransactionDialog from "./ConfirmTransactionDialog";
 import EventBus from "@/EventBus";
-import { BackendUtilities } from "@/unity/Controllers";
 
 export default {
   name: "Send",
