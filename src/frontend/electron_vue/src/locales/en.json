@@ -45,7 +45,13 @@
     "unlock": "Unlock",
     "done": "Done",
     "holding_key": "Holding Key",
-    "info": "Info"
+    "info": "Info",
+    "disconnect": "Disconnect",
+    "ban_hour": "Ban for 1 Hour",
+    "ban_day": "Ban for 1 Day",
+    "ban_week": "Ban for 1 Week",
+    "ban_year": "Ban for 1 Year",
+    "un_ban": "Unban Peer"
   },
   "clipboard_field": {
     "copied_to_clipboard": "Copied to clipboard"
