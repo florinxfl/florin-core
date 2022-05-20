@@ -27,7 +27,7 @@
 bool CCoinsView::GetCoin(const COutPoint &outpoint, Coin &coin, COutPoint* pOutpointRet) const { return false; }
 bool CCoinsView::HaveCoin(const COutPoint &outpoint) const { return false; }
 uint256 CCoinsView::GetBestBlock() const { return uint256(); }
-bool CCoinsView::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock, bool allowFastPath) { return false; }
+bool CCoinsView::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) { return false; }
 CCoinsViewCursor *CCoinsView::Cursor() const { return 0; }
 
 
@@ -36,7 +36,7 @@ bool CCoinsViewBacked::GetCoin(const COutPoint &outpoint, Coin &coin, COutPoint*
 bool CCoinsViewBacked::HaveCoin(const COutPoint &outpoint) const { return base->HaveCoin(outpoint); }
 uint256 CCoinsViewBacked::GetBestBlock() const { return base->GetBestBlock(); }
 void CCoinsViewBacked::SetBackend(CCoinsView &viewIn) { base = &viewIn; }
-bool CCoinsViewBacked::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock, bool allowFastPath) { return base->BatchWrite(mapCoins, hashBlock, allowFastPath); }
+bool CCoinsViewBacked::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) { return base->BatchWrite(mapCoins, hashBlock); }
 CCoinsViewCursor *CCoinsViewBacked::Cursor() const { return base->Cursor(); }
 size_t CCoinsViewBacked::EstimateSize() const { return base->EstimateSize(); }
 
@@ -110,13 +110,11 @@ void CCoinsViewCache::validateInsert(const COutPoint &outpoint, uint64_t block, 
             // Unless the other one is spent and marked dirty, in which case thats fine
             if (!transactionHashesMatch && !(it->second.flags&CCoinsCacheEntry::DIRTY&&it->second.coin.IsSpent()))
             {
-                #if 0
                 std::string warning = strprintf("Warning: outpoint mismatch.\nPlease notify the developers with this information to assist them.\n\n"
                                                 "cohash:[%s]\nophash:[%s]\nblock:[%d] txidx:[%d] outidx:[%d] flags:[%d] spent:[%s] lookupishash: [%s]",
                                                 canonicalOutPoint.getTransactionHash().ToString(), outpoint.getTransactionHash().ToString(), 
                                                 block, txIndex, voutIndex, it->second.flags, (it->second.coin.IsSpent()?"yes":"no"), (outpoint.isHash?"yes":"no"));
-                uiInterface.NotifyUIAlertChanged(warning);
-                #endif
+                throw std::logic_error(warning);
             }
             
             // Block and index should match up
@@ -260,6 +258,20 @@ void CCoinsViewCache::AddCoin(const COutPoint &outpoint, Coin&& coin, bool possi
     // Ensure consistency
     validateInsert(outpoint, coin.nHeight, coin.nTxIndex, outpoint.n);
 
+    // If there is already an existing entry the indexed outpoint map needs to be kept in sync
+    if (cacheCoins.count(outpoint) > 0)
+    {
+        auto coin_entry = cacheCoins[outpoint];
+        auto refIter = cacheCoinRefs.find(COutPoint(coin_entry.coin.nHeight, coin_entry.coin.nTxIndex, outpoint.n));
+
+        // If the existing indexed outpoint is associated with this coin_entry the old entry is erased so there
+        // will be no stale entry left if its index changes
+        if (refIter != cacheCoinRefs.end() && refIter->second.getTransactionHash() == outpoint.getTransactionHash())
+        {
+            cacheCoinRefs.erase(refIter);
+        }
+    }
+
     if (!(coin.nHeight == MEMPOOL_HEIGHT && coin.nTxIndex == MEMPOOL_INDEX))
     {
         cacheCoinRefs[(COutPoint(coin.nHeight, coin.nTxIndex, outpoint.n))] = outpoint;
@@ -377,7 +389,7 @@ void CCoinsViewCache::SetBestBlock(const uint256 &hashBlockIn)
     hashBlock = hashBlockIn;
 }
 
-bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn, bool allowFastPath)
+bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn)
 {
     // It is possible (in fact likely) for the same batch to be both erasing and writing the same entryref e.g. if swapping one block 1963 for a competing block 1963
     // mapCoins is 'randomly' ordered so doing this would create random behaviour and an inconsistent coin database
@@ -410,10 +422,7 @@ bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn
                     }
                     if (!(entry.coin.nHeight == MEMPOOL_HEIGHT && entry.coin.nTxIndex == MEMPOOL_INDEX))
                     {
-                        if (allowFastPath)
-                        {
-                            modificationMap.push_back(it->first);
-                        }
+                        modificationMap.push_back(it->first);
                     }
                 }
             }
@@ -437,7 +446,10 @@ bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn
                     cachedCoinsUsage -= itUs->second.coin.DynamicMemoryUsage();
                     if (!(itUs->second.coin.nHeight == MEMPOOL_HEIGHT && itUs->second.coin.nTxIndex == MEMPOOL_INDEX))
                     {
-                        if (allowFastPath)
+                        // delete index, but only if it correspends
+                        if (itUs->second.coin.nHeight == it->second.coin.nHeight
+                            && itUs->second.coin.nTxIndex == it->second.coin.nTxIndex
+                            && itUs->first.n == it->first.n)
                         {
                             cacheCoinRefs.erase(COutPoint(itUs->second.coin.nHeight, itUs->second.coin.nTxIndex, itUs->first.n));
                         }
@@ -446,6 +458,14 @@ bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn
                 }
                 else
                 {
+                    // if there is already an indexed entry that is ours then delete it as we might be moving to another index
+                    // if it is not ours then leave it
+                    auto indexed = COutPoint(itUs->second.coin.nHeight, itUs->second.coin.nTxIndex, itUs->first.n);
+                    if (cacheCoinRefs[indexed].getTransactionHash() == it->first.getTransactionHash())
+                    {
+                        cacheCoinRefs.erase(indexed);
+                    }
+
                     // A normal modification.
                     cachedCoinsUsage -= itUs->second.coin.DynamicMemoryUsage();
                     itUs->second.coin = std::move(it->second.coin);
@@ -470,52 +490,34 @@ bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn
         CCoinsMap::iterator itOld = it++;
         mapCoins.erase(itOld);
     }
-    
-    //fixme: (MED) The commented out loop below (and two corresponding commented out line above) are technically more efficient than the code we have here (below)
-    //However is having robustness issues, while I think we have resolved all issues now
-    //Rather than take a risk, we instead favour the simpler more robust code
-    //re-visit this in future and establish via more testing that the other code path is fully robust (as well as faster) before re-enabling
-    //otherwise consider purging it in future  if not.
-    if (allowFastPath)
-    {    
-        for (const auto& outPoint : modificationMap)
+       
+    for (const auto& outPoint : modificationMap)
+    {
+        const auto iter = cacheCoins.find(outPoint);
+        if (iter != cacheCoins.end())
         {
-            const auto& iter = cacheCoins.find(outPoint);
-            if (iter != cacheCoins.end())
+            if (iter->second.coin.IsSpent())
             {
-                if (iter->second.coin.IsSpent())
+                // if there is an existing index entry which points to another coin that is NOT spent then leave it
+                // otherwise update/create an index entry for the (now) spent coin
+                auto indexedOut = COutPoint(iter->second.coin.nHeight, iter->second.coin.nTxIndex, outPoint.n);
+                const auto iterRefs = cacheCoinRefs.find(indexedOut);
+                if (iterRefs != cacheCoinRefs.end() && !cacheCoins[iterRefs->second].coin.IsSpent())
                 {
-                    cacheCoinRefs[COutPoint(iter->second.coin.nHeight, iter->second.coin.nTxIndex, outPoint.n)] = outPoint;
+                    continue;
                 }
-            }
-        }
-        for (const auto& outPoint : modificationMap)
-        {
-            const auto& iter = cacheCoins.find(outPoint);
-            if (iter != cacheCoins.end())
-            {
-                if (!iter->second.coin.IsSpent())
-                {
-                    cacheCoinRefs[COutPoint(iter->second.coin.nHeight, iter->second.coin.nTxIndex, outPoint.n)] = outPoint;
-                }
+                cacheCoinRefs[COutPoint(iter->second.coin.nHeight, iter->second.coin.nTxIndex, outPoint.n)] = outPoint;
             }
         }
     }
-    else
+    for (const auto& outPoint : modificationMap)
     {
-        cacheCoinRefs.clear();
-        for (const auto& [outPoint, entry] : cacheCoins)
+        const auto iter = cacheCoins.find(outPoint);
+        if (iter != cacheCoins.end())
         {
-            if (entry.coin.IsSpent())
+            if (!iter->second.coin.IsSpent())
             {
-                cacheCoinRefs[COutPoint(entry.coin.nHeight, entry.coin.nTxIndex, outPoint.n)] = outPoint;
-            }
-        }
-        for (const auto& [outPoint, entry] : cacheCoins)
-        {
-            if (!entry.coin.IsSpent())
-            {
-                cacheCoinRefs[COutPoint(entry.coin.nHeight, entry.coin.nTxIndex, outPoint.n)] = outPoint;
+                cacheCoinRefs[COutPoint(iter->second.coin.nHeight, iter->second.coin.nTxIndex, outPoint.n)] = outPoint;
             }
         }
     }
@@ -524,12 +526,12 @@ bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlockIn
     return true;
 }
 
-bool CCoinsViewCache::Flush(bool allowFastPath)
+bool CCoinsViewCache::Flush()
 {
     if (pChainedWitView)
-        pChainedWitView->Flush(allowFastPath);
+        pChainedWitView->Flush();
 
-    bool fOk = base->BatchWrite(cacheCoins, hashBlock, allowFastPath);
+    bool fOk = base->BatchWrite(cacheCoins, hashBlock);
     cacheCoins.clear();
     cacheCoinRefs.clear();
     cachedCoinsUsage = 0;

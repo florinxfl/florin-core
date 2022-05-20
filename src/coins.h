@@ -238,7 +238,7 @@ public:
 
     //! Do a bulk modification (multiple Coin changes + BestBlock change).
     //! The passed mapCoins can be modified.
-    virtual bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock, bool allowFastPath);
+    virtual bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock);
 
     //! Get a cursor to iterate over the whole state
     virtual CCoinsViewCursor *Cursor() const;
@@ -250,10 +250,6 @@ public:
     virtual size_t EstimateSize() const { return 0; }
 
     virtual void GetAllCoins(std::map<COutPoint, Coin>&) const {};
-    /*virtual int GetDepth() const
-    {
-        return 0;
-    }*/
 };
 
 
@@ -269,13 +265,9 @@ public:
     bool HaveCoin(const COutPoint &outpoint) const override;
     uint256 GetBestBlock() const override;
     void SetBackend(CCoinsView &viewIn);
-    bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock, bool allowFastPath) override;
+    bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override;
     CCoinsViewCursor *Cursor() const override;
     size_t EstimateSize() const override;
-    /*int GetDepth() const override
-    {
-        return base->GetDepth() + 1;
-    }*/
     void GetAllCoins(std::map<COutPoint, Coin>& allCoins) const override
     {
         base->GetAllCoins(allCoins);
@@ -308,7 +300,7 @@ public:
     bool HaveCoin(const COutPoint &outpoint) const override;
     uint256 GetBestBlock() const override;
     void SetBestBlock(const uint256 &hashBlock);
-    bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock, bool allowFastPath) override;
+    bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override;
     CCoinsViewCursor* Cursor() const override {
         throw std::logic_error("CCoinsViewCache cursor iteration not supported.");
     }
@@ -345,7 +337,7 @@ public:
      * Failure to call this method before destruction will cause the changes to be forgotten.
      * If false is returned, the state of this cache (and its backing view) will be undefined.
      */
-    bool Flush(bool allowFastPath);
+    bool Flush();
 
     /**
      * Removes the UTXO with the given outpoint from the cache, if it is
@@ -375,11 +367,6 @@ public:
     // Side view
     void SetSiblingView(std::shared_ptr<CCoinsViewCache> pChainedWitView_) { pChainedWitView = pChainedWitView_; };
     std::shared_ptr<CCoinsViewCache> pChainedWitView;
-
-    /*int GetDepth() const override
-    {
-        return base->GetDepth() + 1;
-    }*/
 
     void GetAllCoins(std::map<COutPoint, Coin>& allCoins) const override
     {
