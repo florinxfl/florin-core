@@ -1,3 +1,10 @@
+2.x.x
+
+CORE      - Implement several important fixes to the (previously disabled) fast path of the "index based" portion of the coin cache, with these fixes in place we also turn the fast path on allowing for faster coin cache computations
+
+
+
+
 2.0.11
 
 Introduce arm64/M1 macOS builds
