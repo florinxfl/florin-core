@@ -1,6 +1,7 @@
 2.x.x
 
 CORE      - Implement several important fixes to the (previously disabled) fast path of the "index based" portion of the coin cache, with these fixes in place we also turn the fast path on allowing for faster coin cache computations
+RPC       - Improve "getrawtransaction" output to also show a hash for index based outpoints when "txindex" is enabled
 
 
 
