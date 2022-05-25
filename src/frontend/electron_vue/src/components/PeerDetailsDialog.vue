@@ -151,11 +151,10 @@ export default {
       });
     },
     banPeer(interval) {
-      console.log(this.peer);
       this.loading = true;
+
       P2pNetworkController.BanPeerAsync(this.peer.addrBind, interval)
-        .then(res => {
-          console.log(res, "RESULT");
+        .then(() => {
           setTimeout(() => {
             this.loading = false;
             EventBus.$emit("close-dialog");
@@ -166,7 +165,17 @@ export default {
         });
     },
     unBanPeer() {
-      // When peer is banned.
+      this.loading = true;
+      P2pNetworkController.UnbanPeerAsync(this.peer.address)
+        .then(() => {
+          setTimeout(() => {
+            this.loading = false;
+            EventBus.$emit("close-dialog");
+          }, 1000);
+        })
+        .catch(err => {
+          console.log(err.message);
+        });
     }
   }
 };

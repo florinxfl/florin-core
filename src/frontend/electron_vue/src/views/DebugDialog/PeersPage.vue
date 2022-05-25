@@ -1,37 +1,35 @@
 <template>
   <div class="peers-page">
-    <app-section>
-      <h4>Peers:</h4>
-      <div class="peer-header-item">
-        <h4 style="width: 30%">Node Id</h4>
-        <h4 style="width: 30%; flex: 1">Node/Service</h4>
-        <h4 style="width: 30%">User Agent</h4>
-      </div>
+    <h4>{{ $t("peers.peers") }}</h4>
+    <div class="peer-header-item">
+      <h4 style="width: 30%">{{ $t("peers.node_id") }}</h4>
+      <h4 style="width: 30%; flex: 1">{{ $t("peers.node_service") }}</h4>
+      <h4 style="width: 30%">{{ $t("peers.user_agent") }}</h4>
+    </div>
+    <app-section class="peer-section">
       <div class="peers-list" v-for="peer in peers" :key="peer.id">
-        <div class="peer-item" @click="showPeerDetails(peer, false)">
+        <div class="peer-item" @click="showPeerDetails(peer, false)" @contextmenu.prevent="onRightClick">
           <div class="peer-item-cell">{{ peer.id }}</div>
           <div class="peer-item-cell" style="flex: 1">{{ peer.ip }}</div>
           <div class="peer-item-cell">{{ peer.userAgent }}</div>
         </div>
       </div>
     </app-section>
-    <app-section>
-      <div class="subheader-row">
-        <h4 style="margin-bottom: 0px; flex: 1">Banned Peers:</h4>
-        <button v-if="bannedPeers && bannedPeers.length > 0" outlined class="small">
-          Clear Banned
-        </button>
-      </div>
-      <div class="peer-header-item">
-        <h4 style="width: 30%">Node Id</h4>
-        <h4 style="width: 30%; flex: 1">Node/Service</h4>
-        <h4 style="width: 30%">User Agent</h4>
-      </div>
+    <div class="subheader-row">
+      <h4 style="margin-bottom: 0px; flex: 1">{{ $t("peers.banned_peers") }}</h4>
+      <button @click="clearBannedPeers" v-if="bannedPeers && bannedPeers.length > 0" outlined class="small">
+        Clear Banned
+      </button>
+    </div>
+    <div class="peer-header-item">
+      <h4 style="width: 30%">{{ $t("peers.address") }}</h4>
+      <h4 style="width: 30%">{{ $t("peers.reason") }}</h4>
+    </div>
+    <app-section class="peer-section">
       <div class="peers-list" v-for="peer in bannedPeers" :key="peer.id">
         <div class="peer-item" @click="showPeerDetails(peer, true)">
-          <div class="peer-item-cell">{{ peer.id }}</div>
-          <div class="peer-item-cell" style="flex: 1">{{ peer.ip }}</div>
-          <div class="peer-item-cell">{{ peer.userAgent }}</div>
+          <div class="peer-item-cell">{{ peer.address }}</div>
+          <div class="peer-item-cell" style="flex: 1">{{ peer.reason }}</div>
         </div>
       </div>
     </app-section>
@@ -53,6 +51,12 @@ export default {
   name: "PeersPage",
   computed: {},
   methods: {
+    onRightClick(e) {
+      console.log(e.x);
+      console.log(e.y);
+      console.log(e.target);
+      console.log("right clicked");
+    },
     getPeers() {
       const peers = P2pNetworkController.GetPeerInfo();
       const bannedPeers = P2pNetworkController.ListBannedPeers();
@@ -71,8 +75,10 @@ export default {
       });
     },
     clearBannedPeers() {
-      P2pNetworkController.ClearBannedAsync();
-      this.getPeers();
+      console.log("Clearing");
+      P2pNetworkController.ClearBannedAsync().then(() => {
+        this.getPeers();
+      });
     }
   },
   mounted() {
@@ -86,6 +92,17 @@ export default {
 .peers-page {
   width: 100%;
   height: 100%;
+}
+
+.peer-section {
+  height: 160px;
+  overflow: scroll;
+  border: solid 0.5px #888888;
+  padding: 2px;
+}
+
+.peer-section::-webkit-scrollbar {
+  display: none;
 }
 
 .peers-list:not(:first-child) > h4 {
@@ -120,7 +137,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 60px;
+  height: 40px;
 }
 
 button.small {
