@@ -52,10 +52,8 @@ export default {
   computed: {},
   methods: {
     onRightClick(e) {
-      console.log(e.x);
-      console.log(e.y);
-      console.log(e.target);
-      console.log("right clicked");
+      // TODO: Right Click
+      // Add Context menu on Right Click
     },
     getPeers() {
       const peers = P2pNetworkController.GetPeerInfo();
@@ -75,7 +73,6 @@ export default {
       });
     },
     clearBannedPeers() {
-      console.log("Clearing");
       P2pNetworkController.ClearBannedAsync().then(() => {
         this.getPeers();
       });

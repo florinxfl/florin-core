@@ -1,87 +1,107 @@
 <template>
   <div class="peer-details-dialog">
     <activity-indicator v-if="loading" :paddingHidden="true" />
-    <div class="peer-info-row">
-      <h5>Node ID</h5>
-      <div>{{ peer.id }}</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Node / Service</h5>
-      <div>{{ peer.ip }}</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Whitelisted</h5>
-      <div>
-        {{ !peer.whitelisted ? "No" : "Yes" }}
+    <div v-if="!banned">
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.node_id") }}</h5>
+        <div>{{ peer.id }}</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.node_service") }}</h5>
+        <div>{{ peer.ip }}</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.whitelisted") }}</h5>
+        <div>
+          {{ !peer.whitelisted ? "No" : "Yes" }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.direction") }}</h5>
+        <div>
+          {{ peer.inbound ? "Inbound" : "Outbound" }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.user_agent") }}</h5>
+        <div>{{ peer.userAgent }}</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.services") }}</h5>
+        <div>
+          {{ peer.services }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.starting_block") }}</h5>
+        <div>
+          {{ peer.start_height }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.synced_headers") }}</h5>
+        <div>
+          {{ peer.synced_height }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.synced_blocks") }}</h5>
+        <div>
+          {{ peer.common_height }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.ban_score") }}</h5>
+        <div>
+          {{ peer.banscore }}
+        </div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.connection_time") }}</h5>
+        <div>{{ formatDateFrom(peer.time_connected) }} s</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.last_send") }}</h5>
+        <div>{{ formatDateFrom(peer.last_send) }} s</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.last_receive") }}</h5>
+        <div>{{ formatDateFrom(peer.last_receive) }} s</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.sent") }}</h5>
+        <div>{{ peer.send_bytes }} B</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.received") }}</h5>
+        <div>{{ peer.receive_bytes }} B</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.ping_time") }}</h5>
+        <div>{{ peer.latency }} ms</div>
+      </div>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.time_offset") }}</h5>
+        <div>{{ peer.time_offset }}</div>
       </div>
     </div>
-    <div class="peer-info-row">
-      <h5>Direction</h5>
-      <div>
-        {{ peer.inbound ? "Inbound" : "Outbound" }}
+    <div v-else>
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.address") }}</h5>
+        <div>{{ peer.address }}</div>
       </div>
-    </div>
-    <div class="peer-info-row">
-      <h5>User Agent / Version</h5>
-      <div>{{ peer.userAgent }}</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Services</h5>
-      <div>
-        {{ peer.services }}
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.banned_from") }}</h5>
+        <div>{{ formatDate(peer.banned_from) }}</div>
       </div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Starting Block</h5>
-      <div>
-        {{ peer.start_height }}
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.banned_until") }}</h5>
+        <div>{{ formatDate(peer.banned_until) }}</div>
       </div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Synced Headers</h5>
-      <div>
-        {{ peer.synced_height }}
+      <div class="peer-info-row">
+        <h5>{{ $t("peers.reason") }}</h5>
+        <div style="text-transform: capitalize">{{ peer.reason }}</div>
       </div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Synced Blocks</h5>
-      <div>
-        {{ peer.common_height }}
-      </div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Ban Score</h5>
-      <div>
-        {{ peer.banscore }}
-      </div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Connection Time</h5>
-      <div>{{ formatDate(peer.time_connected) }} s</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Last Send</h5>
-      <div>{{ formatDate(peer.last_send) }} s</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Last Receive</h5>
-      <div>{{ formatDate(peer.last_receive) }} s</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Sent</h5>
-      <div>{{ peer.send_bytes }} B</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Received</h5>
-      <div>{{ peer.receive_bytes }} B</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Ping Time</h5>
-      <div>{{ peer.latency }} B</div>
-    </div>
-    <div class="peer-info-row">
-      <h5>Time Offset</h5>
-      <div>{{ peer.time_offset }}</div>
     </div>
     <div v-if="!banned" style="margin-top: 20px" class="button-row">
       <button @click="disconnectPeer(peer)" outlined class="small">
@@ -137,9 +157,13 @@ export default {
     close() {
       EventBus.$emit("close-dialog");
     },
-    formatDate(date) {
+    formatDateFrom(date) {
       const now = Date.now() / 1000;
       return parseInt(now - date);
+    },
+    formatDate(date) {
+      const dateTimeString = new Date(date * 1000).toLocaleString();
+      return dateTimeString;
     },
     disconnectPeer() {
       this.loading = true;
