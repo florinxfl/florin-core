@@ -181,8 +181,23 @@
     "address": "Address",
     "reason": "Reason",
     "peers": "Peers:",
-    "banned_peers": "BannedPeers:"
-
+    "banned_peers": "Banned Peers:",
+    "whitelisted": "Whitelisted",
+    "direction": "Direction",
+    "services": "Services",
+    "starting_block": "Starting Block",
+    "synced_headers": "Synced Headers",
+    "synced_blocks": "Synced Blocks",
+    "ban_score": "Ban Score",
+    "connection_time": "Connection Time",
+    "last_send": "Last Send",
+    "last_receive": "Last Receive",
+    "sent": "Sent",
+    "received": "Received",
+    "ping_time": "Ping Time",
+    "time_offset": "Time Offset",
+    "banned_from": "Banned From",
+    "banned_until": "Banned Until"
   },
   "tooltip": {
     "account_balance": "Account Balance",
