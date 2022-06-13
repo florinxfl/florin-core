@@ -83,4 +83,10 @@ public:
 
     /** Check balance for all accounts, returns a map of account_uuid->balance_record */
     static std::unordered_map<std::string, BalanceRecord> getAllAccountBalances();
+
+    static bool addAccountLink(const std::string & accountUUID, const std::string & serviceName);
+
+    static bool removeAccountLink(const std::string & accountUUID, const std::string & serviceName);
+
+    static std::vector<std::string> listAccountLinks(const std::string & accountUUID);
 };

@@ -127,6 +127,23 @@ public abstract class IAccountsController {
         return CppProxy.getAllAccountBalances();
     }
 
+    public static boolean addAccountLink(String accountUUID, String serviceName)
+    {
+        return CppProxy.addAccountLink(accountUUID,
+                                       serviceName);
+    }
+
+    public static boolean removeAccountLink(String accountUUID, String serviceName)
+    {
+        return CppProxy.removeAccountLink(accountUUID,
+                                          serviceName);
+    }
+
+    public static ArrayList<String> listAccountLinks(String accountUUID)
+    {
+        return CppProxy.listAccountLinks(accountUUID);
+    }
+
     private static final class CppProxy extends IAccountsController
     {
         private final long nativeRef;
@@ -185,5 +202,11 @@ public abstract class IAccountsController {
         public static native BalanceRecord getAccountBalance(String accountUUID);
 
         public static native HashMap<String, BalanceRecord> getAllAccountBalances();
+
+        public static native boolean addAccountLink(String accountUUID, String serviceName);
+
+        public static native boolean removeAccountLink(String accountUUID, String serviceName);
+
+        public static native ArrayList<String> listAccountLinks(String accountUUID);
     }
 }

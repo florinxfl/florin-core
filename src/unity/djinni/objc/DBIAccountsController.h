@@ -76,4 +76,12 @@
 /** Check balance for all accounts, returns a map of account_uuid->balance_record */
 + (nonnull NSDictionary<NSString *, DBBalanceRecord *> *)getAllAccountBalances;
 
++ (BOOL)addAccountLink:(nonnull NSString *)accountUUID
+           serviceName:(nonnull NSString *)serviceName;
+
++ (BOOL)removeAccountLink:(nonnull NSString *)accountUUID
+              serviceName:(nonnull NSString *)serviceName;
+
++ (nonnull NSArray<NSString *> *)listAccountLinks:(nonnull NSString *)accountUUID;
+
 @end

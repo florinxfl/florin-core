@@ -340,6 +340,9 @@ declare class NJSIAccountsController
     static declare function getAccountBalance(accountUUID: string): BalanceRecord;
     /** Check balance for all accounts, returns a map of account_uuid->balance_record */
     static declare function getAllAccountBalances(): Map<string, BalanceRecord>;
+    static declare function addAccountLink(accountUUID: string, serviceName: string): boolean;
+    static declare function removeAccountLink(accountUUID: string, serviceName: string): boolean;
+    static declare function listAccountLinks(accountUUID: string): Array<string>;
 }
 /** Interface to receive updates about accounts */
 declare class NJSIAccountsListener
