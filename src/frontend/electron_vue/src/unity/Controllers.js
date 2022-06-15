@@ -745,6 +745,9 @@ class BackendUtilities {
   static GetSellSessionUrl() {
     return handleError(ipc.sendSync("BackendUtilities.GetSellSessionUrl"));
   }
+  static AddAccountToHoldin(witnessKey, action) {
+    return handleError(ipc.sendSync("BackendUtilities.AddAccountToHoldin", { witnessKey, action }));
+  }
 }
 
 export { BackendUtilities };

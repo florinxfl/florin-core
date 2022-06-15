@@ -136,6 +136,7 @@ export default {
   methods: {
     getWitnessKey() {
       this.witnessKey = AccountsController.GetWitnessKeyURI(this.account.UUID);
+      console.log(this.witnessKey, "WK HERE");
     },
     checkForHoldinLink() {
       AccountsController.ListAccountLinksAsync(this.account.UUID).then(result => {
@@ -196,7 +197,6 @@ export default {
       EventBus.$emit(this.unlocked ? "lock-wallet" : "unlock-wallet");
     },
     linkToHoldin(action) {
-      this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
       this.requestLinkToHoldin = true;
 
       if (!this.walletPassword) {
@@ -211,59 +211,43 @@ export default {
         this.holdinAPI(action);
       }
     },
-    holdinAPI(action) {
-      const witnessKey = this.getWitnessKey();
+    async holdinAPI(action) {
+      this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
+      const witnessKeyLocal = AccountsController.GetWitnessKeyURI(this.account.UUID);
+      console.log(witnessKeyLocal, "WKL");
 
-      var data = JSON.stringify({
-        holdingkey: witnessKey,
-        action: action
-      });
+      let result = await BackendUtilities.AddAccountToHoldin(witnessKeyLocal, action);
+      this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
 
-      var config = {
-        method: "post",
-        url: "https://api.holdin.com/api/v1",
-        headers: {
-          Authorization:
-            "Bearer IirLcB20T0tyNc4hjWRfUmPW1PxSxtmtllTh3DSlHeOzT7FreIlcFTzGI5x5EPqBHNFAQDldjXLSvky3jCpHvWWzuXhEVqyAc3xZnT8iXk9BAzVrhwfCOaWsgRQzy0AV9sX1y7v2E72V29Q2po4Vw",
-          "Content-Type": "application/json"
-        },
-        data: data
-      };
+      console.log(result, "RESULT");
 
-      axios(config)
-        .then(function(response) {
-          if (response.data.status_code === 200) {
-            if (action === "add") {
-              AccountsController.AddAccountLinkAsync(this.account.UUID, "holdin")
-                .then(() => {
-                  this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-                  this.requestLinkToHoldin = false;
-                  this.isLinkedToHoldin = true;
-                })
-                .catch(err => {
-                  alert(err.message);
-                });
-            } else {
-              AccountsController.RemoveAccountLinkAsync(this.account.UUID, "holdin")
-                .then(() => {
-                  this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-                  this.isLinkedToHoldin = false;
-                  this.requestLinkToHoldin = false;
-                })
-                .catch(err => {
-                  this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-                  alert(err.message);
-                });
-            }
-          } else {
-            this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-            alert(response.data.status_message);
-          }
-        })
-        .catch(err => {
-          this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-          alert(err.message);
-        });
+      if (result.status_code === 200) {
+        if (action === "add") {
+          AccountsController.AddAccountLinkAsync(this.account.UUID, "holdin")
+            .then(() => {
+              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+              this.requestLinkToHoldin = false;
+              this.isLinkedToHoldin = true;
+            })
+            .catch(err => {
+              alert(err.message);
+            });
+        } else {
+          AccountsController.RemoveAccountLinkAsync(this.account.UUID, "holdin")
+            .then(() => {
+              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+              this.isLinkedToHoldin = false;
+              this.requestLinkToHoldin = false;
+            })
+            .catch(err => {
+              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+              alert(err.message);
+            });
+        }
+      } else {
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+        alert(result.status_message);
+      }
     }
   }
 };
