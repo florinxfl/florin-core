@@ -127,18 +127,21 @@ public abstract class IAccountsController {
         return CppProxy.getAllAccountBalances();
     }
 
+    /**Register with wallet that this account has been "linked" with an external service (e.g. to host holding key) */
     public static boolean addAccountLink(String accountUUID, String serviceName)
     {
         return CppProxy.addAccountLink(accountUUID,
                                        serviceName);
     }
 
+    /**Register with wallet to remove an existing link */
     public static boolean removeAccountLink(String accountUUID, String serviceName)
     {
         return CppProxy.removeAccountLink(accountUUID,
                                           serviceName);
     }
 
+    /**List all active account links that we have previously registered */
     public static ArrayList<String> listAccountLinks(String accountUUID)
     {
         return CppProxy.listAccountLinks(accountUUID);
