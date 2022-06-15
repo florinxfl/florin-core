@@ -51,7 +51,7 @@ export default {
   name: "PeersPage",
   computed: {},
   methods: {
-    onRightClick(e) {
+    onRightClick() {
       // TODO: Right Click
       // Add Context menu on Right Click
     },

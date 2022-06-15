@@ -90,7 +90,9 @@
     "account_weight": "Account weight",
     "network_weight": "Network weight",
     "empty": "This holding account is empty",
-    "percent": "%"
+    "percent": "%",
+    "add_to_holdin": "Add to holdin.com",
+    "remove_from_holdin": "Remove from holdin.com"
   },
   "loader": {
     "shutdown": "Shutting down...",
