@@ -117,10 +117,18 @@ export default {
         if (this.walletPassword && this.requestLinkToHoldin) {
           // Check if add or remove.
           if (this.isLinkedToHoldin) {
-            this.holdinAPI("add");
-          } else {
             this.holdinAPI("remove");
+          } else {
+            this.holdinAPI("add");
           }
+        }
+      }
+    },
+    account: {
+      immediate: true,
+      handler() {
+        if (!this.isSpending) {
+          this.checkForHoldinLink();
         }
       }
     }
@@ -214,10 +222,8 @@ export default {
       this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
       AccountsController.GetWitnessKeyURIAsync(this.account.UUID).then(async key => {
         this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-
         let result = await BackendUtilities.AddAccountToHoldin(key, action);
         this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-
         if (result === "OK") {
           if (action === "add") {
             AccountsController.AddAccountLinkAsync(this.account.UUID, "holdin")
