@@ -136,7 +136,6 @@ export default {
   methods: {
     getWitnessKey() {
       this.witnessKey = AccountsController.GetWitnessKeyURI(this.account.UUID);
-      console.log(this.witnessKey, "WK HERE");
     },
     checkForHoldinLink() {
       AccountsController.ListAccountLinksAsync(this.account.UUID).then(result => {
@@ -213,41 +212,41 @@ export default {
     },
     async holdinAPI(action) {
       this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
-      const witnessKeyLocal = AccountsController.GetWitnessKeyURI(this.account.UUID);
-      console.log(witnessKeyLocal, "WKL");
-
-      let result = await BackendUtilities.AddAccountToHoldin(witnessKeyLocal, action);
-      this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-
-      console.log(result, "RESULT");
-
-      if (result.status_code === 200) {
-        if (action === "add") {
-          AccountsController.AddAccountLinkAsync(this.account.UUID, "holdin")
-            .then(() => {
-              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-              this.requestLinkToHoldin = false;
-              this.isLinkedToHoldin = true;
-            })
-            .catch(err => {
-              alert(err.message);
-            });
-        } else {
-          AccountsController.RemoveAccountLinkAsync(this.account.UUID, "holdin")
-            .then(() => {
-              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-              this.isLinkedToHoldin = false;
-              this.requestLinkToHoldin = false;
-            })
-            .catch(err => {
-              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-              alert(err.message);
-            });
-        }
-      } else {
+      AccountsController.GetWitnessKeyURIAsync(this.account.UUID).then(async key => {
         this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-        alert(result.status_message);
-      }
+
+        let result = await BackendUtilities.AddAccountToHoldin(key, action);
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+
+        if (result === "OK") {
+          if (action === "add") {
+            AccountsController.AddAccountLinkAsync(this.account.UUID, "holdin")
+              .then(() => {
+                this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+                this.requestLinkToHoldin = false;
+                this.isLinkedToHoldin = true;
+              })
+              .catch(err => {
+                alert(err.message);
+              });
+          } else {
+            AccountsController.RemoveAccountLinkAsync(this.account.UUID, "holdin")
+              .then(() => {
+                this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+                this.isLinkedToHoldin = false;
+                this.requestLinkToHoldin = false;
+              })
+              .catch(err => {
+                this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+                alert(err.message);
+              });
+          }
+        } else {
+          this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+          console.log(result);
+          alert(result);
+        }
+      });
     }
   }
 };

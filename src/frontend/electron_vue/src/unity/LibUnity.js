@@ -2759,7 +2759,7 @@ class LibUnity {
 
         var config = {
           method: "post",
-          url: "https://api.holdin.com/api/v1",
+          url: "https://api.holdin.com/api/v1/",
           headers: {
             Authorization: apiKey,
             "Content-Type": "application/json"
