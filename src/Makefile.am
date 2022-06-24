@@ -726,7 +726,7 @@ if BUILD_LIBS_NODE_JS
 DJINNI_CPP_GEN = \
   unity/djinni/cpp/address_record.hpp \
   unity/djinni/cpp/account_record.hpp \
-  unity/djinni/cpp/account_link_record.hpp
+  unity/djinni/cpp/account_link_record.hpp \
   unity/djinni/cpp/balance_record.hpp \
   unity/djinni/cpp/block_info_record.hpp \
   unity/djinni/cpp/i_library_controller.cpp \
