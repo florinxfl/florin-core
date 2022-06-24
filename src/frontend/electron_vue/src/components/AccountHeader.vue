@@ -44,7 +44,6 @@ import { AccountsController, BackendUtilities } from "../unity/Controllers";
 import { formatMoneyForDisplay } from "../util.js";
 import AccountTooltip from "./AccountTooltip.vue";
 import EventBus from "../EventBus";
-import WalletPasswordDialog from "../components/WalletPasswordDialog";
 
 export default {
   components: { AccountTooltip },
@@ -69,7 +68,7 @@ export default {
   },
   computed: {
     ...mapState("app", ["rate"]),
-    ...mapState("wallet", ["walletPassword"]),
+    ...mapState("wallet", ["unlocked"]),
     name() {
       return this.account ? this.account.label : null;
     },
@@ -85,7 +84,7 @@ export default {
       return !this.account || (this.account.type === "Desktop" && !this.editMode);
     },
     lockIcon() {
-      return this.walletPassword ? "unlock" : "lock";
+      return this.unlocked ? "unlock" : "lock";
     }
   },
   watch: {
@@ -146,15 +145,7 @@ export default {
       this.$router.push({ name: "settings" });
     },
     changeLockSettings() {
-      if (this.walletPassword) {
-        this.$store.dispatch("wallet/SET_WALLET_PASSWORD", null);
-      } else {
-        EventBus.$emit("show-dialog", {
-          title: this.$t("password_dialog.unlock_wallet"),
-          component: WalletPasswordDialog,
-          showButtons: false
-        });
-      }
+      EventBus.$emit(this.unlocked ? "lock-wallet" : "unlock-wallet");
     }
   }
 };

@@ -12,14 +12,6 @@
       </content-wrapper>
       <input v-model="address" type="text" :placeholder="$t('send_coins.enter_coins_address')" :class="addressClass" @keydown="isAddressInvalid = false" />
       <input v-model="label" type="text" :placeholder="$t('send_coins.enter_label')" />
-      <input
-        v-model="password"
-        type="password"
-        v-show="walletPassword === null"
-        :placeholder="$t('common.enter_your_password')"
-        :class="passwordClass"
-        @keydown="onPasswordKeydown"
-      />
     </div>
     <div class="flex-row">
       <button class="send" @click="showConfirmation" :disabled="disableSendButton">
@@ -45,20 +37,14 @@ export default {
       maxAmount: null,
       address: "",
       label: "",
-      password: "",
       isAddressInvalid: false,
-      isPasswordInvalid: false,
       sellDisabled: false,
       useMax: false
     };
   },
   computed: {
-    ...mapState("wallet", ["walletPassword"]),
     ...mapState("app", ["decimals"]),
     ...mapGetters("wallet", ["account"]),
-    computedPassword() {
-      return this.walletPassword ? this.walletPassword : this.password || "";
-    },
     computedAmountPlaceholder() {
       return `0.${"0".repeat(this.decimals)}`;
     },
@@ -68,20 +54,16 @@ export default {
     addressClass() {
       return this.isAddressInvalid ? "error" : "";
     },
-    passwordClass() {
-      return this.isPasswordInvalid ? "error" : "";
-    },
     hasErrors() {
-      return this.isAddressInvalid || this.isPasswordInvalid;
+      return this.isAddressInvalid;
     },
     disableSendButton() {
       if (isNaN(parseFloat(this.amount))) return true;
       if (this.address === null || this.address.trim().length === 0) return true;
-      if (this.computedPassword.trim().length === 0) return true;
       return false;
     },
     disableClearButton() {
-      return this.amount === "" && this.address === "" && this.label === "" && this.password === "";
+      return this.amount === "" && this.address === "" && this.label === "";
     }
   },
   mounted() {
@@ -127,11 +109,7 @@ export default {
       this.amount = "";
       this.address = "";
       this.label = "";
-      this.password = "";
       this.$refs.amount.focus();
-    },
-    onPasswordKeydown() {
-      this.isPasswordInvalid = false;
     },
     showConfirmation() {
       // amount is always less then or equal to the floored spendable amount
@@ -141,9 +119,6 @@ export default {
       // validate address
       this.isAddressInvalid = !LibraryController.IsValidNativeAddress(this.address);
 
-      // validate password (confirmation dialog unlocks/locks when user confirms so don't leave it unlocked here)
-      this.isPasswordInvalid = !this.validatePassword(this.computedPassword);
-
       if (this.hasErrors) return;
 
       EventBus.$emit("show-dialog", {
@@ -152,7 +127,6 @@ export default {
         componentProps: {
           amount: amount,
           address: this.address,
-          password: this.password,
           subtractFee: this.useMax
         },
         showButtons: false
@@ -160,10 +134,6 @@ export default {
     },
     onTransactionSucceeded() {
       this.$router.push({ name: "transactions" });
-    },
-    validatePassword(password) {
-      // validation can only be done by unlocking the wallet, but make sure to lock the wallet afterwards
-      return LibraryController.UnlockWallet(password, 0);
     },
     setUseMax() {
       this.useMax = true;
