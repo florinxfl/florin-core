@@ -221,21 +221,38 @@ export default {
     async holdinAPI(action) {
       this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
       AccountsController.GetWitnessKeyURIAsync(this.account.UUID).then(async key => {
-        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-        let result = await BackendUtilities.AddAccountToHoldin(key, action);
-        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-        if (result === "OK") {
-          if (action === "add") {
-            AccountsController.AddAccountLinkAsync(this.account.UUID, "holdin")
-              .then(() => {
-                this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-                this.requestLinkToHoldin = false;
-                this.isLinkedToHoldin = true;
-              })
-              .catch(err => {
-                alert(err.message);
-              });
+        let result = null;
+        if (action === "add") {
+          let infoResult = await BackendUtilities.holdinAPIActions(key, "getinfo");
+
+          if (infoResult.data.available === 1 && infoResult.data.active === "1") {
+            // Account was linked elsewhere. Note that on Florin
+            this.addAccountLink(this.account.UUID);
+          } else if (infoResult.data.available === 1 && infoResult.data.active === "0") {
+            // Account was linked and then removed. Reactivate.
+            result = await BackendUtilities.holdinAPIActions(key, "activate");
+            if (result.status_code === 200) {
+              this.addAccountLink(this.account.UUID);
+            } else {
+              alert(`Holdin: ${result.status_message}`);
+            }
+          } else if (infoResult.data.available === 0 && infoResult.data.active === "0") {
+            // Add account for the first time.
+            result = await BackendUtilities.holdinAPIActions(key, "add");
+            if (result.status_code === 200) {
+              this.addAccountLink(this.account.UUID);
+            } else {
+              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+              alert(`Holdin: ${result.status_message}`);
+            }
           } else {
+            this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+            alert("Holdin: API Error");
+          }
+        } else {
+          result = await BackendUtilities.holdinAPIActions(key, "remove");
+
+          if (result.status_code === 200) {
             AccountsController.RemoveAccountLinkAsync(this.account.UUID, "holdin")
               .then(() => {
                 this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
@@ -246,13 +263,22 @@ export default {
                 this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
                 alert(err.message);
               });
+          } else {
+            alert(`Holdin: ${result.status_message}`);
           }
-        } else {
-          this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-          console.log(result);
-          alert(result);
         }
       });
+    },
+    addAccountLink(accountUID) {
+      AccountsController.AddAccountLinkAsync(accountUID, "holdin")
+        .then(() => {
+          this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+          this.requestLinkToHoldin = false;
+          this.isLinkedToHoldin = true;
+        })
+        .catch(err => {
+          alert(err.message);
+        });
     }
   }
 };

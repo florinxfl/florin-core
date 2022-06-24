@@ -2748,8 +2748,8 @@ class LibUnity {
       }
     });
 
-    ipc.on("BackendUtilities.AddAccountToHoldin", async (event, params) => {
-      console.log(`IPC: BackendUtilities.AddAccountToHoldin()`);
+    ipc.on("BackendUtilities.holdinAPIActions", async (event, params) => {
+      console.log(`IPC: BackendUtilities.holdinAPIActions()`);
 
       try {
         var data = JSON.stringify({
@@ -2771,7 +2771,7 @@ class LibUnity {
           .then(function(response) {
             event.returnValue = {
               success: response.data.status_code === 200,
-              result: response.data.status_message
+              result: response.data
             };
           })
           .catch(function(error) {
