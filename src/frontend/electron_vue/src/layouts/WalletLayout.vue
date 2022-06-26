@@ -1,10 +1,10 @@
 <template>
   <section class="wallet-layout flex-row" :class="walletLayoutClasses">
-    <section v-if="UIConfig.showSidebar" class="sidebar-left">
+    <section v-if="!isSingleAccount" class="sidebar-left">
       <section class="header flex-row">
         <div class="logo" />
         <div class="total-balance flex-row">
-          <account-tooltip type="Wallet" :account="accounts">
+          <account-tooltip type="Wallet" :account="account">
             <div class="flex-row">
               <div class="coin">
                 {{ balanceForDisplay }}
@@ -14,13 +14,13 @@
           </account-tooltip>
         </div>
       </section>
-      <accounts-section v-if="UIConfig.showSidebar" class="accounts" />
+      <accounts-section class="accounts" />
       <section class="footer flex-row">
         <div class="status" />
-        <div class="button" @click="changeLockSettings">
+        <div class="button" @click="handleWalletLock">
           <fa-icon :icon="['fal', lockIcon]" />
         </div>
-        <div class="button" @click="showMining">
+        <div v-if="!isSPV" class="button" @click="showMining">
           <fa-icon :icon="['fal', 'gem']" />
         </div>
         <div class="button" @click="showSettings">
@@ -29,22 +29,21 @@
       </section>
     </section>
     <section class="main">
-      <portal-target ref="headerSlot" name="header-slot" class="header" @change="headerSlotChanged"></portal-target>
+      <section class="header">
+        <account-header v-if="isSingleAccount" :account="account" :is-single-account="true"></account-header>
+        <portal-target v-else ref="headerSlot" name="header-slot" @change="headerSlotChanged"></portal-target>
+      </section>
       <section class="content scrollable">
         <router-view />
       </section>
-      <portal-target ref="footerSlot" name="footer-slot" class="footer" @change="footerSlotChanged"></portal-target>
-    </section>
-    <section class="sidebar-right">
-      <section class="header flex-row">
-        <div class="title">
-          <portal-target name="sidebar-right-title" />
+      <section class="footer">
+        <div v-if="isSingleAccount">
+          <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="account" @click="routeTo" />
+          <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send" @click="routeTo" />
+          <footer-button title="buttons.receive" :icon="['fal', 'arrow-to-bottom']" routeName="receive" @click="routeTo" />
         </div>
-        <div class="close" @click="closeRightSidebar">
-          <fa-icon :icon="['fal', 'times']" />
-        </div>
+        <portal-target v-else ref="footerSlot" name="footer-slot" @change="footerSlotChanged"></portal-target>
       </section>
-      <portal-target class="component" ref="sidebarRight" name="sidebar-right" @change="sidebarRightSlotChanged" />
     </section>
   </section>
 </template>
@@ -52,11 +51,12 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
-import AccountsSection from "./AccountsSection";
-import WalletPasswordDialog from "../components/WalletPasswordDialog";
 import EventBus from "../EventBus";
 import UIConfig from "../../ui-config.json";
+import { AccountsController, LibraryController } from "../unity/Controllers";
+import AccountsSection from "./AccountsSection.vue";
 import AccountTooltip from "../components/AccountTooltip.vue";
+import AccountHeader from "../components/AccountHeader.vue";
 
 export default {
   name: "WalletLayout",
@@ -64,28 +64,31 @@ export default {
     return {
       isHeaderSlotEmpty: true,
       isFooterSlotEmpty: true,
-      isSidebarRightSlotEmpty: true,
-      UIConfig: UIConfig
+      isSingleAccount: UIConfig.isSingleAccount,
+      isSPV: UIConfig.isSPV
     };
   },
   components: {
     AccountsSection,
+    AccountHeader,
     AccountTooltip
   },
   computed: {
     ...mapState("app", ["progress", "rate"]),
-    ...mapState("wallet", ["activeAccount", "walletPassword"]),
-    ...mapGetters("wallet", ["totalBalance", "miningAccount", "accounts"]),
+    ...mapState("wallet", ["activeAccount", "unlocked"]),
+    ...mapGetters("wallet", ["totalBalance", "miningAccount", "account"]),
     walletLayoutClasses() {
       let classes = [];
-      if (this.isHeaderSlotEmpty) classes.push("no-header");
-      if (this.isFooterSlotEmpty) classes.push("no-footer");
-      if (this.isSidebarRightSlotEmpty) classes.push("no-sidebar-right");
-      if (this.isHideSidebarLeft) classes.push("no-sidebar-left");
+      if (!this.isSingleAccount) {
+        if (this.isHeaderSlotEmpty) classes.push("no-header");
+        if (this.isFooterSlotEmpty) classes.push("no-footer");
+      } else {
+        classes.push("no-sidebar-left");
+      }
       return classes;
     },
     lockIcon() {
-      return this.walletPassword ? "unlock" : "lock";
+      return this.unlocked ? "unlock" : "lock";
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
@@ -96,20 +99,12 @@ export default {
       return formatMoneyForDisplay(this.totalBalance);
     }
   },
-  watch: {
-    progress() {
-      console.log(`${this.progress}`);
-    }
-  },
   methods: {
     headerSlotChanged(newContent) {
       this.isHeaderSlotEmpty = !newContent;
     },
     footerSlotChanged(newContent) {
       this.isFooterSlotEmpty = !newContent;
-    },
-    sidebarRightSlotChanged(newContent) {
-      this.isSidebarRightSlotEmpty = !newContent;
     },
     showMining() {
       if (this.miningAccount) {
@@ -119,8 +114,29 @@ export default {
           params: { id: this.miningAccount.UUID }
         });
       } else {
-        if (this.$route.name === "setup-mining") return;
-        this.$router.push({ name: "setup-mining" });
+        EventBus.$emit("unlock-wallet", {
+          timeout: 5,
+          title: "setup_mining.title",
+          message: "setup_mining.information",
+          callback: async () => {
+            let uuid = null;
+            try {
+              // NOTE:
+              // Dont' know if it is actually needed to show the activity indicator when unlocking the wallet and creating the account, but for now I leave it here.
+              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
+              uuid = AccountsController.CreateAccount("Mining", "Mining");
+            } finally {
+              // route to the new account when we have a uuid
+              if (uuid) {
+                // activity indicator is set to true in the router, so no need to remove it here
+                this.$router.push({ name: "account", params: { id: uuid } });
+              } else {
+                // remove the activity indicator
+                this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+              }
+            }
+          }
+        });
       }
     },
     routeTo(route) {
@@ -135,19 +151,8 @@ export default {
       if (this.$route.path === "/settings/") return;
       this.$router.push({ name: "settings" });
     },
-    changeLockSettings() {
-      if (this.walletPassword) {
-        this.$store.dispatch("wallet/SET_WALLET_PASSWORD", null);
-      } else {
-        EventBus.$emit("show-dialog", {
-          title: this.$t("password_dialog.unlock_wallet"),
-          component: WalletPasswordDialog,
-          showButtons: false
-        });
-      }
-    },
-    closeRightSidebar() {
-      EventBus.$emit("close-right-sidebar");
+    handleWalletLock() {
+      EventBus.$emit(this.unlocked ? "lock-wallet" : "unlock-wallet");
     }
   }
 };
@@ -176,14 +181,6 @@ export default {
     }
   }
 
-  &.no-sidebar-right {
-    --sidebar-right-width: 0px;
-
-    & > .sidebar-right {
-      display: none;
-    }
-  }
-
   & > .sidebar-left {
     width: var(--sidebar-left-width);
     background: var(--sidebar-left-background-color);
@@ -205,12 +202,18 @@ export default {
   }
 
   & > .main {
-    width: calc(100% - var(--sidebar-left-width) - var(--sidebar-right-width));
+    width: calc(100% - var(--sidebar-left-width));
 
     & > .header {
       height: var(--header-height);
       border-bottom: 1px solid var(--main-border-color);
       padding: 0 30px;
+
+      & > .logo {
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
     }
 
     & > .content {
@@ -231,24 +234,16 @@ export default {
     }
   }
 
-  & > .sidebar-right {
-    width: var(--sidebar-right-width);
-    background: var(--sidebar-right-background-color);
+  &.no-sidebar-left {
+    & > .main {
+      width: 100%;
+    }
   }
 }
 
 .sidebar-left > .header {
   padding: 20px;
   color: #fff;
-
-  & .logo {
-    width: 22px;
-    min-width: 22px;
-    height: 22px;
-    min-height: 22px;
-    background: url("../img/logo.svg"), linear-gradient(transparent, transparent);
-    background-size: cover;
-  }
 
   & .total-balance {
     padding: 0 0 0 10px;
@@ -280,26 +275,13 @@ export default {
   }
 }
 
-.sidebar-right {
-  padding: 0 24px;
-
-  & > .header {
-    line-height: 62px;
-    font-size: 1.1em;
-    font-weight: 500;
-
-    & .title {
-      flex: 1;
-    }
-
-    & .close {
-      cursor: pointer;
-    }
-  }
-
-  & .component {
-    height: calc(100% - 72px);
-  }
+.logo {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  min-height: 22px;
+  background: url("../img/logo.svg"), linear-gradient(transparent, transparent);
+  background-size: cover;
 }
 
 @media (max-width: 1000px) {
@@ -309,18 +291,6 @@ export default {
     }
 
     & > .main {
-      width: calc(100% - var(--sidebar-left-width-small) - var(--sidebar-right-width));
-    }
-  }
-}
-
-@media (max-width: 1000px) {
-  .wallet-layout:not(.no-sidebar-right) {
-    & > .main {
-      display: none;
-    }
-
-    & > .sidebar-right {
       width: calc(100% - var(--sidebar-left-width-small));
     }
   }

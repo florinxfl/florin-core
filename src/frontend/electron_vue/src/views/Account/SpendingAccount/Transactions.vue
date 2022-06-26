@@ -111,11 +111,8 @@ export default {
     async buyCoins() {
       try {
         this.buyDisabled = true;
-        let url = await BackendUtilities.GetBuySessionUrl();
-        if (!url) {
-          url = "https://florin.org/buy";
-        }
-        window.open(url, "buy-florin");
+        const url = await BackendUtilities.GetBuySessionUrl();
+        window.open(url, "buy-coins");
       } finally {
         this.buyDisabled = false;
       }

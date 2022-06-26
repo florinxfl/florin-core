@@ -1,33 +1,33 @@
 <template>
-  <div class="add-holding-account">
+  <div class="add-saving-account">
     <portal to="header-slot">
-      <main-header :title="$t('add_holding_account.title')"></main-header>
+      <main-header :title="$t('add_saving_account.title')"></main-header>
     </portal>
 
     <section class="content">
       <section class="step-1" v-if="current === 1">
-        <app-form-field title="add_holding_account.funding_account">
+        <app-form-field title="add_saving_account.funding_account">
           <select-list :options="fundingAccounts" :default="fundingAccount" v-model="fundingAccount" />
         </app-form-field>
         <app-form-field title="common.amount">
           <input type="number" min="50" v-model="amount" :max="maxAmountForAccount" :class="amountClass" />
         </app-form-field>
-        <app-form-field title="add_holding_account.lock_for">
+        <app-form-field title="add_saving_account.lock_for">
           <div class="flex-row">
             <vue-slider :min="2" :max="36" class="lock-time-slider" :class="lockTimeClass" :value="lockTimeInMonths" v-model="lockTimeInMonths" />
             <div class="lock-time-info">{{ lockTimeInMonths }} {{ $t("common.months") }}</div>
           </div>
         </app-form-field>
 
-        <app-form-field title="add_holding_account.estimated_earnings" v-if="isWeightSufficient">
+        <app-form-field title="add_saving_account.estimated_earnings" v-if="isWeightSufficient">
           <div class="flex-row">
-            <div class="earnings">{{ $t("add_holding_account.daily") }}</div>
+            <div class="earnings">{{ $t("add_saving_account.daily") }}</div>
             <div class="flex-1 align-right">
               {{ this.formatMoneyForDisplay(this.estimatedWeight.estimated_daily_earnings) }}
             </div>
           </div>
           <div class="flex-row">
-            <div class="earnings">{{ $t("add_holding_account.overall") }}</div>
+            <div class="earnings">{{ $t("add_saving_account.overall") }}</div>
             <div class="flex-1 align-right">
               {{ this.formatMoneyForDisplay(this.estimatedWeight.estimated_lifetime_earnings) }}
             </div>
@@ -37,9 +37,6 @@
       <section class="step-2" v-else>
         <app-form-field title="common.account_name">
           <input type="text" v-model="accountName" maxlength="30" ref="accountName" />
-        </app-form-field>
-        <app-form-field title="common.password" v-if="walletPassword === null">
-          <input v-model="password" type="password" :class="passwordClass" @keydown="onPasswordKeydown" />
         </app-form-field>
       </section>
     </section>
@@ -55,7 +52,7 @@
       <button @click="nextStep" :disabled="!isWeightSufficient" v-if="current === 1">
         {{ $t("buttons.next") }}
       </button>
-      <button @click="createAndFundHoldingAccount" :disabled="disableLockButton" v-else>
+      <button @click="tryCreateAndFundSavingAccount" :disabled="disableLockButton" v-else>
         {{ $t("buttons.lock") }}
       </button>
     </app-button-section>
@@ -63,12 +60,13 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 import { formatMoneyForDisplay, displayToMonetary } from "../../../util.js";
-import { WitnessController, LibraryController, AccountsController } from "../../../unity/Controllers";
+import { WitnessController, AccountsController } from "../../../unity/Controllers";
+import EventBus from "../../../EventBus.js";
 
 export default {
-  name: "AddHoldingAccount",
+  name: "AddSavingAccount",
   data() {
     return {
       current: 1,
@@ -76,17 +74,11 @@ export default {
       accountName: "",
       fundingAccount: null,
       amount: 50,
-      lockTimeInMonths: 36,
-      password: "",
-      isPasswordInvalid: false
+      lockTimeInMonths: 36
     };
   },
   computed: {
-    ...mapState("wallet", ["walletPassword"]),
     ...mapGetters("wallet", ["accounts"]),
-    computedPassword() {
-      return this.walletPassword ? this.walletPassword : this.password || "";
-    },
     amountClass() {
       return this.amount < parseInt(this.networkLimits.minimum_witness_amount) || this.amount > this.maxAmountForAccount ? "error" : "";
     },
@@ -112,15 +104,8 @@ export default {
 
       return estimation;
     },
-    passwordClass() {
-      return this.isPasswordInvalid ? "error" : "";
-    },
-    hasErrors() {
-      return this.isPasswordInvalid;
-    },
     disableLockButton() {
       if (this.accountName.trim().length === 0) return true;
-      if (this.computedPassword.trim().length === 0) return true;
       return false;
     }
   },
@@ -133,9 +118,6 @@ export default {
     }
   },
   methods: {
-    onPasswordKeydown() {
-      this.isPasswordInvalid = false;
-    },
     formatMoneyForDisplay(amount) {
       return formatMoneyForDisplay(amount);
     },
@@ -145,49 +127,44 @@ export default {
         this.$refs.accountName.focus();
       });
     },
-    createAndFundHoldingAccount() {
-      let result = null;
-      let uuid = null;
+    tryCreateAndFundSavingAccount() {
+      EventBus.$emit("unlock-wallet", {
+        callback: async () => {
+          let result = null;
+          let uuid = null;
 
-      try {
-        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
+          try {
+            this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
 
-        // wallet needs to be unlocked to make a payment
-        if (LibraryController.UnlockWallet(this.computedPassword, 120) === false) {
-          this.isPasswordInvalid = true;
+            uuid = AccountsController.CreateAccount(this.accountName, "Holding");
+
+            // Always lock for slightly longer than the minimum to allow a bit of time for transaction to enter the chain
+            // If we don't then its possible that the transaction becomes invalid before entering the chain
+            let finalLockTime = this.lockTimeInBlocks + 50 < this.networkLimits.maximum_lock_period_blocks ? this.lockTimeInBlocks + 50 : this.lockTimeInBlocks;
+
+            result = WitnessController.FundWitnessAccount(this.fundingAccount.UUID, uuid, this.amount * 100000000, finalLockTime);
+
+            if (result.status !== "success") {
+              AccountsController.DeleteAccount(uuid); // something went wrong, so delete the account
+            }
+          } finally {
+            if (result.status === "success") {
+              // route to the saving account when successfully created and funded
+              this.$router.push({ name: "account", params: { id: uuid } });
+            } else {
+              // remove the activity indicator
+              this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+            }
+          }
         }
-
-        if (this.hasErrors) return;
-
-        uuid = AccountsController.CreateAccount(this.accountName, "Holding");
-
-        // Always lock for slightly longer than the minimum to allow a bit of time for transaction to enter the chain
-        // If we don't then its possible that the transaction becomes invalid before entering the chain
-        let finalLockTime = this.lockTimeInBlocks + 50 < this.networkLimits.maximum_lock_period_blocks ? this.lockTimeInBlocks + 50 : this.lockTimeInBlocks;
-
-        result = WitnessController.FundWitnessAccount(this.fundingAccount.UUID, uuid, this.amount * 100000000, finalLockTime);
-
-        if (result.status !== "success") {
-          AccountsController.DeleteAccount(uuid); // something went wrong, so delete the account
-        }
-
-        LibraryController.LockWallet();
-      } finally {
-        if (result.status === "success") {
-          // route to the holding account when successfully created and funded
-          this.$router.push({ name: "account", params: { id: uuid } });
-        } else {
-          // remove the activity indicator
-          this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
-        }
-      }
+      });
     }
   }
 };
 </script>
 
 <style lang="less" scoped>
-.add-holding-account {
+.add-saving-account {
   display: flex;
   flex-direction: column;
 }

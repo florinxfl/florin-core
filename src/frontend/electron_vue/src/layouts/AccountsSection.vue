@@ -44,15 +44,21 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
+import UIConfig from "../../ui-config.json";
 
 export default {
   name: "AccountsSection",
   data() {
+    const categories = ["spending"];
+    if (!UIConfig.isSPV) {
+      categories.push("saving");
+    }
+
     return {
-      categories: ["spending", "holding"],
+      categories,
       opened: {
         spending: false,
-        holding: false
+        saving: false
       }
     };
   },
@@ -68,7 +74,8 @@ export default {
         case "Desktop":
           return "spending";
         case "Holding":
-          return "holding";
+        case "Witness":
+          return "saving";
       }
       return null;
     }
@@ -94,8 +101,8 @@ export default {
         case "spending":
           types = ["Desktop"];
           break;
-        case "holding":
-          types = ["Holding"];
+        case "saving":
+          types = ["Witness", "Holding"];
           break;
       }
       if (types === undefined) return [];
@@ -118,8 +125,8 @@ export default {
     },
     showNewAccountFor(category) {
       switch (category) {
-        case "holding":
-          return this.$route.name === "add-holding-account";
+        case "saving":
+          return this.$route.name === "add-saving-account";
         case "spending":
           return this.$route.name === "add-spending-account";
         default:
@@ -128,8 +135,8 @@ export default {
     },
     addAccountFor(category) {
       switch (category) {
-        case "holding":
-          this.$router.push({ name: "add-holding-account" });
+        case "saving":
+          this.$router.push({ name: "add-saving-account" });
           break;
         case "spending":
           this.$router.push({ name: "add-spending-account" });

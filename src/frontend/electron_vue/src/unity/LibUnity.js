@@ -76,6 +76,28 @@ class LibUnity {
       store.dispatch("wallet/SET_WALLET_BALANCE", new_balance);
     };
 
+    this.walletListener.notifyWalletUnlocked = function() {
+      console.log("receive: notifyWalletUnlocked");
+      store.dispatch("wallet/SET_UNLOCKED", true);
+    };
+
+    this.walletListener.notifyWalletLocked = function() {
+      console.log("receive: notifyWalletLocked");
+      store.dispatch("wallet/SET_UNLOCKED", false);
+    };
+
+    /** Core wants the wallet to unlock; UI should respond to this by calling 'UnlockWallet' */
+    this.walletListener.notifyCoreWantsUnlock = function(reason) {
+      console.log("receive: notifyCoreWantsUnlock", reason);
+      // TODO: show unlock dialog with reason (localized?)
+    };
+
+    /** Core wants display info to the user, type can be one of "MSG_ERROR", "MSG_WARNING", "MSG_INFORMATION"; caption is the suggested caption and message the suggested message to display */
+    this.walletListener.notifyCoreInfo = function(type, caption, message) {
+      console.log("receive: notifyCoreInfo", type, caption, message);
+      // TODO: dispatch message event. add message to queue??
+    };
+
     this.walletController.setListener(this.walletListener);
   }
 
@@ -2693,7 +2715,10 @@ class LibUnity {
           result: `https://blockhut.com/buyflorin.php?sessionid=${response.data.sessionid}`
         };
       } catch (e) {
-        event.returnValue = handleError(e);
+        event.returnValue = {
+          success: true,
+          result: "https://florin.org/buy"
+        };
       }
     });
 
@@ -2715,7 +2740,10 @@ class LibUnity {
           result: `https://blockhut.com/sellflorin.php?sessionid=${response.data.sessionid}`
         };
       } catch (e) {
-        event.returnValue = handleError(e);
+        event.returnValue = {
+          success: true,
+          result: "https://florin.org/sell"
+        };
       }
     });
   }

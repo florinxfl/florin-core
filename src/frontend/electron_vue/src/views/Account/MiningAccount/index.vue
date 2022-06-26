@@ -128,11 +128,7 @@
     <portal to="footer-slot">
       <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
       <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
-      <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-holding" @click="routeTo" />
-    </portal>
-
-    <portal to="sidebar-right">
-      <component v-if="rightSidebar" :is="rightSidebar" v-bind="rightSidebarProps" />
+      <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
     </portal>
   </div>
 </template>
@@ -142,7 +138,6 @@ import { mapState } from "vuex";
 import { formatMoneyForDisplay } from "../../../util.js";
 import { GenerationController, LibraryController } from "../../../unity/Controllers";
 import { clipboard } from "electron";
-import Send from "./Send";
 
 export default {
   name: "MiningAccount",
@@ -162,7 +157,6 @@ export default {
       minimumMemory: 0,
       maximumMemory: 0,
       generationButtonDisabled: false,
-      rightSidebar: null,
       miningAddress: null,
       editMiningAddress: false,
       newMiningAddress: null,
@@ -219,9 +213,6 @@ export default {
     arenaSetupTime() {
       return this.formatStats(this.stats, "arenaSetupTime", " s");
     },
-    rightSidebarProps() {
-      return null;
-    },
     computedStatus() {
       return this.addressInvalid ? "error" : "";
     }
@@ -255,13 +246,6 @@ export default {
     routeTo(route) {
       if (this.$route.name === route) return;
       this.$router.push({ name: route, params: { id: this.account.UUID } });
-    },
-    closeRightSidebar() {
-      this.rightSidebar = null;
-      this.txHash = null;
-    },
-    emptyAccount() {
-      this.rightSidebar = Send;
     },
     formatStats(stats, which, postfix = "/s") {
       if (!stats) return null;

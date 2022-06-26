@@ -26,19 +26,19 @@ const routes = [
         component: () => import(/* webpackChunkName: "account-receive" */ "../views/Account/SpendingAccount/Receive.vue")
       },
       {
-        path: "link-holding-account",
-        name: "link-holding-account",
-        component: () => import(/* webpackChunkName: "link-holding-account" */ "../views/Account/HoldingAccount/LinkHoldingAccount.vue")
+        path: "link-saving-account",
+        name: "link-saving-account",
+        component: () => import(/* webpackChunkName: "link-saving-account" */ "../views/Account/SavingAccount/LinkSavingAccount.vue")
       },
       {
-        path: "send-holding",
-        name: "send-holding",
-        component: () => import(/* webpackChunkName: "send-holding" */ "../views/Account/MiningAccount/Send.vue")
+        path: "send-saving",
+        name: "send-saving",
+        component: () => import(/* webpackChunkName: "send-saving" */ "../views/Account/MiningAccount/Send.vue")
       },
       {
         path: "renew-account",
         name: "renew-account",
-        component: () => import(/* webpackChunkName: "renew-account" */ "../views/Account/HoldingAccount/RenewAccount.vue")
+        component: () => import(/* webpackChunkName: "renew-account" */ "../views/Account/SavingAccount/RenewAccount.vue")
       },
       {
         path: "transactions",
@@ -48,19 +48,14 @@ const routes = [
     ]
   },
   {
-    path: "/setup-mining",
-    name: "setup-mining",
-    component: () => import(/* webpackChunkName: "setup-mining" */ "../views/Account/MiningAccount/SetupMining.vue")
-  },
-  {
-    path: "/add-holding-account",
-    name: "add-holding-account",
-    component: () => import(/* webpackChunkName: "add-holding-account" */ "../views/Account/HoldingAccount/AddHoldingAccount.vue")
+    path: "/add-saving-account",
+    name: "add-saving-account",
+    component: () => import(/* webpackChunkName: "add-saving-account" */ "../views/Account/SavingAccount/AddSavingAccount.vue")
   },
   {
     path: "/add-spending-account",
     name: "add-spending-account",
-    component: () => import(/* webpackChunkName: "add-holding-account" */ "../views/Account/SpendingAccount/AddSpendingAccount.vue")
+    component: () => import(/* webpackChunkName: "add-saving-account" */ "../views/Account/SpendingAccount/AddSpendingAccount.vue")
   },
   {
     path: "/setup",
@@ -121,9 +116,6 @@ router.beforeEach((to, from, next) => {
       // 1. AccountsController.SetActiveAccount tells the backend to change the account (but it isn't changed immediately).
       // 2. When the account has been changed the onActiveAccountChanged handler in unity/LibUnity.js will update the store with new account data.
       // 3. After the account in the store has been changed the onAccountChanged handler in views/Account/index.vue will set the activity indicator to false.
-
-      // close the right sidebar when switching accounts
-      EventBus.$emit("close-right-sidebar");
     }
   }
 
