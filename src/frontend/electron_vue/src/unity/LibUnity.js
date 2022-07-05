@@ -2193,9 +2193,9 @@ class LibUnity {
     });
 
     ipc.answerRenderer("NJSIAccountsController.addAccountLinkAsync", async data => {
-      console.log(`IPC: accountsController.addAccountLinkAsync(${data.accountUUID}, ${data.serviceName})`);
+      console.log(`IPC: accountsController.addAccountLinkAsync(${data.accountUUID}, ${data.serviceName}, ${data.data})`);
       try {
-        let result = this.accountsController.addAccountLink(data.accountUUID, data.serviceName);
+        let result = this.accountsController.addAccountLink(data.accountUUID, data.serviceName, data.data);
         return {
           success: true,
           result: result
@@ -2205,10 +2205,10 @@ class LibUnity {
       }
     });
 
-    ipc.on("NJSIAccountsController.addAccountLink", (event, accountUUID, serviceName) => {
-      console.log(`IPC: accountsController.addAccountLink(${accountUUID}, ${serviceName})`);
+    ipc.on("NJSIAccountsController.addAccountLink", (event, accountUUID, serviceName, data) => {
+      console.log(`IPC: accountsController.addAccountLink(${accountUUID}, ${serviceName}, ${data})`);
       try {
-        let result = this.accountsController.addAccountLink(accountUUID, serviceName);
+        let result = this.accountsController.addAccountLink(accountUUID, serviceName, data);
         event.returnValue = {
           success: true,
           result: result
@@ -2752,10 +2752,26 @@ class LibUnity {
       console.log(`IPC: BackendUtilities.holdinAPIActions()`);
 
       try {
-        var data = JSON.stringify({
-          holdingkey: params.witnessKey,
-          action: params.action
-        });
+        let data = {};
+
+        if (params.action == "payoutaddress") {
+          data = JSON.stringify({
+            holdingkey: params.witnessKey,
+            action: params.action,
+            payoutaddress: params.data
+          });
+        } else if (params.action == "distribution") {
+          data = JSON.stringify({
+            holdingkey: params.witnessKey,
+            action: params.action,
+            compoundpercentage: params.data
+          });
+        } else {
+          data = JSON.stringify({
+            holdingkey: params.witnessKey,
+            action: params.action
+          });
+        }
 
         var config = {
           method: "post",

@@ -569,12 +569,12 @@ class AccountsController {
     return handleError(ipc.sendSync("NJSIAccountsController.getAllAccountBalances"));
   }
 
-  static async AddAccountLinkAsync(accountUUID, serviceName) {
-    return handleError(await ipc.callMain("NJSIAccountsController.addAccountLinkAsync", { accountUUID, serviceName }));
+  static async AddAccountLinkAsync(accountUUID, serviceName, data) {
+    return handleError(await ipc.callMain("NJSIAccountsController.addAccountLinkAsync", { accountUUID, serviceName, data }));
   }
 
-  static AddAccountLink(accountUUID, serviceName) {
-    return handleError(ipc.sendSync("NJSIAccountsController.addAccountLink", accountUUID, serviceName));
+  static AddAccountLink(accountUUID, serviceName, data) {
+    return handleError(ipc.sendSync("NJSIAccountsController.addAccountLink", accountUUID, serviceName, data));
   }
 
   static async RemoveAccountLinkAsync(accountUUID, serviceName) {
@@ -745,8 +745,8 @@ class BackendUtilities {
   static GetSellSessionUrl() {
     return handleError(ipc.sendSync("BackendUtilities.GetSellSessionUrl"));
   }
-  static holdinAPIActions(witnessKey, action) {
-    return handleError(ipc.sendSync("BackendUtilities.holdinAPIActions", { witnessKey, action }));
+  static holdinAPIActions(witnessKey, action, data) {
+    return handleError(ipc.sendSync("BackendUtilities.holdinAPIActions", { witnessKey, action, data }));
   }
 }
 

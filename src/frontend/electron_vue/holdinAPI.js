@@ -1,4 +1,3 @@
-const apiKey =
-  "Bearer IirLcB20T0tyNc4hjWRfUmPW1PxSxtmtllTh3DSlHeOzT7FreIlcFTzGI5x5EPqBHNFAQDldjXLSvky3jCpHvWWzuXhEVqyAc3xZnT8iXk9BAzVrhwfCOaWsgRQzy0AV9sX1y7v2E72V29Q2po4Vw";
+const apiKey = null;
 
 export { apiKey };

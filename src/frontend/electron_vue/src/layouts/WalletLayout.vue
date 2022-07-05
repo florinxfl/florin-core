@@ -53,7 +53,7 @@ import { mapState, mapGetters } from "vuex";
 import { formatMoneyForDisplay } from "../util.js";
 import EventBus from "../EventBus";
 import UIConfig from "../../ui-config.json";
-import { AccountsController, LibraryController } from "../unity/Controllers";
+import { AccountsController } from "../unity/Controllers";
 import AccountsSection from "./AccountsSection.vue";
 import AccountTooltip from "../components/AccountTooltip.vue";
 import AccountHeader from "../components/AccountHeader.vue";
