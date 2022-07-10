@@ -44,12 +44,6 @@
     "transactions": "Transactions",
     "unlock": "Unlock",
     "done": "Done",
-    "disconnect": "Disconnect",
-    "ban_hour": "Ban for 1 Hour",
-    "ban_day": "Ban for 1 Day",
-    "ban_week": "Ban for 1 Week",
-    "ban_year": "Ban for 1 Year",
-    "un_ban": "Unban Peer",
     "saving_key": "Holding Key",
     "info": "Info"
   },
@@ -182,7 +176,7 @@
     "address": "Address",
     "reason": "Reason",
     "peers": "Peers:",
-    "banned_peers": "Banned Peers:",
+    "banned_peers": "Banned Peers",
     "whitelisted": "Whitelisted",
     "direction": "Direction",
     "services": "Services",
@@ -198,7 +192,18 @@
     "ping_time": "Ping Time",
     "time_offset": "Time Offset",
     "banned_from": "Banned From",
-    "banned_until": "Banned Until"
+    "banned_until": "Banned Until",
+    "peer_details": "Peer Details",
+    "ban": "Ban",
+    "buttons": {
+      "clear_banned": "Clear banned",
+      "disconnect": "Disconnect",
+      "ban_hour": "1 Hour",
+      "ban_day": "1 Day",
+      "ban_week": "1 Week",
+      "ban_year": "1 Year",
+      "un_ban": "Unban Peer"
+    }
   },
   "tooltip": {
     "account_balance": "Account Balance",
