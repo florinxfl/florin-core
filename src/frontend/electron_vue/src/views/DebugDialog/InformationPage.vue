@@ -77,7 +77,7 @@ export default {
   data() {
     return {
       clientInfo: null,
-      enableTimeout: true
+      isDestroyed: false
     };
   },
   name: "InformationPage",
@@ -96,29 +96,18 @@ export default {
     }
   },
   created() {
-    document.addEventListener("webkitvisibilitychange", this.visibilityChange);
     this.updateClientInfo();
   },
   beforeDestroy() {
-    this.enableTimeout = false;
+    this.isDestroyed = true;
     clearTimeout(timeout);
-    document.removeEventListener("webkitvisibilitychange", this.visibilityChange);
   },
   methods: {
     updateClientInfo() {
       clearTimeout(timeout);
-      if (this.enableTimeout === false) return;
-      console.log("call update GetClientInfo");
       this.clientInfo = LibraryController.GetClientInfo();
-      timeout = setTimeout(this.updateClientInfo, 5000);
-    },
-    visibilityChange() {
-      if (document["webkitHidden"]) {
-        this.enableTimeout = false;
-      } else {
-        this.enableTimeout = true;
-        this.updateClientInfo();
-      }
+      if (this.isDestroyed) return;
+      timeout = setTimeout(this.updateClientInfo, 10 * 1000);
     },
     formatDate(timestamp) {
       const date = new Date(timestamp * 1000);
