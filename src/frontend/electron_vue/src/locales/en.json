@@ -164,7 +164,7 @@
     "enter_coins_address": "Enter Florin address",
     "confirm_transaction": "Confirm transaction",
     "target_account": "Send to account",
-    "fee_will_be_subtracted": "fee will be subtracted from the amount",
+    "fee_will_be_subtracted": "Fee will be subtracted from the amount",
     "unlock_your_wallet_to_complete_the_transaction": "Unlock your wallet to complete the transaction"
   },
   "renew_saving_account": {

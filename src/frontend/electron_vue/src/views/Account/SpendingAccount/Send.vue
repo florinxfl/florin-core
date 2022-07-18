@@ -2,7 +2,16 @@
   <div class="send-view flex-col">
     <div class="main">
       <div class="flex flex-row">
-        <input v-model="amount" ref="amount" type="number" step="0.00000001" :placeholder="computedAmountPlaceholder" min="0" />
+        <input
+          helper="TEST"
+          :class="getSendClass()"
+          v-model="amount"
+          ref="amount"
+          type="number"
+          step="0.00000001"
+          :placeholder="computedAmountPlaceholder"
+          min="0"
+        />
         <button v-if="maxAmount > 0" outlined class="max" @click="setUseMax" :disabled="useMax">max</button>
       </div>
       <content-wrapper>
@@ -10,7 +19,7 @@
           {{ this.useMax ? $t("send_coins.fee_will_be_subtracted") : "&nbsp;" }}
         </p>
       </content-wrapper>
-      <input v-model="address" type="text" :placeholder="$t('send_coins.enter_coins_address')" :class="addressClass" @keydown="isAddressInvalid = false" />
+      <input v-model="address" type="text" :placeholder="$t('send_coins.enter_coins_address')" :class="getAddressClass()" />
       <input v-model="label" type="text" :placeholder="$t('send_coins.enter_label')" />
     </div>
     <div class="flex-row">
@@ -60,6 +69,8 @@ export default {
     disableSendButton() {
       if (isNaN(parseFloat(this.amount))) return true;
       if (this.address === null || this.address.trim().length === 0) return true;
+      if (this.amount > this.account.balance) return true;
+      if (!LibraryController.IsValidNativeAddress(this.address)) return true;
       return false;
     },
     disableClearButton() {
@@ -110,6 +121,14 @@ export default {
       this.address = "";
       this.label = "";
       this.$refs.amount.focus();
+    },
+    getSendClass() {
+      if (this.amount > this.account.balance) return "error";
+      return "";
+    },
+    getAddressClass() {
+      if (!LibraryController.IsValidNativeAddress(this.address)) return "error";
+      return "";
     },
     showConfirmation() {
       // amount is always less then or equal to the floored spendable amount
