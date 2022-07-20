@@ -82,6 +82,7 @@
       <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
       <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
       <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
+      <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
       <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
     </portal>
   </div>
@@ -158,6 +159,9 @@ export default {
     renewButtonVisible() {
       return this.accountStatus === "expired";
     },
+    optimiseButtonVisible() {
+      return this.getStatistics("is_optimal") === false;
+    },
     totalBalanceFiat() {
       if (!this.rate) return "";
       return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
@@ -188,7 +192,7 @@ export default {
       this.compoundingPercent = WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent || 0;
     },
     getStatistics(which) {
-      return this.statistics[which] || null;
+      return this.statistics[which];
     },
     updateStatistics() {
       return new Promise(resolve => {
