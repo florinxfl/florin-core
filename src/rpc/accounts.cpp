@@ -1512,7 +1512,7 @@ static UniValue calculateholdingweight(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
             "calculateholdingweight \"amount\" \"time\" \n"
-            "calculate what the holding weight would be for a given \"amount\" ant time period \"time\"\n"
+            "calculate what the holding weight would be for a given \"amount\" and time period \"time\"\n"
             "\nArguments:\n"
             "1. \"amount\"          (string, required) The amount of " GLOBAL_COIN_CODE " to hold locked in the witness account.\n"
             "2. \"time\"            (string, required) The time period for which the funds should be locked in the witness account. By default this is interpreted as blocks e.g. \"1000\", suffix with \"y\", \"m\", \"w\", \"d\", \"b\" to specifically work in years, months, weeks, days or blocks.\n"
