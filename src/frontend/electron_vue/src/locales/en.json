@@ -28,6 +28,7 @@
     "buy_your_first_coins": "Buy Florin",
     "clear": "Clear",
     "confirm": "Confirm",
+    "cancel": "Cancel",
     "change_password": "Change password",
     "create_mining_account": "Create mining account",
     "finish": "Finish",
@@ -44,12 +45,6 @@
     "transactions": "Transactions",
     "unlock": "Unlock",
     "done": "Done",
-    "disconnect": "Disconnect",
-    "ban_hour": "Ban for 1 Hour",
-    "ban_day": "Ban for 1 Day",
-    "ban_week": "Ban for 1 Week",
-    "ban_year": "Ban for 1 Year",
-    "un_ban": "Unban Peer",
     "saving_key": "Holding Key",
     "info": "Info"
   },
@@ -164,7 +159,7 @@
     "enter_coins_address": "Enter Florin address",
     "confirm_transaction": "Confirm transaction",
     "target_account": "Send to account",
-    "fee_will_be_subtracted": "fee will be subtracted from the amount",
+    "fee_will_be_subtracted": "Fee will be subtracted from the amount",
     "unlock_your_wallet_to_complete_the_transaction": "Unlock your wallet to complete the transaction"
   },
   "renew_saving_account": {
@@ -182,7 +177,7 @@
     "address": "Address",
     "reason": "Reason",
     "peers": "Peers:",
-    "banned_peers": "Banned Peers:",
+    "banned_peers": "Banned Peers",
     "whitelisted": "Whitelisted",
     "direction": "Direction",
     "services": "Services",
@@ -198,7 +193,18 @@
     "ping_time": "Ping Time",
     "time_offset": "Time Offset",
     "banned_from": "Banned From",
-    "banned_until": "Banned Until"
+    "banned_until": "Banned Until",
+    "peer_details": "Peer Details",
+    "ban": "Ban",
+    "buttons": {
+      "clear_banned": "Clear banned",
+      "disconnect": "Disconnect",
+      "ban_hour": "1 Hour",
+      "ban_day": "1 Day",
+      "ban_week": "1 Week",
+      "ban_year": "1 Year",
+      "un_ban": "Unban Peer"
+    }
   },
   "tooltip": {
     "account_balance": "Account Balance",
