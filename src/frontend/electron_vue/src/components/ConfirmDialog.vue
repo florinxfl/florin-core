@@ -122,7 +122,7 @@ export default {
 .content {
   margin: 30px 0;
   padding: 0 30px;
-  overflow-y: auto;
+  height: auto;
 }
 
 .buttons {
