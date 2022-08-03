@@ -84,25 +84,25 @@ fi
 for i in "${NDK_TARGETS[@]}"
 do
   source ${i}
-  export AR=${TOOLS}/$target_host-ar
-  export AS=${TOOLS}/$target_host-clang
+  export AR=${TOOLS}/llvm-ar
+  export AS=${TOOLS}/$target_host-as
   export CC=${TOOLS}/${clang_prefix}${ANDROID_LEVEL}-clang
   export CXX=${TOOLS}/${clang_prefix}${ANDROID_LEVEL}-clang++
-  export LD=${TOOLS}/$target_host-ld
-  export STRIP=${TOOLS}/$target_host-strip
-  export RANLIB=${TOOLS}/$target_host-ranlib
+  export LD=${TOOLS}/llvm-ld
+  export STRIP=${TOOLS}/llvm-strip
+  export RANLIB=${TOOLS}/llvm-ranlib
   export LIBTOOL=libtool
-  export CXXFLAGS="-O3 -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer ${march_flags} -DEXPERIMENTAL_AUTO_CPP_THREAD_ATTACH"
+  # build with debug symbols, android studio will take care of split-debug and stripping
+  export CXXFLAGS="-O3 -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer ${march_flags} -DANDROID_STL=c++_shared -DEXPERIMENTAL_AUTO_CPP_THREAD_ATTACH ${target_opt_cflags} -g3"
   #visibility=hidden
   export CFLAGS=${CXXFLAGS}
-  export LDFLAGS="-fPIC -Bsymbolic -Wl,--no-undefined -Wl,--gc-sections"
+  export LDFLAGS="-fPIC -Bsymbolic -Wl,--no-undefined -Wl,--gc-sections -Wl,--build-id"
 
   if [ -z "$SKIP_DEPENDS" ]
   then
     cd depends
     make HOST=$target_host NO_QT=1 NO_UPNP=1 EXTRA_PACKAGES='qrencode protobufunity' -j ${NUM_PROCS}
     cd ..
-    ${RANLIB} depends/$target_host/lib/*.a
   else
     echo Skipping depends
   fi
@@ -112,17 +112,14 @@ do
   cd build_android_${target_host}
   if [ -z "$SKIP_CONFIG" ]
   then
-    ../configure --prefix=$PWD/../depends/$target_host ac_cv_c_bigendian=no ac_cv_sys_file_offset_bits=$target_bits --host=$target_host --disable-bench --enable-experimental-asm --disable-tests --disable-man --disable-zmq --without-utils --with-libs --without-daemon --with-jni-libs --with-qrencode
+    ../configure --prefix=$PWD/../depends/$target_host ac_cv_c_bigendian=no ac_cv_sys_file_offset_bits=$target_bits --host=$target_host --disable-bench --enable-experimental-asm --disable-tests --disable-man --disable-zmq --without-utils --with-libs --without-daemon --with-jni-libs --with-qrencode --with-node-js-libs=no
   else
     echo Skipping explicit configure
   fi
-  make -j ${NUM_PROCS} V=1
+  make V=1 -j ${NUM_PROCS} V=1
   cd ..
 
   mkdir src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib} | true
   cp build_android_${target_host}/src/.libs/lib_unity_jni.so src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/
   cp ${LIB_DIR}/${target_host}/libc++_shared.so src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/
-  ${STRIP} --enable-deterministic-archives --only-keep-debug src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/lib_unity_jni.so -o src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/lib_unity_jni.so.dbg
-  ${STRIP} --enable-deterministic-archives --only-keep-debug src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/libc++_shared.so -o src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/libc++_shared.so.dbg
-  ${STRIP} --enable-deterministic-archives --strip-unneeded src/frontend/android/unity_wallet/app/src/main/jniLibs/${jni_lib}/*.so
 done

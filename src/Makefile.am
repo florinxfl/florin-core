@@ -865,6 +865,8 @@ lib_unity_jni_la_SOURCES = \
   unity/djinni/jni/NativeMnemonicRecord.cpp \
   unity/djinni/jni/NativeMutationRecord.hpp \
   unity/djinni/jni/NativePaymentResultStatus.hpp \
+  unity/djinni/jni/NativeBannedPeerRecord.hpp \
+  unity/djinni/jni/NativeBannedPeerRecord.cpp \
   unity/djinni/jni/NativePeerRecord.hpp \
   unity/djinni/jni/NativePeerRecord.cpp \
   unity/djinni/jni/NativeQrCodeRecord.hpp \
@@ -884,6 +886,7 @@ lib_unity_jni_la_SOURCES = \
   unity/djinni/jni/NativeOutputRecord.cpp \
   unity/djinni/jni/NativeInputRecord.hpp \
   unity/djinni/jni/NativeInputRecord.cpp \
+  unity/djinni/support-lib/jni/djinni_support.hpp \
   unity/djinni/cpp/i_library_controller.hpp \
   unity/djinni/cpp/i_library_controller.cpp \
   unity/djinni/cpp/i_library_listener.hpp \
@@ -899,7 +902,7 @@ ANDROID_DEPS = $(LIB_COMPAT) $(LIB_CONSENSUS) $(LIB_NODE) $(LIB_UTIL) $(LIB_COMM
 
 
 lib_unity_jni_la_LDFLAGS = -shared -module -export-dynamic $(AM_LDFLAGS_NO_THREADS) $(RELDFLAGS) -llog
-lib_unity_jni_la_LIBADD = $(ANDROID_DEPS) $(ANDROID_DEPS) $(LIBSECP256K1) $(SSL_LIBS) $(BOOST_LIBS) $(BDB_LIBS) $(LIBLEVELDB) $(LIBMEMENV) $(LIBUNIVALUE) $(PROTOBUF_LIBS) -lqrencode -lcryptopp
+lib_unity_jni_la_LIBADD = $(ANDROID_DEPS) $(ANDROID_DEPS) $(LIBSECP256K1) $(SSL_LIBS) -lcrypto $(BOOST_LIBS) $(BDB_LIBS) $(LIBLEVELDB) $(LIBMEMENV) $(LIBUNIVALUE) $(PROTOBUF_LIBS) -lqrencode -lcryptopp
 lib_unity_jni_la_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) -I$(srcdir)/unity/djinni/jni -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/unity/djinni/support-lib/jni -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
 lib_unity_jni_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(COMMON_INCLUDES) -I$(srcdir)/unity/djinni/jni -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/unity/djinni/support-lib/jni -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
 endif
