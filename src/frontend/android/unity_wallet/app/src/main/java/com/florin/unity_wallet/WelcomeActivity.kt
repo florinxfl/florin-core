@@ -5,19 +5,19 @@
 
 package com.florin.unity_wallet
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.florin.barcodereader.BarcodeCaptureActivity
 import com.florin.jniunifiedbackend.ILibraryController
 import com.florin.unity_wallet.ui.EnterRecoveryPhraseActivity
 import com.florin.unity_wallet.ui.ShowRecoveryPhraseActivity
 import com.florin.unity_wallet.util.AppBaseActivity
 import com.florin.unity_wallet.util.gotoWalletActivity
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.appcompat.v7.Appcompat
 import kotlin.concurrent.thread
 
 class WelcomeActivity : AppBaseActivity(), UnityCore.Observer
@@ -88,26 +88,25 @@ class WelcomeActivity : AppBaseActivity(), UnityCore.Observer
                         null,
                         action = { password->
                             if (UnityCore.instance.isCoreReady()) {
-                                if (ILibraryController.ContinueWalletLinkedFromURI(barcode.displayValue, password.joinToString(""))) {
+                                if (ILibraryController.ContinueWalletLinkedFromURI(barcode?.displayValue, password.joinToString(""))) {
                                     gotoWalletActivity(this)
                                     return@chooseAccessCode
                                 }
                             } else {
                                 // Create the new wallet, a coreReady event will follow which will proceed to the main activity
-                                if (ILibraryController.InitWalletLinkedFromURI(barcode.displayValue, password.joinToString(""))) {
+                                if (ILibraryController.InitWalletLinkedFromURI(barcode?.displayValue, password.joinToString(""))) {
                                     return@chooseAccessCode
                                 }
                             }
 
                             // Got here so there was an error in init or continue linked wallet
-                            alert(Appcompat,  getString(R.string.no_qrsync_warning),  getString(R.string.no_qrsync_warning_title))
-                            {
-                                positiveButton(getString(R.string.button_ok))
-                                {
-                                    it.dismiss()
-                                }
-                                isCancelable = true
-                            }.build().show()
+                            val dialog = MaterialAlertDialogBuilder(this)
+                                    .setTitle(getString(R.string.no_qrsync_warning_title))
+                                    .setMessage(getString(R.string.no_qrsync_warning))
+                                    .setPositiveButton(android.R.string.ok) { dialog: DialogInterface, i: Int ->
+                                        dialog.dismiss()
+                                    }
+                                    .show()
                         },
                         cancelled = {}
                 )

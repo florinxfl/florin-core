@@ -42,11 +42,14 @@ import com.florin.unity_wallet.util.AppBaseFragment
 import com.florin.unity_wallet.util.SwipeToDeleteCallback
 import kotlinx.android.synthetic.main.add_address_entry.view.*
 import kotlinx.android.synthetic.main.fragment_send.*
-import org.jetbrains.anko.support.v4.runOnUiThread
+import android.os.Handler
+import android.os.Looper
 import org.json.JSONObject
 
 
 class SendFragment : AppBaseFragment(), UnityCore.Observer {
+
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     {
@@ -262,7 +265,7 @@ class SendFragment : AppBaseFragment(), UnityCore.Observer {
     {
         try
         {
-            val clipboard = ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
+            val clipboard = ContextCompat.getSystemService(context!!, ClipboardManager::class.java)
             return (clipboard?.primaryClip?.getItemAt(0)?.coerceToText(context)).toString()
         }
         catch (e : Exception)
@@ -296,15 +299,15 @@ class SendFragment : AppBaseFragment(), UnityCore.Observer {
             {
                 if (data != null) {
                     val barcode = data.getParcelableExtra<Barcode>(BarcodeCaptureActivity.BarcodeObject)
-                    val qrContent = barcode.displayValue
+                    val qrContent = barcode?.displayValue
                     val recipient = try {
-                        createRecipient(qrContent)
+                        createRecipient(qrContent!!)
                     }
                     catch (e: InvalidRecipientException) {
                         errorMessage(getString(R.string.not_coin_qr, qrContent))
                         return
                     }
-                    SendCoinsFragment.newInstance(recipient, false).show(requireActivity().supportFragmentManager, SendCoinsFragment::class.java.simpleName)
+                    SendCoinsFragment.newInstance(recipient!!, false).show(activity!!.supportFragmentManager, SendCoinsFragment::class.java.simpleName)
                 }
             }
         } else {
@@ -314,7 +317,7 @@ class SendFragment : AppBaseFragment(), UnityCore.Observer {
 
     override fun onAddressBookChanged() {
         val newAddresses = ILibraryController.getAddressBookRecords()
-        runOnUiThread {
+        handler.post {
             val adapter = addressBookList.adapter as AddressBookAdapter
             adapter.updateDataSource(newAddresses)
             updateEmptyViewState()

@@ -11,29 +11,31 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.preference.PreferenceManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.florin.jniunifiedbackend.ILibraryController
-import com.florin.unity_wallet.main_activity_fragments.*
-import com.florin.unity_wallet.ui.monitor.NetworkMonitorActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.android.volley.*
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
+import com.florin.jniunifiedbackend.ILibraryController
 import com.florin.jniunifiedbackend.IWalletController
+import com.florin.unity_wallet.main_activity_fragments.*
 import com.florin.unity_wallet.ui.getDisplayDimensions
-import com.florin.unity_wallet.util.*
+import com.florin.unity_wallet.ui.monitor.NetworkMonitorActivity
+import com.florin.unity_wallet.util.AppBaseActivity
+import com.florin.unity_wallet.util.getAndroidVersion
+import com.florin.unity_wallet.util.getDeviceName
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.contentView
-import org.jetbrains.anko.design.snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.concurrent.thread
+
 
 class WalletActivity : UnityCore.Observer, AppBaseActivity(),
         SharedPreferences.OnSharedPreferenceChangeListener
@@ -180,7 +182,7 @@ class WalletActivity : UnityCore.Observer, AppBaseActivity(),
                 else
                 {
                     runOnUiThread {
-                        this.contentView?.snackbar(getString(R.string.rescan_started))
+                        Snackbar.make(View(this@WalletActivity), getString(R.string.rescan_started), Snackbar.LENGTH_SHORT).show()
                         gotoPage(ReceiveFragment())
                     }
                 }

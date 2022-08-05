@@ -8,7 +8,10 @@ package com.florin.unity_wallet
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.florin.jniunifiedbackend.AddressRecord
 import com.florin.jniunifiedbackend.ILibraryController
 import com.florin.jniunifiedbackend.UriRecipient
@@ -31,9 +35,6 @@ import com.florin.unity_wallet.util.invokeNowOrOnSuccessfulCompletion
 import kotlinx.android.synthetic.main.fragment_send_coins.view.*
 import kotlinx.android.synthetic.main.text_input_address_label.view.*
 import kotlinx.coroutines.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.dimen
 import kotlin.coroutines.CoroutineContext
 
 
@@ -114,7 +115,7 @@ class SendCoinsFragment : BottomSheetDialogFragment(), CoroutineScope
         val preferredHeight = mMainlayout.measuredHeight
 
         // maximum height that we allow it to be, to be sure that the balance shows through (if not hidden)
-        val allowedHeight = outSize.y - context!!.dimen(R.dimen.top_space_send_coins)
+        val allowedHeight = outSize.y - context!!.resources.getDimensionPixelSize(R.dimen.top_space_send_coins)
 
         // programmatically adjust layout, only if needed
         if (preferredHeight > allowedHeight) {
@@ -257,31 +258,31 @@ class SendCoinsFragment : BottomSheetDialogFragment(), CoroutineScope
             }
             if (fee + amountNative > balance) {
                 // alert dialog for confirmation of payment and reduction of amount since amount + fee exceeds balance
-                fragmentActivity.alert(Appcompat, getString(R.string.send_all_instead_msg), getString(R.string.send_all_instead_title)) {
-
-                    // on confirmation compose recipient with reduced amount and execute payment with subtract fee from amount
-                    positiveButton(getString(R.string.send_all_btn)) {
-                        val sendAllRequest = UriRecipient(true, recipient.address, recipient.label, recipient.desc, balance)
-                        performAuthenticatedPayment(dialog!!, sendAllRequest, null,true)
-                    }
-
-                    negativeButton(getString(R.string.cancel_btn)) {}
-                }.show()
+                MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(getString(R.string.send_all_instead_title))
+                        .setMessage(getString(R.string.send_all_instead_msg))
+                        // on confirmation compose recipient with reduced amount and execute payment with subtractFee fee from amount
+                        .setPositiveButton(getString(R.string.send_all_btn)) { dialogInterface: DialogInterface, i: Int ->
+                            val sendAllRequest = UriRecipient(true, recipient.address, recipient.label, recipient.desc, balance)
+                            performAuthenticatedPayment(dialog!!, sendAllRequest, null,true)
+                        }
+                        .setNegativeButton(getString(R.string.cancel_btn)) { dialogInterface: DialogInterface, i: Int -> }
+                        .show()
             } else {
                 // create styled message from resource template and arguments bundle
                 val amountStr = String.format("%.${PRECISION_SHORT}f", amountNativeStr)
                 val message = getString(R.string.send_coins_confirm_template, amountStr, recipientDisplayAddress)
 
                 // alert dialog for confirmation
-                fragmentActivity.alert(Appcompat, message, getString(R.string.send_coins_title)) {
-
-                    // on confirmation compose recipient and execute payment
-                    positiveButton(getString(R.string.send_btn)) {
-                        performAuthenticatedPayment(dialog!!, paymentRequest, null,false)
-                    }
-
-                    negativeButton(getString(R.string.cancel_btn)) {}
-                }.show()
+                MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(getString(R.string.send_coins_title))
+                        .setMessage(message)
+                        // on confirmation compose recipient and execute payment
+                        .setPositiveButton(getString(R.string.send_btn)) { dialogInterface: DialogInterface, i: Int ->
+                            performAuthenticatedPayment(dialog!!, paymentRequest, null,false)
+                        }
+                        .setNegativeButton(getString(R.string.cancel_btn)) { dialogInterface: DialogInterface, i: Int -> }
+                        .show()
             }
         } catch (exception: RuntimeException) {
             errorMessage(exception.message!!)
@@ -289,9 +290,13 @@ class SendCoinsFragment : BottomSheetDialogFragment(), CoroutineScope
     }
 
     private fun errorMessage(msg: String) {
-        fragmentActivity.alert(Appcompat, msg, "") {
-            positiveButton(getString(R.string.send_coins_error_acknowledge)) {}
-        }.show()
+        MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.send_coins_title))
+                .setMessage(msg)
+                // on confirmation compose recipient and execute payment
+                .setPositiveButton(getString(R.string.send_coins_error_acknowledge)) { dialogInterface: DialogInterface, i: Int ->
+                }
+                .show()
     }
 
     override fun onDestroy() {

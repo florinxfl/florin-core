@@ -21,13 +21,16 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
-import org.jetbrains.anko.runOnUiThread
+import android.os.Handler
+import android.os.Looper
+import androidx.annotation.RequiresApi
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 private const val TAG = "background_sync"
 const val APP_PERIODIC_SYNC = "APP_PERIODIC_SYNC"
 
+@RequiresApi(Build.VERSION_CODES.S)
 fun setupBackgroundSync(context: Context) {
 
     // get syncType from preferences
@@ -38,16 +41,14 @@ fun setupBackgroundSync(context: Context) {
 
     val serviceIntent = Intent(context, SyncService::class.java)
 
+    context.stopService(serviceIntent)
+    WorkManager.getInstance().cancelAllWorkByTag(APP_PERIODIC_SYNC)
+
     when (syncType) {
         "BACKGROUND_SYNC_OFF" -> {
-            context.stopService(serviceIntent)
-            WorkManager.getInstance().cancelAllWorkByTag(APP_PERIODIC_SYNC)
         }
 
         "BACKGROUND_SYNC_DAILY" -> {
-            context.stopService(serviceIntent)
-            WorkManager.getInstance().cancelAllWorkByTag(APP_PERIODIC_SYNC)
-
             val work = PeriodicWorkRequestBuilder<SyncWorker>(24, TimeUnit.HOURS)
                     .addTag(APP_PERIODIC_SYNC)
                     .build()
@@ -55,7 +56,27 @@ fun setupBackgroundSync(context: Context) {
         }
 
         "BACKGROUND_SYNC_CONTINUOUS" -> {
-            ContextCompat.startForegroundService(context, serviceIntent)
+            var tryForeground = true;
+            if (android.os.Build.MANUFACTURER == "samsung")
+                tryForeground = false;
+
+            if (tryForeground) {
+                try {
+                    ContextCompat.startForegroundService(context, serviceIntent)
+                } catch (e: ForegroundServiceStartNotAllowedException) {
+                    tryForeground = false;
+                }
+            }
+            if(!tryForeground) {
+                //fixme: (HIGH) - as of API 32 the above is "illegal" and leads to ForegroundServiceStartNotAllowedException
+                //see: https://stackoverflow.com/questions/69604951/getting-android-app-foregroundservicestartnotallowedexception-in-android-12-sdk
+                //
+                //For now instead we just call the periodic sync a lot more frequently, however I don't know if this is the best solution, we should look at something else in future
+                val work = PeriodicWorkRequestBuilder<SyncWorker>(10, TimeUnit.MINUTES)
+                        .addTag(APP_PERIODIC_SYNC)
+                        .build()
+                WorkManager.getInstance().enqueue(work)
+            }
         }
     }
 }
@@ -82,6 +103,8 @@ class SyncService : Service(), UnityCore.Observer
     private var builder: NotificationCompat.Builder? = null
 
     private val channelID = "com.florin.unity_wallet.service.channel"
+
+    private val handler = Handler(Looper.getMainLooper())
 
     private fun startInForeground()
     {
@@ -120,7 +143,7 @@ class SyncService : Service(), UnityCore.Observer
     override fun onCreate() {
         super.onCreate()
 
-        UnityCore.instance.addObserver(this, fun (callback:() -> Unit) { runOnUiThread { callback() }})
+        UnityCore.instance.addObserver(this, fun (callback:() -> Unit) { handler.post { callback() }})
         UnityCore.instance.startCore()
     }
     override fun onDestroy() {
