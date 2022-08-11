@@ -5,7 +5,7 @@
     </portal>
 
     <div class="main">
-      <app-form-field title="optimise_holding_account.funding_account">
+      <app-form-field title="saving_account.optimise_holding_account">
         <select-list :options="fundingAccounts" :default="fundingAccount" v-model="fundingAccount" />
       </app-form-field>
 
@@ -18,8 +18,8 @@
         @keydown="onPasswordKeydown"
       />
     </div>
-    <button @click="trySend" :disabled="disableSendButton">
-      {{ $t("buttons.send") }}
+    <button @click="tryOptimise" :disabled="disableSendButton">
+      {{ $t("buttons.optimise") }}
     </button>
   </div>
 </template>
@@ -68,33 +68,35 @@ export default {
     onPasswordKeydown() {
       this.isPasswordInvalid = false;
     },
-    trySend() {
-      /*
-       todo:
-        - improve notifications / messages on success and error
-       */
-
-      // wallet needs to be unlocked to make a payment
+    tryOptimise() {
       if (LibraryController.UnlockWallet(this.computedPassword, 120) === false) {
         this.isPasswordInvalid = true;
       }
 
-      if (this.hasErrors) return;
+      if (this.hasErrors) {
+        alert("Invalid password");
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+        return;
+      }
+
+      this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
 
       let accountUUID = AccountsController.GetActiveAccount();
       let optimalAmounts = WitnessController.GetOptimalWitnessDistributionForAccount(accountUUID);
-      let result = WitnessController.OptimiseWitnessAccount(this.account.UUID, this.account.UUID, optimalAmounts);
+
+      let result = WitnessController.OptimiseWitnessAccount(this.account.UUID, this.fundingAccount.UUID, optimalAmounts);
 
       if (result.result === true) {
         this.password = null;
         this.fundingAccount = null;
 
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
         EventBus.$emit("close-right-sidebar");
+        alert("Operation was successful");
       } else {
         alert(result.info);
       }
 
-      // lock the wallet again
       LibraryController.LockWallet();
     }
   }
