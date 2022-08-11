@@ -46,7 +46,8 @@
     "unlock": "Unlock",
     "done": "Done",
     "saving_key": "Holding Key",
-    "info": "Info"
+    "info": "Info",
+    "optimise": "Optimise"
   },
   "clipboard_field": {
     "copied_to_clipboard": "Copied to clipboard"
@@ -85,7 +86,8 @@
     "account_weight": "Account weight",
     "network_weight": "Network weight",
     "empty": "This holding account is empty",
-    "percent": "%"
+    "percent": "%",
+    "optimise_holding_account": "Funding account"
   },
   "loader": {
     "shutdown": "Shutting down...",
@@ -203,7 +205,8 @@
       "ban_day": "1 Day",
       "ban_week": "1 Week",
       "ban_year": "1 Year",
-      "un_ban": "Unban Peer"
+      "un_ban": "Unban Peer",
+      "optimise": "Optimise"
     }
   },
   "tooltip": {

@@ -76,15 +76,21 @@
     </app-section>
 
     <router-view />
-
-    <portal to="footer-slot">
-      <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
-      <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
-      <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
-      <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
-      <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
-      <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
-    </portal>
+    <div>
+      <portal ref="footerSlot" to="footer-slot">
+        <div v-on:scroll.passive="handleScroll" class="footer">
+          <div class="scroll-arrow" v-if="showOverFlowArrow">
+            <fa-icon class="pen" :icon="['fal', 'fa-long-arrow-right']" />
+          </div>
+          <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
+          <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
+          <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
+          <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
+          <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
+          <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
+        </div>
+      </portal>
+    </div>
   </div>
 </template>
 
@@ -105,8 +111,12 @@ export default {
       rightSection: null,
       rightSectionComponent: null,
       statistics: null,
-      compoundingPercent: 0
+      compoundingPercent: 0,
+      showOverFlowArrow: false
     };
+  },
+  mounted() {
+    this.isOverflown();
   },
   computed: {
     ...mapState("app", ["rate", "activityIndicator"]),
@@ -177,6 +187,9 @@ export default {
   created() {
     this.initialize();
   },
+  destroyed() {
+    window.removeEventListener("resize", this.isOverflown);
+  },
   watch: {
     account() {
       this.initialize();
@@ -190,6 +203,8 @@ export default {
       this.updateStatistics();
 
       this.compoundingPercent = WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent || 0;
+
+      window.addEventListener("resize", this.isOverflown);
     },
     getStatistics(which) {
       return this.statistics[which];
@@ -214,6 +229,29 @@ export default {
     routeTo(route) {
       if (this.$route.name === route) return;
       this.$router.push({ name: route, params: { id: this.account.UUID } });
+    },
+    isOverflown(e) {
+      if (e) {
+        const width = e.currentTarget.innerWidth;
+        if (width && width < 900) {
+          this.showOverFlowArrow = true;
+        } else {
+          this.showOverFlowArrow = false;
+        }
+      } else {
+        if (window.innerWidth < 900) {
+          this.showOverFlowArrow = true;
+        } else {
+          this.showOverFlowArrow = false;
+        }
+      }
+    },
+    handleScroll(e) {
+      if (e.target.scrollWidth - e.target.scrollLeft === e.target.clientWidth) {
+        this.showOverFlowArrow = false;
+      } else {
+        this.showOverFlowArrow = true;
+      }
     }
   }
 };
@@ -236,5 +274,26 @@ export default {
   text-align: right;
   line-height: 18px;
   flex: 1;
+}
+.footer {
+  display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+  width: 100%;
+}
+.footer::-webkit-scrollbar {
+  display: none;
+}
+.scroll-arrow {
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.9), #ffffff);
+  height: 55px;
+  width: 55px;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  right: 0;
+  bottom: 0;
 }
 </style>
