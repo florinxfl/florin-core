@@ -95,6 +95,7 @@ export default {
         alert("Operation was successful");
       } else {
         alert(result.info);
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
       }
 
       LibraryController.LockWallet();

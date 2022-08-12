@@ -87,7 +87,7 @@
     "network_weight": "Network weight",
     "empty": "This holding account is empty",
     "percent": "%",
-    "optimise_holding_account": "Funding account"
+    "optimise_holding_account": "Select Funding Account"
   },
   "loader": {
     "shutdown": "Shutting down...",
