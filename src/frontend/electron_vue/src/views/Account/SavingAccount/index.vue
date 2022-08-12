@@ -77,18 +77,21 @@
 
     <router-view />
     <div>
-      <portal ref="footerSlot" to="footer-slot">
-        <div v-on:scroll.passive="handleScroll" class="footer">
-          <div class="scroll-arrow" v-if="showOverFlowArrow">
-            <fa-icon class="pen" :icon="['fal', 'fa-long-arrow-right']" />
+      <portal to="footer-slot">
+        <div style="display: flex">
+          <div v-on:scroll.passive="handleScroll" class="footer-layout">
+            <div class="scroll-arrow" v-if="showOverFlowArrow">
+              <fa-icon class="pen" :icon="['fal', 'fa-long-arrow-right']" />
+            </div>
+            <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
+            <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
+            <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
+            <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
+            <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
+            <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
           </div>
-          <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
-          <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
-          <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
-          <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
-          <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
-          <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
         </div>
+        xx
       </portal>
     </div>
   </div>
@@ -231,22 +234,36 @@ export default {
       this.$router.push({ name: route, params: { id: this.account.UUID } });
     },
     isOverflown(e) {
+      console.log(this.renewButtonVisible);
+      console.log(this.optimiseButtonVisible);
+
+      // Determine whether to show the overflow arrow
       if (e) {
         const width = e.currentTarget.innerWidth;
-        if (width && width < 900) {
-          this.showOverFlowArrow = true;
+        if (width && width <= 1000) {
+          if (this.renewButtonVisible || this.optimiseButtonVisible) {
+            this.showOverFlowArrow = true;
+          } else {
+            this.showOverFlowArrow = false;
+          }
         } else {
           this.showOverFlowArrow = false;
         }
       } else {
-        if (window.innerWidth < 900) {
-          this.showOverFlowArrow = true;
+        // Triggered on page load.
+        if (window.innerWidth <= 1000) {
+          if (this.renewButtonVisible || this.optimiseButtonVisible) {
+            this.showOverFlowArrow = true;
+          } else {
+            this.showOverFlowArrow = false;
+          }
         } else {
           this.showOverFlowArrow = false;
         }
       }
     },
     handleScroll(e) {
+      // Determine when user it at the end of the horizontal scroll bar.
       if (e.target.scrollWidth - e.target.scrollLeft === e.target.clientWidth) {
         this.showOverFlowArrow = false;
       } else {
@@ -275,13 +292,13 @@ export default {
   line-height: 18px;
   flex: 1;
 }
-.footer {
+.footer-layout {
   display: flex;
   flex-direction: row;
   overflow-x: scroll;
   width: 100%;
 }
-.footer::-webkit-scrollbar {
+.footer-layout::-webkit-scrollbar {
   display: none;
 }
 .scroll-arrow {
