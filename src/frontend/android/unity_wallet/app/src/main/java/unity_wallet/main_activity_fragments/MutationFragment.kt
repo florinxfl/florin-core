@@ -11,9 +11,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import jniunifiedbackend.ILibraryController
-import jniunifiedbackend.MutationRecord
-import jniunifiedbackend.TransactionRecord
+import unity_wallet.jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.MutationRecord
+import unity_wallet.jniunifiedbackend.TransactionRecord
 import unity_wallet.*
 import unity_wallet.ui.MutationAdapter
 import unity_wallet.util.AppBaseFragment
@@ -43,15 +43,24 @@ class MutationFragment : AppBaseFragment(), UnityCore.Observer, CoroutineScope {
             mutationList?.emptyView = emptyMutationListView
             val mutations = ILibraryController.getMutationHistory()
 
-            val adapter = MutationAdapter(this@MutationFragment.context!!, mutations)
+            val adapter = MutationAdapter(this@MutationFragment.requireContext(), mutations)
             mutationList.adapter = adapter
 
             mutationList.setOnItemClickListener { parent, _, position, _ ->
                 val mutation = parent.adapter.getItem(position) as MutationRecord
-                val intent = Intent(this@MutationFragment.context, TransactionInfoActivity::class.java)
+                val intent =
+                    Intent(this@MutationFragment.context, TransactionInfoActivity::class.java)
                 intent.putExtra(TransactionInfoActivity.EXTRA_TRANSACTION, mutation.txHash)
                 startActivity(intent)
             }
+
+            buyYourFirstText.setOnClickListener {
+                (activity as WalletActivity).gotoBuyActivity()
+            }
+            noTransactionsText.setOnClickListener {
+                (activity as WalletActivity).gotoBuyActivity()
+            }
+
 
             launch {
                 try {
@@ -94,4 +103,5 @@ class MutationFragment : AppBaseFragment(), UnityCore.Observer, CoroutineScope {
             adapter.updateDataSource(mutations)
         }
     }
+
 }

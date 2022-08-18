@@ -16,7 +16,7 @@ import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import barcodereader.BarcodeCaptureActivity
-import jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.ILibraryController
 import unity_wallet.*
 import unity_wallet.util.invokeNowOrOnSuccessfulCompletion
 import kotlinx.coroutines.CoroutineScope
@@ -112,9 +112,9 @@ class WalletSettingsFragment : androidx.preference.PreferenceFragmentCompat(), C
 
                     if (!ILibraryController.IsValidLinkURI(barcode?.displayValue)) {
                         AlertDialog.Builder(context!!)
-                                .setTitle(getString(R.string.no_qrsync_warning_title))
-                                .setMessage(getString(R.string.no_qrsync_warning))
-                                .setPositiveButton(getString(R.string.button_ok)) { dialogInterface, i ->
+                                .setTitle(getString(unity_wallet.R.string.no_qrsync_warning_title))
+                                .setMessage(getString(unity_wallet.R.string.no_qrsync_warning))
+                                .setPositiveButton(getString(unity_wallet.R.string.button_ok)) { dialogInterface, i ->
                                     dialogInterface.dismiss()
                                 }
                                 .setCancelable(true)
@@ -128,12 +128,12 @@ class WalletSettingsFragment : androidx.preference.PreferenceFragmentCompat(), C
                         val builder = AlertDialog.Builder(context!!)
                                 .setTitle(getString(titleResId))
                                 .setMessage(getString(msgResId))
-                                .setPositiveButton(getString(R.string.button_ok)) { dialogInterface, i ->
+                                .setPositiveButton(getString(unity_wallet.R.string.button_ok)) { dialogInterface, i ->
                                     action(dialogInterface)
                                 }
                                 .setCancelable(true)
                         if (withCancel)
-                            builder.setNegativeButton(getString(R.string.button_cancel)) { dialogInterface, i ->
+                            builder.setNegativeButton(getString(unity_wallet.R.string.button_cancel)) { dialogInterface, i ->
                                 dialogInterface.dismiss()
                             }
                         builder.create().show()

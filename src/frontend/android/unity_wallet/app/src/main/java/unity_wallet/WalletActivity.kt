@@ -21,8 +21,8 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import jniunifiedbackend.ILibraryController
-import jniunifiedbackend.IWalletController
+import unity_wallet.jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.IWalletController
 import unity_wallet.main_activity_fragments.*
 import unity_wallet.ui.getDisplayDimensions
 import unity_wallet.ui.monitor.NetworkMonitorActivity

@@ -12,11 +12,10 @@
 -keep class android.support.v7.** { *; }
 
 # unity backend
--keep class jniunifiedbackend.** { *; }
--keep interface jniunifiedbackend.** { *; }
+-keep class unity_wallet.jniunifiedbackend.** { *; }
+-keep interface unity_wallet.jniunifiedbackend.** { *; }
 
 #### OkHttp, Retrofit and Moshi
--dontwarn retrofit2.Platform$Java8
 -dontwarn okio.**
 -dontwarn javax.annotation.**
 -keepclasseswithmembers class * { @retrofit2.http.* <methods>; }

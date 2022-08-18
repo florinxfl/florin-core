@@ -1,5 +1,5 @@
 // Copyright (c) 2018 The Florin developers
-// Authored by: Malcolm MacLeod (mmacleod@webmail.co.za), Willem de Jonge (willem@isnapp.nl)
+// Authored by: Malcolm MacLeod (mmacleod@gmx.com), Willem de Jonge (willem@isnapp.nl)
 // Distributed under the Florin software license, see the accompanying
 // file COPYING
 
@@ -31,10 +31,10 @@ import com.android.volley.toolbox.Volley
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode
 import barcodereader.BarcodeCaptureActivity
-import jniunifiedbackend.AddressRecord
-import jniunifiedbackend.ILibraryController
-import jniunifiedbackend.IWalletController
-import jniunifiedbackend.UriRecipient
+import unity_wallet.jniunifiedbackend.AddressRecord
+import unity_wallet.jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.IWalletController
+import unity_wallet.jniunifiedbackend.UriRecipient
 import unity_wallet.*
 import unity_wallet.ui.AddressBookAdapter
 import unity_wallet.util.AppBaseFragment

@@ -23,9 +23,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import jniunifiedbackend.AddressRecord
-import jniunifiedbackend.ILibraryController
-import jniunifiedbackend.UriRecipient
+import unity_wallet.jniunifiedbackend.AddressRecord
+import unity_wallet.jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.UriRecipient
 import unity_wallet.Config.Companion.PRECISION_SHORT
 import unity_wallet.R.layout.text_input_address_label
 import unity_wallet.ui.getDisplayDimensions

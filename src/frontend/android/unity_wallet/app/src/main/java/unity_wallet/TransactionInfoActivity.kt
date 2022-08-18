@@ -1,5 +1,5 @@
 // Copyright (c) 2018 The Florin developers
-// Authored by: Malcolm MacLeod (mmacleod@webmail.co.za), Willem de Jonge (willem@isnapp.nl)
+// Authored by: Malcolm MacLeod (mmacleod@gmx.com), Willem de Jonge (willem@isnapp.nl)
 // Distributed under the Florin software license, see the accompanying
 // file COPYING
 
@@ -11,10 +11,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import jniunifiedbackend.MonitorListener
-import jniunifiedbackend.ILibraryController
-import jniunifiedbackend.TransactionRecord
-import jniunifiedbackend.TransactionStatus
+import unity_wallet.jniunifiedbackend.MonitorListener
+import unity_wallet.jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.TransactionRecord
+import unity_wallet.jniunifiedbackend.TransactionStatus
 import unity_wallet.util.AppBaseActivity
 import kotlinx.android.synthetic.main.activity_transaction_info.*
 import kotlinx.android.synthetic.main.content_transaction_info.*

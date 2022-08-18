@@ -13,7 +13,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import barcodereader.BarcodeCaptureActivity
-import jniunifiedbackend.ILibraryController
+import unity_wallet.jniunifiedbackend.ILibraryController
 import unity_wallet.ui.EnterRecoveryPhraseActivity
 import unity_wallet.ui.ShowRecoveryPhraseActivity
 import unity_wallet.util.AppBaseActivity

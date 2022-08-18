@@ -110,7 +110,7 @@ class SyncService : Service(), UnityCore.Observer
     {
 
         val notificationIntent = Intent(this, WalletActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_MUTABLE)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
