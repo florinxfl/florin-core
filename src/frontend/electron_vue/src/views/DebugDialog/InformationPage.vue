@@ -13,12 +13,22 @@
       </div>
       <div class="flex-row">
         <div>Data dir</div>
-        <div class="selectable">{{ clientInfo.datadir_path }}</div>
+        <div class="path-row">
+          <div @click="openFile(clientInfo.datadir_path)" class="list-item-icon">
+            <fa-icon :icon="['fal', 'file-search']" />
+          </div>
+          <div class="selectable">{{ clientInfo.datadir_path }}</div>
+        </div>
       </div>
       <div class="flex-row">
         <div>Log file</div>
-        <div class="selectable">
-          {{ clientInfo.logfile_path }}
+        <div class="path-row">
+          <div @click="openFile(clientInfo.logfile_path)" class="list-item-icon">
+            <fa-icon :icon="['fal', 'file-search']" />
+          </div>
+          <div class="selectable">
+            {{ clientInfo.logfile_path }}
+          </div>
         </div>
       </div>
       <div class="flex-row">
@@ -71,6 +81,8 @@
 
 <script>
 import { LibraryController } from "../../unity/Controllers";
+const { shell } = require("electron"); // deconstructing assignment
+
 let timeout;
 
 export default {
@@ -120,6 +132,9 @@ export default {
         minute: "2-digit",
         second: "2-digit"
       });
+    },
+    openFile(path) {
+      shell.openPath(path);
     }
   }
 };
@@ -140,6 +155,7 @@ export default {
   & .flex-row > div {
     font-size: 0.85rem;
     line-height: 20px;
+    margin-bottom: 5px;
   }
   & .flex-row :first-child {
     flex: 0 0 180px;
@@ -149,6 +165,16 @@ export default {
     overflow-wrap: break-word;
     word-break: break-word;
   }
+}
+
+.list-item-icon {
+  max-width: 30px;
+  cursor: pointer;
+}
+
+.path-row {
+  display: flex;
+  flex-direction: row;
 }
 
 .selectable {
