@@ -422,8 +422,7 @@ private constructor()
             maxZoom = parameters.maxZoom
 
             currentZoom = parameters.zoom + 1
-            val newZoom: Float
-            newZoom = if (scale > 1)
+            val newZoom: Float = if (scale > 1)
             {
                 currentZoom + scale * (maxZoom / 10)
             }

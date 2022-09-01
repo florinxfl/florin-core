@@ -34,14 +34,14 @@ class BlockListFragment : AppBaseFragment() {
         viewModel = ViewModelProviders.of(this).get(BlockListViewModel::class.java)
 
         // observe changes
-        viewModel.getBlocks().observe(viewLifecycleOwner, { blocks ->
+        viewModel.getBlocks().observe(viewLifecycleOwner) { blocks ->
             if (blocks.isEmpty()) {
                 block_list_group.displayedChild = 0
             } else {
                 block_list_group.displayedChild = 1
                 adapter.submitList(blocks)
             }
-        })
+        }
 
         val view = inflater.inflate(R.layout.block_list_fragment, container, false)
 
