@@ -100,7 +100,7 @@ CJNIEXPORT jstring JNICALL Java_unity_1wallet_jniunifiedbackend_IWitnessControll
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_com_florin_jniunifiedbackend_IWitnessController_00024CppProxy_getOptimalWitnessDistribution(JNIEnv* jniEnv, jobject /*this*/, jlong j_amount, jlong j_durationInBlocks, jlong j_totalNetworkWeight)
+CJNIEXPORT jobject JNICALL Java_unity_1wallet_jniunifiedbackend_IWitnessController_00024CppProxy_getOptimalWitnessDistribution(JNIEnv* jniEnv, jobject /*this*/, jlong j_amount, jlong j_durationInBlocks, jlong j_totalNetworkWeight)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -111,7 +111,7 @@ CJNIEXPORT jobject JNICALL Java_com_florin_jniunifiedbackend_IWitnessController_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_com_florin_jniunifiedbackend_IWitnessController_00024CppProxy_getOptimalWitnessDistributionForAccount(JNIEnv* jniEnv, jobject /*this*/, jstring j_witnessAccountUUID)
+CJNIEXPORT jobject JNICALL Java_unity_1wallet_jniunifiedbackend_IWitnessController_00024CppProxy_getOptimalWitnessDistributionForAccount(JNIEnv* jniEnv, jobject /*this*/, jstring j_witnessAccountUUID)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
@@ -120,7 +120,7 @@ CJNIEXPORT jobject JNICALL Java_com_florin_jniunifiedbackend_IWitnessController_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_com_florin_jniunifiedbackend_IWitnessController_00024CppProxy_optimiseWitnessAccount(JNIEnv* jniEnv, jobject /*this*/, jstring j_witnessAccountUUID, jstring j_fundingAccountUUID, jobject j_optimalDistribution)
+CJNIEXPORT jobject JNICALL Java_unity_1wallet_jniunifiedbackend_IWitnessController_00024CppProxy_optimiseWitnessAccount(JNIEnv* jniEnv, jobject /*this*/, jstring j_witnessAccountUUID, jstring j_fundingAccountUUID, jobject j_optimalDistribution)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
