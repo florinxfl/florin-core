@@ -40,6 +40,7 @@ LIB_CONSENSUS=lib_consensus.a
 LIB_CLI=lib_cli.a
 LIB_UTIL=lib_util.a
 LIB_GENERIC=lib_generic.a
+LIB_GENERIC_INIT=lib_generic_init.a
 LIB_CRYPTO_SSE3=crypto/lib_crypto_sse3.a
 LIB_CRYPTO_SSE3_AES=crypto/lib_crypto_sse3_aes.a
 LIB_CRYPTO_SSE4=crypto/lib_crypto_sse4.a
@@ -91,6 +92,7 @@ EXTRA_LIBRARIES += \
   $(LIB_ANDROID_COMPAT) \
   $(LIB_UTIL) \
   $(LIB_GENERIC) \
+  $(LIB_GENERIC_INIT) \
   $(LIB_COMMON) \
   $(LIB_CONSENSUS) \
   $(LIB_SERVER) \
@@ -282,7 +284,6 @@ lib_server_a_SOURCES = \
   httprpc.cpp \
   httpserver.cpp \
   rest.cpp \
-  unity/generic/init_generic.cpp \
   torcontrol.cpp \
   $(CORE_H)
 
@@ -697,6 +698,13 @@ lib_generic_a_SOURCES = \
   core_read.cpp \
   core_write.cpp \
   $(CORE_H)
+  
+# generic_init: anything that includes 'generic' library must also include either this or 'generic_init_node' or provide its own init functions depending on if initialisation of http/rpc etc. is required
+lib_generic_init_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES)
+lib_generic_init_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+lib_generic_init_a_SOURCES = \
+  unity/generic/init_generic.cpp \
+  $(CORE_H)
 
 if GLIBC_BACK_COMPAT
 lib_util_a_SOURCES += compat/glibc_compat.cpp
@@ -803,6 +811,8 @@ lib_unity_node_js_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 lib_unity_node_js_la_SOURCES = \
   controllers/rpccontroller.cpp \
   controllers/rpccontroller.h \
+  core_read.cpp \
+  core_write.cpp \
   unity/libinit.cpp \
   unity/libinit.h \
   unity/node_js/logging_node_js.cpp \
@@ -820,7 +830,7 @@ lib_unity_node_js_la_SOURCES = \
   $(DJINNI_NODE_JS_GEN)
 
 
-NJS_DEPS = $(LIB_CONSENSUS) $(LIB_NODE) $(LIB_UTIL) $(LIB_COMMON) $(LIB_SERVER) $(LIB_RPC) $(LIB_GENERIC) $(LIB_WALLET) $(LIB_CRYPTO_ALL) $(LIB_ZMQ)
+NJS_DEPS = $(LIB_CONSENSUS) $(LIB_NODE) $(LIB_UTIL) $(LIB_COMMON) $(LIB_SERVER) $(LIB_RPC) $(LIB_WALLET) $(LIB_CRYPTO_ALL) $(LIB_ZMQ)
 lib_unity_node_js_la_LDFLAGS = -shared -module -no-undefined -export-dynamic $(AM_LDFLAGS) $(RELDFLAGS) -pthread
 lib_unity_node_js_la_LIBADD = $(NJS_DEPS) $(NJS_DEPS) $(LIBSECP256K1) $(SSL_LIBS) $(CRYPTOPP_LIBS) $(BOOST_LIBS) $(BDB_LIBS) $(LIBLEVELDB) $(LIBMEMENV) $(LIBUNIVALUE) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(SSL_LIBS) $(ZMQ_LIBS) -lqrencode -lpthread -lcryptopp $(SSL_LIBS) -lcrypto
 lib_unity_node_js_la_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS) -I$(srcdir)/unity/djinni/node_js -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
