@@ -1170,9 +1170,9 @@ void CAccount::setLabel(const std::string& label, CWalletDB* Db)
 
 void CAccount::addLink(const std::string& serviceName, const std::string& serviceData, CWalletDB* Db)
 {
-    accountLinks[serviceName] = serviceData;
-    if (accountLinks.count(serviceName) == 0)
+    if (accountLinks.count(serviceName) == 0 || accountLinks[serviceName] != serviceData)
     {
+        accountLinks[serviceName] = serviceData;
         if (Db)
         {
             Db->EraseAccountLinks(getUUIDAsString(getUUID()));
@@ -1181,7 +1181,7 @@ void CAccount::addLink(const std::string& serviceName, const std::string& servic
             {
                 dynamic_cast<CExtWallet*>(pactiveWallet)->NotifyAccountModified(pactiveWallet, this);
             }
-        }   
+        }
     }
 }
 
