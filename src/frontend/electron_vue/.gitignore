@@ -28,6 +28,6 @@ pnpm-debug.log*
 /src/unity/*.node
 
 # Confidential Credentials
-.holdinAPI.js
+holdinAPI.js
 
 yarn.lock
