@@ -667,6 +667,32 @@ class WitnessController {
   static GetWitnessAddress(witnessAccountUUID) {
     return handleError(ipc.sendSync("NJSIWitnessController.getWitnessAddress", witnessAccountUUID));
   }
+
+  static async GetOptimalWitnessDistributionAsync(amount, durationInBlocks, totalNetworkWeight) {
+    return handleError(await ipc.callMain("NJSIWitnessController.getOptimalWitnessDistributionAsync", { amount, durationInBlocks, totalNetworkWeight }));
+  }
+
+  static GetOptimalWitnessDistribution(amount, durationInBlocks, totalNetworkWeight) {
+    return handleError(ipc.sendSync("NJSIWitnessController.getOptimalWitnessDistribution", amount, durationInBlocks, totalNetworkWeight));
+  }
+
+  static async GetOptimalWitnessDistributionForAccountAsync(witnessAccountUUID) {
+    return handleError(await ipc.callMain("NJSIWitnessController.getOptimalWitnessDistributionForAccountAsync", { witnessAccountUUID }));
+  }
+
+  static GetOptimalWitnessDistributionForAccount(witnessAccountUUID) {
+    return handleError(ipc.sendSync("NJSIWitnessController.getOptimalWitnessDistributionForAccount", witnessAccountUUID));
+  }
+
+  static async OptimiseWitnessAccountAsync(witnessAccountUUID, fundingAccountUUID, optimalDistribution) {
+    return handleError(
+      await ipc.callMain("NJSIWitnessController.optimiseWitnessAccountAsync", { witnessAccountUUID, fundingAccountUUID, optimalDistribution })
+    );
+  }
+
+  static OptimiseWitnessAccount(witnessAccountUUID, fundingAccountUUID, optimalDistribution) {
+    return handleError(ipc.sendSync("NJSIWitnessController.optimiseWitnessAccount", witnessAccountUUID, fundingAccountUUID, optimalDistribution));
+  }
 }
 
 class GenerationController {

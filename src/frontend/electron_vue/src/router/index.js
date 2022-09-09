@@ -40,6 +40,11 @@ const routes = [
         component: () => import(/* webpackChunkName: "renew-account" */ "../views/Account/SavingAccount/RenewAccount.vue")
       },
       {
+        path: "optimise-account",
+        name: "optimise-account",
+        component: () => import(/* webpackChunkName: "optimise-account" */ "../views/Account/HoldingAccount/OptimiseAccount.vue")
+      },
+      {
         path: "transactions",
         name: "transactions",
         component: () => import(/* webpackChunkName: "transactions" */ "../views/Account/SpendingAccount/Transactions.vue")

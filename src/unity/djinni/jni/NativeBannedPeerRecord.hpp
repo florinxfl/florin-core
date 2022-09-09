@@ -24,7 +24,7 @@ private:
     NativeBannedPeerRecord();
     friend ::djinni::JniClass<NativeBannedPeerRecord>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("com/florin/jniunifiedbackend/BannedPeerRecord") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("unity_wallet/jniunifiedbackend/BannedPeerRecord") };
     const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;JJLjava/lang/String;)V") };
     const jfieldID field_mAddress { ::djinni::jniGetFieldID(clazz.get(), "mAddress", "Ljava/lang/String;") };
     const jfieldID field_mBannedUntil { ::djinni::jniGetFieldID(clazz.get(), "mBannedUntil", "J") };

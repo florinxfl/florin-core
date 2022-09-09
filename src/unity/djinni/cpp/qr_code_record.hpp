@@ -7,12 +7,6 @@
 #include <utility>
 #include <vector>
 
-/**
- * Copyright (c) 2018-2020 The Gulden developers
- * Authored by: Malcolm MacLeod (mmacleod@gmx.com)
- * Distributed under the GULDEN software license, see the accompanying
- * file COPYING
- */
 struct QrCodeRecord final {
     int32_t width;
     std::vector<uint8_t> pixel_data;

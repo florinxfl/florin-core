@@ -8,9 +8,10 @@ file COPYING
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar.Bridge">
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorSurface">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
@@ -31,7 +32,10 @@ file COPYING
         <item name="android:layout">@layout/preference_fragment_layout</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -49,7 +53,7 @@ file COPYING
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
         <item name="colorControlNormal">@color/colorPrimary</item>
         <item name="android:background">@color/bg_bright</item>
         <item name="android:textColor">@color/colorPrimary</item>
@@ -60,10 +64,10 @@ file COPYING
         <item name="elevation">0dp</item>
     </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+    <style name="AppTheme.PopupOverlay" parent="Theme.MaterialComponents.Light">
     </style>
 
-    <style name="MyActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="MyActionBar" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="android:background">@color/bg_welcome</item>
     </style>
 
@@ -76,10 +80,6 @@ file COPYING
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1px</item>
         <item name="android:background">@color/lightGray</item>
-    </style>
-
-    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
     <style name="TxDetailHeader">

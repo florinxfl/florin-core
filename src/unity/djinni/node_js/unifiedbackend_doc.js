@@ -230,6 +230,7 @@ declare class NJSILibraryListener
     declare function notifyInitWithoutExistingWallet();
     declare function notifyShutdown();
     declare function notifyCoreReady();
+    declare function notifyError(error: string);
     declare function logPrint(str: string);
 }
 /** C++ interface to execute RPC commands */
@@ -382,6 +383,12 @@ declare class NJSIWitnessController
     static declare function isAccountCompounding(witnessAccountUUID: string): number;
     /** Get the witness address of the account */
     static declare function getWitnessAddress(witnessAccountUUID: string): string;
+    /** Get the optimal distribution amounts for the account; totalNetworkWeight should be the value of "total_weight_eligible_raw" */
+    static declare function getOptimalWitnessDistribution(amount: number, durationInBlocks: number, totalNetworkWeight: number): Array<number>;
+    /** Same as the above but calculates all the paramaters from the account UUID; its more efficient to use the other call if you already have these values */
+    static declare function getOptimalWitnessDistributionForAccount(witnessAccountUUID: string): Array<number>;
+    /** Redistribute a witness account to its optimal distribution, call 'getOptimalWitnessDistribution' first to calculate this */
+    static declare function optimiseWitnessAccount(witnessAccountUUID: string, fundingAccountUUID: string, optimalDistribution: Array<number>): ResultRecord;
 }
 /** C++ interface to control generation of blocks (proof of work) */
 declare class NJSIGenerationController

@@ -2488,6 +2488,84 @@ class LibUnity {
       }
     });
 
+    ipc.answerRenderer("NJSIWitnessController.getOptimalWitnessDistributionAsync", async data => {
+      console.log(`IPC: witnessController.getOptimalWitnessDistributionAsync(${data.amount}, ${data.durationInBlocks}, ${data.totalNetworkWeight})`);
+      try {
+        let result = this.witnessController.getOptimalWitnessDistribution(data.amount, data.durationInBlocks, data.totalNetworkWeight);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIWitnessController.getOptimalWitnessDistribution", (event, amount, durationInBlocks, totalNetworkWeight) => {
+      console.log(`IPC: witnessController.getOptimalWitnessDistribution(${amount}, ${durationInBlocks}, ${totalNetworkWeight})`);
+      try {
+        let result = this.witnessController.getOptimalWitnessDistribution(amount, durationInBlocks, totalNetworkWeight);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIWitnessController.getOptimalWitnessDistributionForAccountAsync", async data => {
+      console.log(`IPC: witnessController.getOptimalWitnessDistributionForAccountAsync(${data.witnessAccountUUID})`);
+      try {
+        let result = this.witnessController.getOptimalWitnessDistributionForAccount(data.witnessAccountUUID);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIWitnessController.getOptimalWitnessDistributionForAccount", (event, witnessAccountUUID) => {
+      console.log(`IPC: witnessController.getOptimalWitnessDistributionForAccount(${witnessAccountUUID})`);
+      try {
+        let result = this.witnessController.getOptimalWitnessDistributionForAccount(witnessAccountUUID);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
+    ipc.answerRenderer("NJSIWitnessController.optimiseWitnessAccountAsync", async data => {
+      console.log(`IPC: witnessController.optimiseWitnessAccountAsync(${data.witnessAccountUUID}, ${data.fundingAccountUUID}, ${data.optimalDistribution})`);
+      try {
+        let result = this.witnessController.optimiseWitnessAccount(data.witnessAccountUUID, data.fundingAccountUUID, data.optimalDistribution);
+        return {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        return handleError(e);
+      }
+    });
+
+    ipc.on("NJSIWitnessController.optimiseWitnessAccount", (event, witnessAccountUUID, fundingAccountUUID, optimalDistribution) => {
+      console.log(`IPC: witnessController.optimiseWitnessAccount(${witnessAccountUUID}, ${fundingAccountUUID}, ${optimalDistribution})`);
+      try {
+        let result = this.witnessController.optimiseWitnessAccount(witnessAccountUUID, fundingAccountUUID, optimalDistribution);
+        event.returnValue = {
+          success: true,
+          result: result
+        };
+      } catch (e) {
+        event.returnValue = handleError(e);
+      }
+    });
+
     // Register NJSIGenerationController ipc handlers
     ipc.answerRenderer("NJSIGenerationController.startGenerationAsync", async data => {
       console.log(`IPC: generationController.startGenerationAsync(${data.numThreads}, ${data.numArenaThreads}, ${data.memoryLimit})`);

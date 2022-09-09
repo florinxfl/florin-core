@@ -10,9 +10,9 @@ file COPYING
     android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".main_activity_fragments.MutationFragment">
+    tools:context="unity_wallet.main_activity_fragments.MutationFragment">
 
-    <com.florin.unity_wallet.ui.widgets.LockView
+    <unity_wallet.ui.widgets.LockView
         android:id="@+id/viewAnimator"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -64,24 +64,24 @@ file COPYING
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    android:id="@+id/noTransactionsText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/black"
-                    android:onClick="gotoBuyActivity"
                     android:text="@string/transaction_list_empty_title" />
 
                 <TextView
+                    android:id="@+id/buyYourFirstText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="1dp"
                     android:layout_marginTop="16dp"
-                    android:onClick="gotoBuyActivity"
                     android:text="@string/transaction_list_empty_message" />
 
             </LinearLayout>
         </FrameLayout>
 
-    </com.florin.unity_wallet.ui.widgets.LockView>
+    </unity_wallet.ui.widgets.LockView>
 
     <View
         android:id="@+id/divider"

@@ -9,7 +9,7 @@
           </span>
         </div>
       </div>
-      <div class="content">
+      <div :class="contentClass">
         {{ message }}
         <component v-if="component" :is="component" v-bind="componentProps"></component>
       </div>
@@ -39,6 +39,9 @@ export default {
     },
     title() {
       return this.value.title || "title";
+    },
+    contentClass() {
+      return `content ${this.value.noMargin ? "no-margin" : ""}`;
     },
     showButtons() {
       return typeof this.value.showButtons === "boolean" ? this.value.showButtons : true;
@@ -118,7 +121,7 @@ export default {
   }
 }
 
-.content {
+.content:not(.no-margin) {
   margin: 30px 0;
   padding: 0 30px;
   overflow-y: auto;

@@ -44,13 +44,13 @@ private:
         friend ::djinni::JniInterface<::IAccountsListener, ::djinni_generated::NativeIAccountsListener>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("com/florin/jniunifiedbackend/IAccountsListener") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("unity_wallet/jniunifiedbackend/IAccountsListener") };
     const jmethodID method_onActiveAccountChanged { ::djinni::jniGetMethodID(clazz.get(), "onActiveAccountChanged", "(Ljava/lang/String;)V") };
     const jmethodID method_onActiveAccountNameChanged { ::djinni::jniGetMethodID(clazz.get(), "onActiveAccountNameChanged", "(Ljava/lang/String;)V") };
     const jmethodID method_onAccountNameChanged { ::djinni::jniGetMethodID(clazz.get(), "onAccountNameChanged", "(Ljava/lang/String;Ljava/lang/String;)V") };
     const jmethodID method_onAccountAdded { ::djinni::jniGetMethodID(clazz.get(), "onAccountAdded", "(Ljava/lang/String;Ljava/lang/String;)V") };
     const jmethodID method_onAccountDeleted { ::djinni::jniGetMethodID(clazz.get(), "onAccountDeleted", "(Ljava/lang/String;)V") };
-    const jmethodID method_onAccountModified { ::djinni::jniGetMethodID(clazz.get(), "onAccountModified", "(Ljava/lang/String;Lcom/florin/jniunifiedbackend/AccountRecord;)V") };
+    const jmethodID method_onAccountModified { ::djinni::jniGetMethodID(clazz.get(), "onAccountModified", "(Ljava/lang/String;Lunity_wallet/jniunifiedbackend/AccountRecord;)V") };
 };
 
 }  // namespace djinni_generated

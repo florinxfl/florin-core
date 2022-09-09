@@ -76,14 +76,24 @@
     </app-section>
 
     <router-view />
-
-    <portal to="footer-slot">
-      <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
-      <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
-      <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
-      <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
-      <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
-    </portal>
+    <div>
+      <portal to="footer-slot">
+        <div style="display: flex">
+          <div v-on:scroll.passive="handleScroll" class="footer-layout">
+            <div class="scroll-arrow" v-if="showOverFlowArrow">
+              <fa-icon class="pen" :icon="['fal', 'fa-long-arrow-right']" />
+            </div>
+            <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
+            <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
+            <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
+            <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
+            <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
+            <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
+          </div>
+        </div>
+        xx
+      </portal>
+    </div>
   </div>
 </template>
 
@@ -105,8 +115,12 @@ export default {
       rightSectionComponent: null,
       statistics: null,
       compoundingPercent: 0,
-      keyHash: null
+      keyHash: null,
+      showOverFlowArrow: false
     };
+  },
+  mounted() {
+    this.isOverflown();
   },
   computed: {
     ...mapState("app", ["rate", "activityIndicator"]),
@@ -159,6 +173,9 @@ export default {
     renewButtonVisible() {
       return this.accountStatus === "expired";
     },
+    optimiseButtonVisible() {
+      return this.getStatistics("is_optimal") === false;
+    },
     totalBalanceFiat() {
       if (!this.rate) return "";
       return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
@@ -173,6 +190,9 @@ export default {
   },
   created() {
     this.initialize();
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.isOverflown);
   },
   watch: {
     account() {
@@ -197,9 +217,11 @@ export default {
           this.keyHash = findHoldin.serviceData;
         }
       });
+
+      window.addEventListener("resize", this.isOverflown);
     },
     getStatistics(which) {
-      return this.statistics[which] || null;
+      return this.statistics[which];
     },
     updateStatistics() {
       return new Promise(resolve => {
@@ -221,6 +243,43 @@ export default {
     routeTo(route) {
       if (this.$route.name === route) return;
       this.$router.push({ name: route, params: { id: this.account.UUID } });
+    },
+    isOverflown(e) {
+      console.log(this.renewButtonVisible);
+      console.log(this.optimiseButtonVisible);
+
+      // Determine whether to show the overflow arrow
+      if (e) {
+        const width = e.currentTarget.innerWidth;
+        if (width && width <= 1000) {
+          if (this.renewButtonVisible || this.optimiseButtonVisible) {
+            this.showOverFlowArrow = true;
+          } else {
+            this.showOverFlowArrow = false;
+          }
+        } else {
+          this.showOverFlowArrow = false;
+        }
+      } else {
+        // Triggered on page load.
+        if (window.innerWidth <= 1000) {
+          if (this.renewButtonVisible || this.optimiseButtonVisible) {
+            this.showOverFlowArrow = true;
+          } else {
+            this.showOverFlowArrow = false;
+          }
+        } else {
+          this.showOverFlowArrow = false;
+        }
+      }
+    },
+    handleScroll(e) {
+      // Determine when user it at the end of the horizontal scroll bar.
+      if (e.target.scrollWidth - e.target.scrollLeft === e.target.clientWidth) {
+        this.showOverFlowArrow = false;
+      } else {
+        this.showOverFlowArrow = true;
+      }
     }
   }
 };
@@ -243,5 +302,26 @@ export default {
   text-align: right;
   line-height: 18px;
   flex: 1;
+}
+.footer-layout {
+  display: flex;
+  flex-direction: row;
+  overflow-x: scroll;
+  width: 100%;
+}
+.footer-layout::-webkit-scrollbar {
+  display: none;
+}
+.scroll-arrow {
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.9), #ffffff);
+  height: 55px;
+  width: 55px;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  right: 0;
+  bottom: 0;
 }
 </style>

@@ -22,7 +22,7 @@ file COPYING
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:context=".LicenseActivity">
+    tools:context="unity_wallet.LicenseActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLayoutBarSettingsHeader"
@@ -36,7 +36,6 @@ file COPYING
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@null"
-            android:onClick="onBackButtonPushed"
             android:padding="24dp"
             android:src="?attr/homeAsUpIndicator"
             android:text=""

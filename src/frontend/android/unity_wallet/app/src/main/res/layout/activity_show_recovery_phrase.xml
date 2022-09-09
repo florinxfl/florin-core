@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    tools:context="com.florin.unity_wallet.ui.ShowRecoveryPhraseActivity"
+    tools:context="unity_wallet.ui.ShowRecoveryPhraseActivity"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -80,7 +80,6 @@
             android:layout_centerVertical="true"
             android:layout_alignParentLeft="false"
             android:layout_alignParentStart="true"
-            android:onClick="onAcknowledgeRecoveryPhrase"
             android:layout_marginLeft="20dp"/>
 
         <Button
@@ -88,7 +87,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/recovery_phrase_continue"
-            android:onClick="onAcceptRecoveryPhrase"
             android:padding="10dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"

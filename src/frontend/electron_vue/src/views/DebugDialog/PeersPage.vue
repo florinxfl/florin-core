@@ -1,147 +1,159 @@
 <template>
-  <div class="peers-page">
-    <h4>{{ $t("peers.peers") }}</h4>
-    <div class="peer-header-item">
-      <h4 style="width: 30%">{{ $t("peers.node_id") }}</h4>
-      <h4 style="width: 30%; flex: 1">{{ $t("peers.node_service") }}</h4>
-      <h4 style="width: 30%">{{ $t("peers.user_agent") }}</h4>
-    </div>
-    <app-section class="peer-section">
-      <div class="peers-list" v-for="peer in peers" :key="peer.id">
-        <div class="peer-item" @click="showPeerDetails(peer, false)" @contextmenu.prevent="onRightClick">
-          <div class="peer-item-cell">{{ peer.id }}</div>
-          <div class="peer-item-cell" style="flex: 1">{{ peer.ip }}</div>
-          <div class="peer-item-cell">{{ peer.userAgent }}</div>
+  <div class="layout">
+    <div>
+      <div class="header">
+        <h4>{{ $t("peers.node_id") }}</h4>
+        <h4>{{ $t("peers.node_service") }}</h4>
+        <h4>{{ $t("peers.user_agent") }}</h4>
+      </div>
+      <div class="list scrollable">
+        <div v-for="peer in peerInfo.peers" :key="peer.id" @click="showPeerDetails(peer)" @contextmenu.prevent="onRightClick">
+          <div>{{ peer.id }}</div>
+          <div>{{ peer.ip }}</div>
+          <div>{{ peer.userAgent }}</div>
         </div>
       </div>
-    </app-section>
-    <div class="subheader-row">
-      <h4 style="margin-bottom: 0px; flex: 1">{{ $t("peers.banned_peers") }}</h4>
-      <button @click="clearBannedPeers" v-if="bannedPeers && bannedPeers.length > 0" outlined class="small">
-        Clear Banned
+    </div>
+    <div v-if="hasBannedPeers">
+      <div class="header">
+        <h4>{{ $t("peers.banned_peers") }}</h4>
+        <h4>{{ $t("peers.reason") }}</h4>
+      </div>
+      <div class="list scrollable">
+        <div v-for="peer in peerInfo.banned" :key="peer.id" @click="showPeerDetails(peer)" @contextmenu.prevent="onRightClick">
+          <div>{{ peer.address }}</div>
+          <div>{{ peer.reason }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons" v-if="hasBannedPeers">
+      <button @click="clearBannedPeers" v-if="peerInfo.banned.length > 0" class="clear-banned" outlined small>
+        {{ $t("peers.buttons.clear_banned") }}
       </button>
     </div>
-    <div class="peer-header-item">
-      <h4 style="width: 30%">{{ $t("peers.address") }}</h4>
-      <h4 style="width: 30%">{{ $t("peers.reason") }}</h4>
-    </div>
-    <app-section class="peer-section">
-      <div class="peers-list" v-for="peer in bannedPeers" :key="peer.id">
-        <div class="peer-item" @click="showPeerDetails(peer, true)">
-          <div class="peer-item-cell">{{ peer.address }}</div>
-          <div class="peer-item-cell" style="flex: 1">{{ peer.reason }}</div>
-        </div>
-      </div>
-    </app-section>
   </div>
 </template>
 
 <script>
-import { P2pNetworkController } from "../../unity/Controllers";
-import PeerDetailsDialog from "../../components/PeerDetailsDialog";
-import EventBus from "../../EventBus";
+import { P2pNetworkController } from "@/unity/Controllers";
+import PeerDetailsDialog from "./PeerDetailsDialog";
+import EventBus from "@/EventBus";
+
+let timeout;
 
 export default {
   data() {
     return {
-      peers: null,
-      bannedPeers: null
+      peerInfo: {
+        peers: [],
+        banned: []
+      },
+      isDestroyed: false
     };
   },
-  name: "PeersPage",
-  computed: {},
+  name: "PeersPage2",
+  computed: {
+    hasBannedPeers() {
+      return this.peerInfo.banned.length;
+    }
+  },
   methods: {
     onRightClick() {
       // TODO: Right Click
       // Add Context menu on Right Click
+      console.log(e);
     },
     getPeers() {
-      const peers = P2pNetworkController.GetPeerInfo();
-      const bannedPeers = P2pNetworkController.ListBannedPeers();
-      this.peers = peers;
-      this.bannedPeers = bannedPeers;
+      clearTimeout(timeout);
+
+      this.peerInfo = {
+        peers: P2pNetworkController.GetPeerInfo(),
+        banned: P2pNetworkController.ListBannedPeers()
+      };
+
+      if (this.isDestroyed) return;
+      timeout = setTimeout(this.getPeers, 10 * 1000);
     },
-    showPeerDetails(peer, banned) {
+    showPeerDetails(peer) {
       EventBus.$emit("show-dialog", {
-        title: "Peer Details",
+        title: this.$t("peers.peer_details"),
         component: PeerDetailsDialog,
         componentProps: {
-          peer: peer,
-          banned: banned
+          peer: peer
         },
+        noMargin: true,
         showButtons: false
       });
     },
-    clearBannedPeers() {
-      P2pNetworkController.ClearBannedAsync().then(() => {
-        this.getPeers();
-      });
+    async clearBannedPeers() {
+      await P2pNetworkController.ClearBannedAsync();
+      this.getPeers();
     }
   },
-  mounted() {
+  created() {
     this.getPeers();
+  },
+  mounted() {
     EventBus.$on("close-dialog", this.getPeers);
+  },
+  beforeDestroy() {
+    this.isDestroyed = true;
+    clearTimeout(timeout);
+    EventBus.$off("close-dialog", this.getPeers);
   }
 };
 </script>
 
 <style lang="less" scoped>
-.peers-page {
+.layout {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  & > div:not(.buttons) {
+    flex: 1 0 0;
+    margin-bottom: 10px;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  & > div.buttons {
+    text-align: right;
+  }
 }
 
-.peer-section {
-  height: 160px;
-  overflow: scroll;
+.header,
+.list > div {
+  display: flex;
+
+  & :first-child {
+    flex: 1 0 0;
+  }
+
+  & :not(:first-child) {
+    flex: 2 0 0;
+  }
+}
+
+.list {
   border: solid 0.5px #888888;
-  padding: 2px;
+  padding: 0 5px;
+  flex: 1 0 0;
+
+  & > div {
+    cursor: pointer;
+    padding: 5px 0;
+  }
+
+  & > div:hover {
+    color: var(--primary-color);
+    background: var(--hover-color);
+  }
 }
 
-.peer-section::-webkit-scrollbar {
-  display: none;
-}
-
-.peers-list:not(:first-child) > h4 {
-  margin-top: 30px;
-}
-
-.peer-header-item {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-
-.peer-item {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  cursor: pointer;
-}
-
-.peer-item:hover {
-  color: var(--primary-color);
-  background: var(--hover-color);
-}
-
-.peer-item-cell {
-  width: 30%;
-  padding: 5px 10px 5px 0px;
-  text-transform: uppercase;
-}
-
-.subheader-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: 40px;
-}
-
-button.small {
-  height: 20px;
-  line-height: 20px;
-  font-size: 10px;
-  margin-left: 5px;
-  min-width: 150px;
+h4 {
+  margin-bottom: 5px;
 }
 </style>

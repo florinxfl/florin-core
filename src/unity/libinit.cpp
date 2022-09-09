@@ -94,8 +94,8 @@ void connectUIInterface()
     uiInterface.InitMessage.connect(unityInitMessage);
 
     #ifdef ENABLE_WALLET
-    uiInterface.RequestUnlock.connect(boost::bind(NotifyRequestUnlockS, _1, _2));
-    uiInterface.RequestUnlockWithCallback.connect(boost::bind(NotifyRequestUnlockWithCallbackS, _1, _2, _3));
+    uiInterface.RequestUnlock.connect(boost::bind(NotifyRequestUnlockS,  boost::placeholders::_1,  boost::placeholders::_2));
+    uiInterface.RequestUnlockWithCallback.connect(boost::bind(NotifyRequestUnlockWithCallbackS,  boost::placeholders::_1,  boost::placeholders::_2,  boost::placeholders::_3));
     #endif
 }
 
@@ -111,7 +111,7 @@ int InitUnity()
     connectUIInterface();
 
     AppLifecycleManager appManager; 
-    appManager.signalAppInitializeResult.connect(boost::bind(handleAppInitResult, _1));
+    appManager.signalAppInitializeResult.connect(boost::bind(handleAppInitResult, boost::placeholders::_1));
     appManager.signalAboutToInitMain.connect(&handlePreInitMain);
     appManager.signalAppShutdownFinished.connect(&handleFinalShutdown);
 

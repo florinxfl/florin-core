@@ -281,19 +281,19 @@ AC_ARG_WITH([utils],
 AC_ARG_WITH([node-js-libs],
   [AS_HELP_STRING([--with-node-js-libs],
   [build node.js library (default=no)])],
-  [build_libs_node_js=yes],
+  [build_libs_node_js=$withval],
   [build_libs_node_js=no])
 
 AC_ARG_WITH([jni-libs],
   [AS_HELP_STRING([--with-jni-libs],
   [build jni library (default=no)])],
-  [build_libs_jni=yes],
+  [build_libs_jni=$withval],
   [build_libs_jni=no])
 
 AC_ARG_WITH([objc-libs],
   [AS_HELP_STRING([--with-objc-libs],
   [build objc library (default=no)])],
-  [build_libs_objc=yes],
+  [build_libs_objc=$withval],
   [build_libs_objc=no])
 
 AC_ARG_WITH([daemon],
@@ -431,7 +431,9 @@ case $host in
      ;;
    *android*)
      dnl make sure android stays above linux for hosts like *linux-android*
-     LEVELDB_TARGET_FLAGS="-DOS_ANDROID"
+     dnl libtool insists on inserting -nostdlib and other things which break our build, the below works around this
+     archive_cmds_CXX="\$CC -shared \$libobjs \$deplibs \$compiler_flags -o \$output_objdir/\$soname"
+     postdeps_CXX=
      ;;
    *linux*)
      TARGET_OS=linux
@@ -922,7 +924,7 @@ if test x$use_pkgconfig = xyes; then
       PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl  not found.)])
       PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto  not found.)])
       PKG_CHECK_MODULES([PROTOBUF], [protobuf],[have_protobuf=yes],[have_protobuf=no])
-      if test x$build_utils$build_daemon$use_tests != xnononono; then
+    if test x$build_utils$build_daemon$use_tests$build_libs_node_js != xnononono; then
         PKG_CHECK_MODULES([EVENT], [libevent],, [AC_MSG_ERROR(libevent not found.)])
         if test x$TARGET_OS != xwindows; then
           PKG_CHECK_MODULES([EVENT_PTHREADS], [libevent_pthreads],, [AC_MSG_ERROR(libevent_pthreads not found.)])
@@ -1062,16 +1064,16 @@ AM_CONDITIONAL([BUILD_UTILS], [test x$build_utils = xyes])
 AC_MSG_RESULT($build_utils)
 
 AC_MSG_CHECKING([whether to build node.js libraries])
-AM_CONDITIONAL([BUILD_LIBS_NODE_JS], [test x$build_libs_node_js = xyes])
+AM_CONDITIONAL([BUILD_LIBS_NODE_JS], [test "$build_libs_node_js" = "yes"])
 AC_MSG_RESULT($build_libs_node_js)
 
 
 AC_MSG_CHECKING([whether to build jni libraries])
-AM_CONDITIONAL([BUILD_LIBS_JNI], [test x$build_libs_jni = xyes])
+AM_CONDITIONAL([BUILD_LIBS_JNI], [test "$build_libs_jni" = "yes"])
 AC_MSG_RESULT($build_libs_jni)
 
 AC_MSG_CHECKING([whether to build objc libraries])
-AM_CONDITIONAL([BUILD_LIBS_OBJC], [test x$build_libs_objc = xyes])
+AM_CONDITIONAL([BUILD_LIBS_OBJC], [test "$build_libs_objc" = "yes"])
 AC_MSG_RESULT($build_libs_objc)
 
 AC_LANG_POP
