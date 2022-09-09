@@ -45,9 +45,7 @@ export default {
     ...mapGetters("wallet", ["totalBalance", "lockedBalance", "spendableBalance", "pendingBalance", "immatureBalance"])
   },
   props: {
-    account: {
-      type: Object
-    },
+    account: {},
     type: {
       type: String
     }

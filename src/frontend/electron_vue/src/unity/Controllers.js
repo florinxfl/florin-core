@@ -771,6 +771,9 @@ class BackendUtilities {
   static GetSellSessionUrl() {
     return handleError(ipc.sendSync("BackendUtilities.GetSellSessionUrl"));
   }
+  static holdinAPIActions(witnessKey, action, data) {
+    return handleError(ipc.sendSync("BackendUtilities.holdinAPIActions", { witnessKey, action, data }));
+  }
 }
 
 export { BackendUtilities };

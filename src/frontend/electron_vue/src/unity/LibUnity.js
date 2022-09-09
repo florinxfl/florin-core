@@ -4,6 +4,7 @@ import fs from "fs";
 import axios from "axios";
 import FormData from "form-data";
 import store from "../store";
+import { apiKey } from "../../holdinAPI";
 
 import libUnity from "native-ext-loader!./lib_unity.node";
 
@@ -2822,6 +2823,56 @@ class LibUnity {
           success: true,
           result: "https://florin.org/sell"
         };
+      }
+    });
+
+    ipc.on("BackendUtilities.holdinAPIActions", async (event, params) => {
+      console.log(`IPC: BackendUtilities.holdinAPIActions()`);
+
+      try {
+        let data = {};
+
+        if (params.action == "payoutaddress") {
+          data = JSON.stringify({
+            holdingkey: params.witnessKey,
+            action: params.action,
+            payoutaddress: params.data
+          });
+        } else if (params.action == "distribution") {
+          data = JSON.stringify({
+            holdingkey: params.witnessKey,
+            action: params.action,
+            compoundpercentage: params.data
+          });
+        } else {
+          data = JSON.stringify({
+            holdingkey: params.witnessKey,
+            action: params.action
+          });
+        }
+
+        var config = {
+          method: "post",
+          url: "https://api.holdin.com/api/v1/",
+          headers: {
+            Authorization: apiKey,
+            "Content-Type": "application/json"
+          },
+          data: data
+        };
+
+        axios(config)
+          .then(function(response) {
+            event.returnValue = {
+              success: response.data.status_code === 200,
+              result: response.data
+            };
+          })
+          .catch(function(error) {
+            event.returnValue = handleError(error);
+          });
+      } catch (e) {
+        event.returnValue = handleError(e);
       }
     });
   }

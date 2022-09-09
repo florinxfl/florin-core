@@ -87,6 +87,8 @@
     "network_weight": "Network weight",
     "empty": "This holding account is empty",
     "percent": "%",
+    "add_to_holdin": "Add to holdin.com",
+    "remove_from_holdin": "Remove from holdin.com",
     "optimise_holding_account": "Select Funding Account"
   },
   "loader": {

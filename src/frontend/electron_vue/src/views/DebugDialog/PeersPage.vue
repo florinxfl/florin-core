@@ -58,7 +58,7 @@ export default {
     }
   },
   methods: {
-    onRightClick(e) {
+    onRightClick() {
       // TODO: Right Click
       // Add Context menu on Right Click
       console.log(e);

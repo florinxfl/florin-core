@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { WitnessController } from "../../../unity/Controllers";
+import { WitnessController, AccountsController, BackendUtilities } from "../../../unity/Controllers";
 import { formatMoneyForDisplay } from "../../../util.js";
 import { mapState } from "vuex";
 
@@ -115,6 +115,7 @@ export default {
       rightSectionComponent: null,
       statistics: null,
       compoundingPercent: 0,
+      keyHash: null,
       showOverFlowArrow: false
     };
   },
@@ -199,6 +200,9 @@ export default {
     },
     compoundingPercent() {
       WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
+      if (this.keyHash) {
+        BackendUtilities.holdinAPIActions(this.keyHash, "distribution", this.compoundingPercent);
+      }
     }
   },
   methods: {
@@ -206,6 +210,13 @@ export default {
       this.updateStatistics();
 
       this.compoundingPercent = WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent || 0;
+      AccountsController.ListAccountLinksAsync(this.account.UUID).then(result => {
+        const findHoldin = result.find(element => element.serviceName == "holdin");
+
+        if (findHoldin) {
+          this.keyHash = findHoldin.serviceData;
+        }
+      });
 
       window.addEventListener("resize", this.isOverflown);
     },

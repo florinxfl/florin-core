@@ -43,16 +43,29 @@
         </div>
       </div>
       <input v-else ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" @blur="cancelEdit" />
+      <div v-if="!showBuySellButtons && showHoldinButtons">
+        <div v-if="!isLinkedToHoldin">
+          <button outlined class="small" @click="linkToHoldin('add')" :disabled="sellDisabled">
+            {{ $t("saving_account.add_to_holdin") }}
+          </button>
+        </div>
+        <div v-else>
+          <button outlined class="small" @click="linkToHoldin('remove')" :disabled="sellDisabled">
+            {{ $t("saving_account.remove_from_holdin") }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import { AccountsController, BackendUtilities } from "../unity/Controllers";
+import { AccountsController, BackendUtilities, WitnessController, GenerationController } from "../unity/Controllers";
 import { formatMoneyForDisplay } from "../util.js";
 import AccountTooltip from "./AccountTooltip.vue";
 import EventBus from "../EventBus";
+import { apiKey } from "../../holdinAPI";
 import ConfirmDialog from "./ConfirmDialog.vue";
 
 export default {
@@ -64,6 +77,9 @@ export default {
       newAccountName: null,
       buyDisabled: false,
       sellDisabled: false,
+      requestLinkToHoldin: false,
+      isLinkedToHoldin: false,
+      keyHash: ""
       modal: null
     };
   },
@@ -79,7 +95,7 @@ export default {
   },
   computed: {
     ...mapState("app", ["rate"]),
-    ...mapState("wallet", ["unlocked"]),
+    ...mapState("wallet", ["walletPassword", "unlocked"]),
     name() {
       return this.account ? this.account.label : null;
     },
@@ -94,6 +110,9 @@ export default {
     showBuySellButtons() {
       return !this.account || (this.account.type === "Desktop" && !this.editMode);
     },
+    showHoldinButtons() {
+      return apiKey;
+    },
     lockIcon() {
       return this.unlocked ? "unlock" : "lock";
     }
@@ -104,9 +123,44 @@ export default {
       handler() {
         this.editMode = false;
       }
+    },
+    unlocked: {
+      immediate: true,
+      handler() {
+        if (this.unlocked && this.requestLinkToHoldin) {
+          // Check if add or remove.
+          if (this.isLinkedToHoldin) {
+            this.holdinAPI("remove");
+          } else {
+            this.holdinAPI("add");
+          }
+        }
+      }
+    },
+    account: {
+      immediate: true,
+      handler() {
+        if (!this.showBuySellButtons) {
+          this.checkForHoldinLink();
+        }
+      }
+    }
+  },
+  mounted() {
+    if (!this.showBuySellButtons) {
+      this.checkForHoldinLink();
     }
   },
   methods: {
+    checkForHoldinLink() {
+      AccountsController.ListAccountLinksAsync(this.account.UUID).then(result => {
+        const findHoldin = result.find(element => element.serviceName == "holdin");
+        this.isLinkedToHoldin = findHoldin && findHoldin.serviceName === "holdin";
+        if (this.isLinkedToHoldin) {
+          this.keyHash = findHoldin.serviceData;
+        }
+      });
+    },
     editName() {
       this.newAccountName = this.name;
       this.editMode = true;
@@ -136,6 +190,11 @@ export default {
     cancelEdit() {
       this.editMode = false;
     },
+    dismissIndicator() {
+      setTimeout(() => {
+        this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", false);
+      }, 1000);
+    },
     async sellCoins() {
       try {
         this.sellDisabled = true;
@@ -161,6 +220,102 @@ export default {
     changeLockSettings() {
       EventBus.$emit(this.unlocked ? "lock-wallet" : "unlock-wallet");
     },
+    linkToHoldin(action) {
+      this.requestLinkToHoldin = true;
+
+      if (!this.unlocked) {
+        EventBus.$emit("unlock-wallet");
+      } else {
+        this.holdinAPI(action);
+      }
+    },
+    async holdinAPI(action) {
+      this.$store.dispatch("app/SET_ACTIVITY_INDICATOR", true);
+      AccountsController.GetWitnessKeyURIAsync(this.account.UUID).then(async key => {
+        let result = null;
+
+        if (action === "add") {
+          let infoResult = await BackendUtilities.holdinAPIActions(key, "getinfo");
+          const keyHashLocal = infoResult.data.keyhash;
+
+          if (infoResult.data.available === 1 && infoResult.data.active === "1") {
+            // Account was linked elsewhere. Note that on Florin and update the compound value.
+            GenerationController.GetGenerationAddressAsync()
+              .then(async payoutAddress => {
+                // Add payout address to Holdin..
+                await BackendUtilities.holdinAPIActions(key, "payoutaddress", payoutAddress);
+                this.addAccountLink(this.account.UUID, keyHashLocal, infoResult.data.compound);
+              })
+              .catch(err => {
+                alert(err.message);
+                this.dismissIndicator();
+              });
+          } else if (infoResult.data.available === 1 && infoResult.data.active === "0") {
+            // Account was linked and then removed. Reactivate.
+            GenerationController.GetGenerationAddressAsync()
+              .then(async payoutAddress => {
+                result = await BackendUtilities.holdinAPIActions(key, "activate");
+                if (result.status_code === 200) {
+                  await BackendUtilities.holdinAPIActions(key, "payoutaddress", payoutAddress);
+                  this.addAccountLink(this.account.UUID, keyHashLocal);
+                } else {
+                  alert(`Holdin: ${result.status_message}`);
+                }
+              })
+              .catch(err => {
+                alert(err.message);
+                this.dismissIndicator();
+              });
+          } else if (infoResult.data.available === 0 && infoResult.data.active === "0") {
+            // Add account for the first time.
+            result = await BackendUtilities.holdinAPIActions(key, "add");
+            if (result.status_code === 200) {
+              this.addAccountLink(this.account.UUID, keyHashLocal);
+            } else {
+              this.dismissIndicator();
+              alert(`Holdin: ${result.status_message}`);
+            }
+          } else {
+            this.dismissIndicator();
+            alert("Holdin: API Error");
+          }
+        } else {
+          result = await BackendUtilities.holdinAPIActions(key, "remove");
+          if (result.status_code === 200) {
+            AccountsController.RemoveAccountLinkAsync(this.account.UUID, "holdin")
+              .then(() => {
+                this.isLinkedToHoldin = false;
+                this.requestLinkToHoldin = false;
+                this.dismissIndicator();
+              })
+              .catch(err => {
+                alert(err.message);
+                this.dismissIndicator();
+              });
+          } else {
+            alert(`Holdin: ${result.status_message}`);
+          }
+        }
+      });
+    },
+    addAccountLink(accountUID, keyHash, compound) {
+      AccountsController.AddAccountLinkAsync(accountUID, "holdin", keyHash)
+        .then(() => {
+          if (compound) {
+            WitnessController.SetAccountCompoundingAsync(accountUID, compound).then(() => {
+              this.dismissIndicator();
+              this.requestLinkToHoldin = false;
+              this.isLinkedToHoldin = true;
+            });
+          } else {
+            this.dismissIndicator();
+            this.requestLinkToHoldin = false;
+            this.isLinkedToHoldin = true;
+          }
+        })
+        .catch(err => {
+          alert(err.message);
+        });
     showConfirmModal() {
       if (
         this.account.allBalances.availableIncludingLocked === 0 &&

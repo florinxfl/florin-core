@@ -3,7 +3,6 @@ import VueRouter from "vue-router";
 import Account from "../views/Account";
 
 import { AccountsController } from "../unity/Controllers";
-import EventBus from "../EventBus";
 import store from "../store";
 
 Vue.use(VueRouter);
