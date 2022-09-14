@@ -79,7 +79,7 @@ export default {
       sellDisabled: false,
       requestLinkToHoldin: false,
       isLinkedToHoldin: false,
-      keyHash: ""
+      keyHash: "",
       modal: null
     };
   },
@@ -316,6 +316,7 @@ export default {
         .catch(err => {
           alert(err.message);
         });
+    },
     showConfirmModal() {
       if (
         this.account.allBalances.availableIncludingLocked === 0 &&
