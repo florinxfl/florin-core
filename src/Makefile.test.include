@@ -119,7 +119,7 @@ endif
 if ENABLE_ZMQ
 test_test_florin_LDADD += $(LIB_ZMQ) $(ZMQ_LIBS)
 endif
-test_test_florin_LDADD += $(LIB_CLI) $(LIB_COMMON) $(LIB_GENERIC) $(LIB_UTIL) $(LIB_CONSENSUS) $(LIB_RPC) $(LIB_WALLET) $(LIB_NODE) $(LIB_CRYPTO_ALL) $(LIB_ANDROID_COMPAT) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
+test_test_florin_LDADD += $(LIB_CLI) $(LIB_COMMON) $(LIB_UTIL) $(LIB_CONSENSUS) $(LIB_RPC) $(LIB_SERVER) $(LIB_WALLET) $(LIB_NODE) $(LIB_CRYPTO_ALL) $(LIB_GENERIC) $(LIB_GENERIC_INIT) $(LIB_ANDROID_COMPAT) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
   $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS) $(PROTOBUF_LIBS)
 test_test_florin_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
@@ -145,6 +145,7 @@ endif
 test_test_florin_fuzzy_LDADD += \
   $(LIB_COMMON) \
   $(LIB_GENERIC) \
+  $(LIB_GENERIC_INIT) \
   $(LIB_UTIL) \
   $(LIB_CONSENSUS) \
   $(LIB_CRYPTO_ALL) \
@@ -157,7 +158,9 @@ test_test_florin_fuzzy_LDADD += \
   $(LIB_COMMON) \
   $(LIB_WALLET) \
   $(LIB_RPC) \
+  $(LIB_SERVER) \
   $(LIB_NODE) \
+  $(LIB_COMMON) \
   $(LIB_WALLET) \
   $(LIB_GENERIC) \
   $(LIB_CRYPTO_ALL) \
@@ -193,9 +196,6 @@ check-local:
 	@echo "Running test/util/util-test.py..."
 	$(top_builddir)/test/util/util-test.py
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 check
-if EMBEDDED_UNIVALUE
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C univalue check
-endif
 
 %.json.h: %.json
 	@$(MKDIR_P) $(@D)

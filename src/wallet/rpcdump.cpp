@@ -666,20 +666,20 @@ UniValue checkwalletagainstutxo(const JSONRPCRequest& request)
     UniValue result(UniValue::VOBJ);
     if(!nMismatchFound && !nOrphansFound)
     {
-        result.push_back(std::pair("wallet check passed", true));
+        result.pushKV("wallet check passed", true);
     }
     else
     {
         if(nMismatchFound)
         {
-            result.push_back(std::pair("coins in UTXO but not in wallet", nWalletMissingUTXO));
-            result.push_back(std::pair("coins spent in wallet but are in UTXO", nWalletSpentCoinsStillInUTXO));
-            result.push_back(std::pair("coins in wallet but not in UTXO", nWalletCoinsNotInUTXO));
-            result.push_back(std::pair("amount in question", ValueFromAmount(nBalanceInQuestion)));
+            result.pushKV("coins in UTXO but not in wallet", nWalletMissingUTXO);
+            result.pushKV("coins spent in wallet but are in UTXO", nWalletSpentCoinsStillInUTXO);
+            result.pushKV("coins in wallet but not in UTXO", nWalletCoinsNotInUTXO);
+            result.pushKV("amount in question", ValueFromAmount(nBalanceInQuestion));
         }
         if(nOrphansFound)
         {
-            result.push_back(std::pair("orphans found", nOrphansFound));
+            result.pushKV("orphans found", nOrphansFound);
         }
     }
     return result;
@@ -730,13 +730,13 @@ UniValue removeallorphans(const JSONRPCRequest& request)
     bool success = (pwallet->RemoveAllOrphans(numErased, numDetected, strError) == DB_LOAD_OK);
     
     UniValue result(UniValue::VOBJ);
-    result.push_back(std::pair("succeeded", success));
+    result.pushKV("succeeded", success);
     if (!success)
     {
-        result.push_back(std::pair("error_message", strError));
+        result.pushKV("error_message", strError);
     }
-    result.push_back(std::pair("num_erased", numErased));
-    result.push_back(std::pair("num_detected", numDetected));
+    result.pushKV("num_erased", numErased);
+    result.pushKV("num_detected", numDetected);
     
     return result;
 }
@@ -850,7 +850,7 @@ UniValue dumpwallet(const JSONRPCRequest& request)
     file.close();
 
     UniValue reply(UniValue::VOBJ);
-    reply.push_back(Pair("filename", filepath.string()));
+    reply.pushKV("filename", filepath.string());
 
     return reply;
 }

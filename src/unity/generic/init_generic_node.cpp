@@ -245,38 +245,85 @@ std::string HelpMessage(HelpMessageMode mode)
 
 void InitRegisterRPC()
 {
+    RegisterAllCoreRPCCommands(tableRPC);
+    #ifdef ENABLE_WALLET
+        RegisterWalletRPCCommands(tableRPC);
+    #endif
 }
 void ServerInterrupt(boost::thread_group& threadGroup)
 {
+    InterruptHTTPServer();
+    InterruptHTTPRPC();
+    InterruptRPC();
+    InterruptREST();
+    InterruptTorControl();
 }
 
 void ServerShutdown(boost::thread_group& threadGroup)
 {
+    StopHTTPServer();
+    StopHTTPRPC();
+    MilliSleep(20); //Allow other threads (UI etc. a chance to cleanup as well)
+    StopRPC();
+    StopREST();
+    MilliSleep(20); //Allow other threads (UI etc. a chance to cleanup as well)
+    StopTorControl();
 }
 
 static void OnRPCStarted()
 {
+    uiInterface.NotifyBlockTip.connect(&RPCNotifyBlockChange);
 }
 
 static void OnRPCStopped()
 {
+    uiInterface.NotifyBlockTip.disconnect(&RPCNotifyBlockChange);
+    RPCNotifyBlockChange(false, nullptr);
+    cvBlockChange.notify_all();
+    LogPrint(BCLog::RPC, "RPC stopped.\n");
 }
 
 static void OnRPCPreCommand(const CRPCCommand& cmd)
 {
+    // Observe safe mode
+    std::string strWarning = GetWarnings("rpc");
+    if (strWarning != "" && !GetBoolArg("-disablesafemode", DEFAULT_DISABLE_SAFEMODE) &&
+        !cmd.okSafeMode)
+        throw JSONRPCError(RPC_FORBIDDEN_BY_SAFE_MODE, std::string("Safe mode: ") + strWarning);
 }
 
 static bool AppInitServers(boost::thread_group& threadGroup)
 {
+    RPCServer::OnStarted(&OnRPCStarted);
+    RPCServer::OnStopped(&OnRPCStopped);
+    RPCServer::OnPreCommand(&OnRPCPreCommand);
+    if (!InitHTTPServer())
+        return false;
+    if (!StartRPC())
+        return false;
+    if (!StartHTTPRPC())
+        return false;
+    if (GetBoolArg("-rest", DEFAULT_REST_ENABLE) && !StartREST())
+        return false;
+    if (!StartHTTPServer())
+        return false;
     return true;
 }
 
 bool InitRPCWarmup(boost::thread_group& threadGroup)
 {
+    if (GetBoolArg("-server", false))
+    {
+        uiInterface.InitMessage.connect(SetRPCWarmupStatus);
+        if (!AppInitServers(threadGroup))
+            return InitError(errortr("Unable to start HTTP server. See debug log for details."));
+    }
     return true;
 }
 
 bool InitTor(boost::thread_group& threadGroup, CScheduler& scheduler)
 {
+    if (GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
+        StartTorControl(threadGroup, scheduler);
     return true;
 }

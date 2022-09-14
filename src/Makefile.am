@@ -9,7 +9,7 @@
 # Distributed under the GULDEN software license, see the accompanying
 # file COPYING
 
-DIST_SUBDIRS = secp256k1 univalue
+DIST_SUBDIRS = secp256k1
 
 AM_LDFLAGS_NO_THREADS = $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(AM_LDFLAGS_NO_THREADS)
@@ -17,20 +17,11 @@ AM_CXXFLAGS = $(HARDENED_CXXFLAGS) $(ERROR_CXXFLAGS)
 AM_CPPFLAGS = $(HARDENED_CPPFLAGS)
 EXTRA_LIBRARIES =
 
-if EMBEDDED_UNIVALUE
-LIBUNIVALUE = univalue/libunivalue.la
-
-$(LIBUNIVALUE): $(wildcard univalue/lib/*) $(wildcard univalue/include/*)
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-else
-LIBUNIVALUE = $(UNIVALUE_LIBS)
-endif
-
 CONFIG_INCLUDES=-I$(builddir)/config
 COMMON_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS) $(CRYPTOPP_CFLAGS)
 
 COMMON_INCLUDES += -I$(srcdir)/secp256k1/include
-COMMON_INCLUDES += $(UNIVALUE_CFLAGS)
+COMMON_INCLUDES += -I$(srcdir)/$(UNIVALUE_INCLUDE_DIR_INT)
 
 LIB_SERVER=lib_server.a
 LIB_RPC=lib_rpc.a
@@ -41,6 +32,7 @@ LIB_CLI=lib_cli.a
 LIB_UTIL=lib_util.a
 LIB_GENERIC=lib_generic.a
 LIB_GENERIC_INIT=lib_generic_init.a
+LIB_GENERIC_INIT_NODE=lib_generic_init_node.a
 LIB_CRYPTO_SSE3=crypto/lib_crypto_sse3.a
 LIB_CRYPTO_SSE3_AES=crypto/lib_crypto_sse3_aes.a
 LIB_CRYPTO_SSE4=crypto/lib_crypto_sse4.a
@@ -93,6 +85,7 @@ EXTRA_LIBRARIES += \
   $(LIB_UTIL) \
   $(LIB_GENERIC) \
   $(LIB_GENERIC_INIT) \
+  $(LIB_GENERIC_INIT_NODE) \
   $(LIB_COMMON) \
   $(LIB_CONSENSUS) \
   $(LIB_SERVER) \
@@ -103,10 +96,11 @@ EXTRA_LIBRARIES += \
   $(LIB_ZMQ)
 
 lib_LTLIBRARIES = $(LIB_UNITY_JNI) $(LIB_UNITY_NODE_JS)
+noinst_LTLIBRARIES =
+noinst_LIBRARIES =
 
 bin_PROGRAMS =
 noinst_PROGRAMS =
-noinst_LIBRARIES =
 TESTS =
 BENCHMARKS =
 
@@ -288,7 +282,7 @@ lib_server_a_SOURCES = \
   $(CORE_H)
 
 # node: shared between Daemon, GUI client and unity libraries.
-lib_node_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS) -I$(srcdir)/univalue/include
+lib_node_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 lib_node_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 lib_node_a_SOURCES = \
   addrdb.cpp \
@@ -706,6 +700,13 @@ lib_generic_init_a_SOURCES = \
   unity/generic/init_generic.cpp \
   $(CORE_H)
 
+# generic_init: anything that includes 'generic' library must also include either this or 'generic_init_server' or provide its own init functions depending on if initialisation of http/rpc etc. is required
+lib_generic_init_node_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES)
+lib_generic_init_node_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+lib_generic_init_node_a_SOURCES = \
+  unity/generic/init_generic_node.cpp \
+  $(CORE_H)
+
 if GLIBC_BACK_COMPAT
 lib_util_a_SOURCES += compat/glibc_compat.cpp
 AM_LDFLAGS += $(COMPAT_LDFLAGS)
@@ -833,8 +834,8 @@ lib_unity_node_js_la_SOURCES = \
 NJS_DEPS = $(LIB_CONSENSUS) $(LIB_NODE) $(LIB_UTIL) $(LIB_COMMON) $(LIB_SERVER) $(LIB_RPC) $(LIB_WALLET) $(LIB_CRYPTO_ALL) $(LIB_ZMQ)
 lib_unity_node_js_la_LDFLAGS = -shared -module -no-undefined -export-dynamic $(AM_LDFLAGS) $(RELDFLAGS) -pthread
 lib_unity_node_js_la_LIBADD = $(NJS_DEPS) $(NJS_DEPS) $(LIBSECP256K1) $(SSL_LIBS) $(CRYPTOPP_LIBS) $(BOOST_LIBS) $(BDB_LIBS) $(LIBLEVELDB) $(LIBMEMENV) $(LIBUNIVALUE) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(SSL_LIBS) $(ZMQ_LIBS) -lqrencode -lpthread -lcryptopp $(SSL_LIBS) -lcrypto
-lib_unity_node_js_la_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS) -I$(srcdir)/unity/djinni/node_js -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
-lib_unity_node_js_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(COMMON_INCLUDES) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS) -I$(srcdir)/unity/djinni/node_js -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
+lib_unity_node_js_la_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS) -I$(srcdir)/unity/djinni/node_js -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
+lib_unity_node_js_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(COMMON_INCLUDES) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS) -I$(srcdir)/unity/djinni/node_js -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
 endif
 
 # unity library (for java)#
@@ -913,9 +914,9 @@ ANDROID_DEPS = $(LIB_COMPAT) $(LIB_CONSENSUS) $(LIB_NODE) $(LIB_UTIL) $(LIB_COMM
 
 
 lib_unity_jni_la_LDFLAGS = -shared -module -export-dynamic $(AM_LDFLAGS_NO_THREADS) $(RELDFLAGS) -llog
-lib_unity_jni_la_LIBADD = $(ANDROID_DEPS) $(ANDROID_DEPS) $(LIBSECP256K1) $(SSL_LIBS) -lcrypto $(BOOST_LIBS) $(BDB_LIBS) $(LIBLEVELDB) $(LIBMEMENV) $(LIBUNIVALUE) $(PROTOBUF_LIBS) -lqrencode -lcryptopp
-lib_unity_jni_la_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) -I$(srcdir)/unity/djinni/jni -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/unity/djinni/support-lib/jni -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
-lib_unity_jni_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(COMMON_INCLUDES) -I$(srcdir)/unity/djinni/jni -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/unity/djinni/support-lib/jni -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
+lib_unity_jni_la_LIBADD = $(ANDROID_DEPS) $(ANDROID_DEPS) $(LIBSECP256K1) $(SSL_LIBS) -lcrypto $(BOOST_LIBS) $(BDB_LIBS) $(LIBLEVELDB) $(LIBMEMENV) $(PROTOBUF_LIBS) -lqrencode -lcryptopp
+lib_unity_jni_la_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) -I$(srcdir)/unity/djinni/jni -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/unity/djinni/support-lib/jni -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
+lib_unity_jni_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) $(COMMON_INCLUDES) -I$(srcdir)/unity/djinni/jni -I$(srcdir)/unity/djinni/cpp -I$(builddir)/obj -I$(srcdir)/unity/djinni/support-lib/jni -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
 endif
 #
 
@@ -924,7 +925,7 @@ if BUILD_LIBS_OBJC
 
 noinst_LIBRARIES += $(LIB_UNITY_OBJC)
 
-lib_unity_objc_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) -I$(srcdir)/univalue/include -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
+lib_unity_objc_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES) -I$(srcdir)/secp256k1/include -DBUILD_INTERNAL
 lib_unity_objc_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -I$(srcdir)/unity/djinni/cpp
 lib_unity_objc_a_OBJCXXFLAGS = -fobjc-arc  -I$(srcdir)/unity/djinni/cpp $(DJINNI_OBJCXXFLAGS)
 
@@ -1076,6 +1077,10 @@ Florin_daemon_LDADD = \
   $(LIBUNIVALUE) \
   $(LIB_UTIL) \
   $(LIB_GENERIC) \
+  $(LIB_GENERIC_INIT_NODE) \
+  $(LIB_SERVER) \
+  $(LIB_RPC) \
+  $(LIB_WALLET) \
   $(LIB_ZMQ) \
   $(LIB_CONSENSUS) \
   $(LIB_CRYPTO_ALL) \
@@ -1103,6 +1108,7 @@ Florin_cli_LDADD = \
   $(LIBUNIVALUE) \
   $(LIB_UTIL) \
   $(LIB_GENERIC) \
+  $(LIB_GENERIC_INIT) \
   $(LIB_CRYPTO_ALL)
 
 Florin_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTOPP_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
@@ -1125,6 +1131,7 @@ Florin_tx_LDADD = \
   $(LIB_COMMON) \
   $(LIB_UTIL) \
   $(LIB_GENERIC) \
+  $(LIB_GENERIC_INIT) \
   $(LIB_CONSENSUS) \
   $(LIB_CRYPTO_ALL) \
   $(LIB_COMMON) \
@@ -1167,7 +1174,6 @@ $(top_srcdir)/$(subdir)/config/build-config.h.in:  $(am__configure_deps)
 
 clean-local:
 	-$(MAKE) -C secp256k1 clean
-	-$(MAKE) -C univalue clean
 	-rm -f leveldb/*/*.gcda leveldb/*/*.gcno leveldb/helpers/memenv/*.gcda leveldb/helpers/memenv/*.gcno
 	-rm -f config.h
 	-rm -rf test/__pycache__
@@ -1197,3 +1203,5 @@ if ENABLE_BENCH
 #include Makefile.bench.include
 include Makefile.sigmabench.include
 endif
+
+include Makefile.univalue.include

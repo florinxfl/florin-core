@@ -1,5 +1,4 @@
-dnl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
-AC_PREREQ([2.60])
+AC_PREREQ([2.71])
 define(_CLIENT_VERSION_MAJOR,       2)
 define(_CLIENT_VERSION_MINOR,       0)
 define(_CLIENT_VERSION_REVISION, 0)
@@ -13,6 +12,12 @@ AC_CONFIG_SRCDIR([src/init.cpp])
 AC_CONFIG_HEADERS([src/config/build-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
+
+m4_ifndef([PKG_PROG_PKG_CONFIG], [m4_fatal([PKG_PROG_PKG_CONFIG macro not found. Please install pkg-config and re-run autogen.sh])])
+PKG_PROG_PKG_CONFIG
+if test "$PKG_CONFIG" = ""; then
+  AC_MSG_ERROR([pkg-config not found])
+fi
 
 m4_define([_DAEMON_NAME], [Florin-daemon])
 m4_define([_CLI_NAME], [Florin-cli])
@@ -29,8 +34,8 @@ AC_DEFINE(TX_NAME, "_TX_NAME", [Command name of the tx binary])
 
 
 dnl Unless the user specified ARFLAGS, force it to be cr
-AC_ARG_VAR(ARFLAGS, [Flags for the archiver, defaults to <cr> if not set])
-if test "x${ARFLAGS+set}" != "xset"; then
+AC_ARG_VAR([ARFLAGS], [Flags for the archiver, defaults to <cr> if not set])
+if test "${ARFLAGS+set}" != "set"; then
   ARFLAGS="cr"
 fi
 
@@ -44,17 +49,17 @@ dnl faketime breaks configure and is only needed for make. Disable it here.
 unset FAKETIME
 
 dnl Automake init set-up and checks
-AM_INIT_AUTOMAKE([no-define subdir-objects foreign])
+AM_INIT_AUTOMAKE([1.13 no-define subdir-objects foreign])
 
 dnl faketime messes with timestamps and causes configure to be re-run.
 dnl --disable-maintainer-mode can be used to bypass this.
 AM_MAINTAINER_MODE([enable])
 
 dnl make the compilation flags quiet unless V=1 is used
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AM_SILENT_RULES([yes])
 
 dnl Compiler checks (here before libtool).
-if test "x${CXXFLAGS+set}" = "xset"; then
+if test "${CXXFLAGS+set}" = "set"; then
   CXXFLAGS_overridden=yes
 else
   CXXFLAGS_overridden=no
@@ -80,35 +85,39 @@ INTRINSIC_FLAG_CHECK
 dnl Unless the user specified OBJCXX, force it to be the same as CXX. This ensures
 dnl that we get the same -std flags for both.
 m4_ifdef([AC_PROG_OBJCXX],[
-if test "x${OBJCXX+set}" = "x"; then
+if test "${OBJCXX+set}" = ""; then
   OBJCXX="${CXX}"
 fi
 AC_PROG_OBJCXX
 ])
 
+dnl Since libtool 1.5.2 (released 2004-01-25), on Linux libtool no longer
+dnl sets RPATH for any directories in the dynamic linker search path.
+dnl See more: https://wiki.debian.org/RpathIssue
+LT_PREREQ([1.5.2])
 dnl Libtool init checks.
-LT_INIT([pic-only])
+LT_INIT([pic-only win32-dll])
 LIBTOOL="$LIBTOOL --preserve-dup-deps"
 
 dnl Check/return PATH for base programs.
-AC_PATH_TOOL(AR, ar)
-AC_PATH_TOOL(RANLIB, ranlib)
-AC_PATH_TOOL(STRIP, strip)
-AC_PATH_TOOL(GCOV, gcov)
-AC_PATH_PROG(LCOV, lcov)
+AC_PATH_TOOL([AR], [ar])
+AC_PATH_TOOL([RANLIB], [ranlib])
+AC_PATH_TOOL([STRIP], [strip])
+AC_PATH_TOOL([GCOV], [gcov])
+AC_PATH_PROG([LCOV], [lcov])
 dnl Python 3.5 is specified in .python-version and should be used if available, see doc/dependencies.md
 AC_PATH_PROGS([PYTHON], [python3.5 python3.6 python3.7 python3.8 python3 python])
-AC_PATH_PROG(GENHTML, genhtml)
+AC_PATH_PROG([GENHTML], [genhtml])
 AC_PATH_PROG([GIT], [git])
-AC_PATH_PROG(CCACHE,ccache)
-AC_PATH_PROG(XGETTEXT,xgettext)
-AC_PATH_PROG(HEXDUMP,hexdump)
+AC_PATH_PROG([CCACHE], [ccache])
+AC_PATH_PROG([XGETTEXT], [xgettext])
+AC_PATH_PROG([HEXDUMP], [hexdump])
 AC_PATH_TOOL(READELF, readelf)
 AC_PATH_TOOL(CPPFILT, c++filt)
-AC_PATH_TOOL(OBJCOPY, objcopy)
+AC_PATH_TOOL([OBJCOPY], [objcopy])
 AC_PATH_PROG(DJINNI_RUN, djinni-run,, $prefix/bin)
 
-AC_ARG_VAR(PYTHONPATH, Augments the default search path for python module files)
+AC_ARG_VAR([PYTHONPATH], [Augments the default search path for python module files])
 
 # Enable wallet
 AC_ARG_ENABLE([wallet],
@@ -191,12 +200,7 @@ AC_ARG_ENABLE([glibc-back-compat],
   [use_glibc_compat=$enableval],
   [use_glibc_compat=no])
 
-AC_ARG_WITH([system-univalue],
-  [AS_HELP_STRING([--with-system-univalue],
-  [Build with system UniValue (default is no)])],
-  [system_univalue=$withval],
-  [system_univalue=no]
-)
+
 AC_ARG_ENABLE([zmq],
   [AS_HELP_STRING([--disable-zmq],
   [disable ZMQ notifications])],
@@ -209,19 +213,19 @@ AC_ARG_ENABLE(man,
     [AS_HELP_STRING([--disable-man],
                     [do not install man pages (default is to install)])],,
     enable_man=yes)
-AM_CONDITIONAL(ENABLE_MAN, test "$enable_man" != no)
+AM_CONDITIONAL([ENABLE_MAN], [test "$enable_man" != "no"])
 
-# Enable debug
+dnl Enable debug
 AC_ARG_ENABLE([debug],
     [AS_HELP_STRING([--enable-debug],
-                    [use debug compiler flags and macros (default is no)])],
+                    [use compiler flags and macros suited for debugging (default is no)])],
     [enable_debug=$enableval],
     [enable_debug=no])
 
-# Turn warnings into errors
+dnl Turn warnings into errors
 AC_ARG_ENABLE([werror],
     [AS_HELP_STRING([--enable-werror],
-                    [Treat certain compiler warnings as errors (default is no)])],
+                    [Treat compiler warnings as errors (default is no)])],
     [enable_werror=$enableval],
     [enable_werror=no])
 
@@ -302,48 +306,42 @@ AC_ARG_WITH([daemon],
   [build_daemon=$withval],
   [build_daemon=yes])
 
-use_pkgconfig=yes
-
 
 case $host in
   *mingw*)
-
-     #pkgconfig does more harm than good with MinGW
-     use_pkgconfig=no
-
      TARGET_OS=windows
-     AC_CHECK_LIB([mingwthrd],      [main],, AC_MSG_ERROR(libmingwthrd missing))
-     AC_CHECK_LIB([kernel32],      [main],, AC_MSG_ERROR(libkernel32 missing))
-     AC_CHECK_LIB([user32],      [main],, AC_MSG_ERROR(libuser32 missing))
-     AC_CHECK_LIB([gdi32],      [main],, AC_MSG_ERROR(libgdi32 missing))
-     AC_CHECK_LIB([comdlg32],      [main],, AC_MSG_ERROR(libcomdlg32 missing))
-     AC_CHECK_LIB([winspool],      [main],, AC_MSG_ERROR(libwinspool missing))
-     AC_CHECK_LIB([winmm],      [main],, AC_MSG_ERROR(libwinmm missing))
-     AC_CHECK_LIB([shell32],      [main],, AC_MSG_ERROR(libshell32 missing))
-     AC_CHECK_LIB([comctl32],      [main],, AC_MSG_ERROR(libcomctl32 missing))
-     AC_CHECK_LIB([ole32],      [main],, AC_MSG_ERROR(libole32 missing))
-     AC_CHECK_LIB([oleaut32],      [main],, AC_MSG_ERROR(liboleaut32 missing))
-     AC_CHECK_LIB([uuid],      [main],, AC_MSG_ERROR(libuuid missing))
-     AC_CHECK_LIB([rpcrt4],      [main],, AC_MSG_ERROR(librpcrt4 missing))
-     AC_CHECK_LIB([advapi32],      [main],, AC_MSG_ERROR(libadvapi32 missing))
-     AC_CHECK_LIB([ws2_32],      [main],, AC_MSG_ERROR(libws2_32 missing))
-     AC_CHECK_LIB([mswsock],      [main],, AC_MSG_ERROR(libmswsock missing))
-     AC_CHECK_LIB([shlwapi],      [main],, AC_MSG_ERROR(libshlwapi missing))
-     AC_CHECK_LIB([iphlpapi],      [main],, AC_MSG_ERROR(libiphlpapi missing))
-     AC_CHECK_LIB([crypt32],      [main],, AC_MSG_ERROR(libcrypt32 missing))
+     AC_CHECK_LIB([mingwthrd],[main],                    [], [AC_MSG_ERROR([libmingwthrd missing])])
+     AC_CHECK_LIB([kernel32], [GetModuleFileNameA],      [], [AC_MSG_ERROR([libkernel32 missing])])
+     AC_CHECK_LIB([user32],   [main],                    [], [AC_MSG_ERROR([libuser32 missing])])
+     AC_CHECK_LIB([gdi32],    [main],                    [], [AC_MSG_ERROR([libgdi32 missing])])
+     AC_CHECK_LIB([comdlg32], [main],                    [], [AC_MSG_ERROR([libcomdlg32 missing])])
+     AC_CHECK_LIB([winspool], [main],                    [], [AC_MSG_ERROR([libwinspool missing])])
+     AC_CHECK_LIB([winmm],    [main],                    [], [AC_MSG_ERROR([libwinmm missing])])
+     AC_CHECK_LIB([shell32],  [SHGetSpecialFolderPathW], [], [AC_MSG_ERROR([libshell32 missing])])
+     AC_CHECK_LIB([comctl32], [main],                    [], [AC_MSG_ERROR([libcomctl32 missing])])
+     AC_CHECK_LIB([ole32],    [CoCreateInstance],        [], [AC_MSG_ERROR([libole32 missing])])
+     AC_CHECK_LIB([oleaut32], [main],                    [], [AC_MSG_ERROR([liboleaut32 missing])])
+     AC_CHECK_LIB([uuid],     [main],                    [], [AC_MSG_ERROR([libuuid missing])])
+     AC_CHECK_LIB([rpcrt4],   [main],                    [], [AC_MSG_ERROR([librpcrt4 missing])])
+     AC_CHECK_LIB([advapi32], [CryptAcquireContextW],    [], [AC_MSG_ERROR([libadvapi32 missing])])
+     AC_CHECK_LIB([ws2_32],   [WSAStartup],              [], [AC_MSG_ERROR([libws2_32 missing])])
+     AC_CHECK_LIB([mswsock],  [main],                    [], [AC_MSG_ERROR([libmswsock missing])])
+     AC_CHECK_LIB([shlwapi],  [PathRemoveFileSpecW],     [], [AC_MSG_ERROR([libshlwapi missing])])
+     AC_CHECK_LIB([iphlpapi], [GetAdaptersAddresses],    [], [AC_MSG_ERROR([libiphlpapi missing])])
+     AC_CHECK_LIB([crypt32],  [main],                    [], [AC_MSG_ERROR([libcrypt32 missing])])
 
-     # -static is interpreted by libtool, where it has a different meaning.
-     # In libtool-speak, it's -all-static.
-     AX_CHECK_LINK_FLAG([[-static]],[LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
+     dnl -static is interpreted by libtool, where it has a different meaning.
+     dnl In libtool-speak, it's -all-static.
+     AX_CHECK_LINK_FLAG([-static], [LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
 
-     AC_PATH_PROG([MAKENSIS], [makensis], none)
-     if test x$MAKENSIS = xnone; then
-       AC_MSG_WARN("makensis not found. Cannot create installer.")
+     AC_PATH_PROG([MAKENSIS], [makensis], [none])
+     if test "$MAKENSIS" = "none"; then
+       AC_MSG_WARN([makensis not found. Cannot create installer.])
      fi
 
-     AC_PATH_TOOL(WINDRES, windres, none)
-     if test x$WINDRES = xnone; then
-       AC_MSG_ERROR("windres not found")
+     AC_PATH_TOOL([WINDRES], [windres], [none])
+     if test "$WINDRES" = "none"; then
+       AC_MSG_ERROR([windres not found])
      fi
 
      CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB -D_WIN32_WINNT=0x0601"
@@ -468,38 +466,22 @@ case $host in
      ;;
 esac
 
-if test x$use_pkgconfig = xyes; then
-  m4_ifndef([PKG_PROG_PKG_CONFIG], [AC_MSG_ERROR(PKG_PROG_PKG_CONFIG macro not found. Please install pkg-config and re-run autogen.sh.)])
-  m4_ifdef([PKG_PROG_PKG_CONFIG], [
-  PKG_PROG_PKG_CONFIG
-  if test x"$PKG_CONFIG" = "x"; then
-    AC_MSG_ERROR(pkg-config not found.)
-  fi
-  ])
-fi
-
-AC_ARG_WITH([webview],
-  [AS_HELP_STRING([--with-webview],
-  [Build with embedded webview (webengine|webkit|no, default=webengine except on Windows 32 bit)])],
-  [with_webview=$withval],
-  [with_webview=$default_webview])
-
 if test x$use_extended_functional_tests != xno; then
   AC_SUBST(EXTENDED_FUNCTIONAL_TESTS, --extended)
 fi
 
-if test x$use_lcov = xyes; then
-  if test x$LCOV = x; then
-    AC_MSG_ERROR("lcov testing requested but lcov not found")
+if test "$use_lcov" = "yes"; then
+  if test "$LCOV" = ""; then
+    AC_MSG_ERROR([lcov testing requested but lcov not found])
   fi
-  if test x$GCOV = x; then
-    AC_MSG_ERROR("lcov testing requested but gcov not found")
+  if test "$GCOV" = ""; then
+    AC_MSG_ERROR("[lcov testing requested but gcov not found])
   fi
-  if test x$PYTHON = x; then
-    AC_MSG_ERROR("lcov testing requested but python not found")
+  if test "$PYTHON" = ""; then
+    AC_MSG_ERROR([lcov testing requested but python not found])
   fi
-  if test x$GENHTML = x; then
-    AC_MSG_ERROR("lcov testing requested but genhtml not found")
+  if test "$GENHTML" = ""; then
+    AC_MSG_ERROR([lcov testing requested but genhtml not found])
   fi
   LCOV="$LCOV --gcov-tool=$GCOV"
   AX_CHECK_LINK_FLAG([[--coverage]], [LDFLAGS="$LDFLAGS --coverage"],
@@ -514,22 +496,22 @@ AC_C_BIGENDIAN
 dnl Check for pthread compile/link requirements
 AX_PTHREAD
 
-# The following macro will add the necessary defines to build-config.h, but
-# they also need to be passed down to any subprojects. Pull the results out of
-# the cache and add them to CPPFLAGS.
+dnl The following macro will add the necessary defines to build-config.h, but
+dnl they also need to be passed down to any subprojects. Pull the results out of
+dnl the cache and add them to CPPFLAGS.
 AC_SYS_LARGEFILE
-# detect POSIX or GNU variant of strerror_r
+dnl detect POSIX or GNU variant of strerror_r
 AC_FUNC_STRERROR_R
 
-if test x$ac_cv_sys_file_offset_bits != x &&
-   test x$ac_cv_sys_file_offset_bits != xno &&
-   test x$ac_cv_sys_file_offset_bits != xunknown; then
+if test "$ac_cv_sys_file_offset_bits" != "" &&
+   test "$ac_cv_sys_file_offset_bits" != "no" &&
+   test "$ac_cv_sys_file_offset_bits" != "unknown"; then
   CPPFLAGS="$CPPFLAGS -D_FILE_OFFSET_BITS=$ac_cv_sys_file_offset_bits"
 fi
 
-if test x$ac_cv_sys_large_files != x &&
-   test x$ac_cv_sys_large_files != xno &&
-   test x$ac_cv_sys_large_files != xunknown; then
+if test "$ac_cv_sys_large_files" != "" &&
+   test "$ac_cv_sys_large_files" != "no" &&
+   test "$ac_cv_sys_large_files" != "unknown"; then
   CPPFLAGS="$CPPFLAGS -D_LARGE_FILES=$ac_cv_sys_large_files"
 fi
 
@@ -569,10 +551,10 @@ if test x$TARGET_OS != xwindows; then
   AX_CHECK_COMPILE_FLAG([-fPIC],[PIC_FLAGS="-fPIC"])
 fi
 
-if test x$use_hardening != xno; then
+if test "$use_hardening" != "no"; then
   use_hardening=yes
-  AX_CHECK_COMPILE_FLAG([-Wstack-protector],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -Wstack-protector"])
-  AX_CHECK_COMPILE_FLAG([-fstack-protector-all],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -fstack-protector-all"])
+  AX_CHECK_COMPILE_FLAG([-Wstack-protector], [HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -Wstack-protector"])
+  AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -fstack-protector-all"])
 
   AX_CHECK_PREPROC_FLAG([-D_FORTIFY_SOURCE=2],[
     AX_CHECK_PREPROC_FLAG([-U_FORTIFY_SOURCE],[
@@ -587,14 +569,14 @@ if test x$use_hardening != xno; then
   AX_CHECK_LINK_FLAG([[-Wl,-z,relro]], [HARDENED_LDFLAGS="$HARDENED_LDFLAGS -Wl,-z,relro"])
   AX_CHECK_LINK_FLAG([[-Wl,-z,now]], [HARDENED_LDFLAGS="$HARDENED_LDFLAGS -Wl,-z,now"])
 
-  if test x$TARGET_OS != xwindows; then
+  if test "$TARGET_OS" != "windows"; then
     AX_CHECK_COMPILE_FLAG([-fPIE],[PIE_FLAGS="-fPIE"])
     AX_CHECK_LINK_FLAG([[-pie]], [HARDENED_LDFLAGS="$HARDENED_LDFLAGS -pie"], [HARDENED_LDFLAGS="$HARDENED_LDFLAGS -Wl,-pie"], ["-Werror"])
   fi
 
   case $host in
     *mingw*)
-       AC_CHECK_LIB([ssp],      [main],, AC_MSG_ERROR(libssp missing))
+       AC_CHECK_LIB([ssp], [main], [], [AC_MSG_ERROR([libssp missing])])
     ;;
   esac
 fi
@@ -612,18 +594,18 @@ AC_CHECK_DECLS([getifaddrs, freeifaddrs],,,
 )
 AC_CHECK_DECLS([strnlen])
 
-# Check for fork(2), unrelated to --with-daemon (although used by it)
+dnl These are used for daemonization in GuldenD
 AC_CHECK_DECLS([fork])
 
 AC_CHECK_DECLS([le16toh, le32toh, le64toh, htole16, htole32, htole64, be16toh, be32toh, be64toh, htobe16, htobe32, htobe64],,,
-		[#if HAVE_ENDIAN_H
+    [#if HAVE_ENDIAN_H
                  #include <endian.h>
                  #elif HAVE_SYS_ENDIAN_H
                  #include <sys/endian.h>
                  #endif])
 
 AC_CHECK_DECLS([bswap_16, bswap_32, bswap_64],,,
-		[#if HAVE_BYTESWAP_H
+    [#if HAVE_BYTESWAP_H
                  #include <byteswap.h>
                  #endif])
 
@@ -646,19 +628,19 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>]],
 )
 
 dnl Check for malloc_info (for memory statistics information in getmemoryinfo)
-AC_MSG_CHECKING(for getmemoryinfo)
+AC_MSG_CHECKING([for getmemoryinfo])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <malloc.h>]],
  [[ int f = malloc_info(0, NULL); ]])],
- [ AC_MSG_RESULT(yes); AC_DEFINE(HAVE_MALLOC_INFO, 1,[Define this symbol if you have malloc_info]) ],
- [ AC_MSG_RESULT(no)]
+ [ AC_MSG_RESULT([yes]); AC_DEFINE([HAVE_MALLOC_INFO], [1], [Define this symbol if you have malloc_info]) ],
+ [ AC_MSG_RESULT([no])]
 )
 
 dnl Check for mallopt(M_ARENA_MAX) (to set glibc arenas)
-AC_MSG_CHECKING(for mallopt M_ARENA_MAX)
+AC_MSG_CHECKING([for mallopt M_ARENA_MAX])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <malloc.h>]],
  [[ mallopt(M_ARENA_MAX, 1); ]])],
- [ AC_MSG_RESULT(yes); AC_DEFINE(HAVE_MALLOPT_ARENA_MAX, 1,[Define this symbol if you have mallopt with M_ARENA_MAX]) ],
- [ AC_MSG_RESULT(no)]
+ [ AC_MSG_RESULT([yes]); AC_DEFINE([HAVE_MALLOPT_ARENA_MAX], [1], [Define this symbol if you have mallopt with M_ARENA_MAX]) ],
+ [ AC_MSG_RESULT([no])]
 )
 
 AC_MSG_CHECKING([for visibility attribute])
@@ -671,28 +653,28 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([
     AC_MSG_RESULT(yes)
   ],
   [
-    AC_MSG_RESULT(no)
-    if test x$use_reduce_exports = xyes; then
+    AC_MSG_RESULT([no])
+    if test "$use_reduce_exports" = "yes"; then
       AC_MSG_ERROR([Cannot find a working visibility attribute. Use --disable-reduce-exports.])
     fi
   ]
 )
 
-# Check for different ways of gathering OS randomness
-AC_MSG_CHECKING(for Linux getrandom syscall)
+dnl Check for different ways of gathering OS randomness
+AC_MSG_CHECKING([for Linux getrandom syscall])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>
   #include <sys/syscall.h>
   #include <linux/random.h>]],
  [[ syscall(SYS_getrandom, nullptr, 32, 0); ]])],
- [ AC_MSG_RESULT(yes); AC_DEFINE(HAVE_SYS_GETRANDOM, 1,[Define this symbol if the Linux getrandom system call is available]) ],
- [ AC_MSG_RESULT(no)]
+ [ AC_MSG_RESULT([yes]); AC_DEFINE([HAVE_SYS_GETRANDOM], [1], [Define this symbol if the Linux getrandom system call is available]) ],
+ [ AC_MSG_RESULT([no])]
 )
 
-AC_MSG_CHECKING(for getentropy)
+AC_MSG_CHECKING([for getentropy])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>]],
  [[ getentropy(nullptr, 32) ]])],
- [ AC_MSG_RESULT(yes); AC_DEFINE(HAVE_GETENTROPY, 1,[Define this symbol if the BSD getentropy system call is available]) ],
- [ AC_MSG_RESULT(no)]
+ [ AC_MSG_RESULT([yes]); AC_DEFINE([HAVE_GETENTROPY], [1], [Define this symbol if the BSD getentropy system call is available]) ],
+ [ AC_MSG_RESULT([no])]
 )
 
 AC_MSG_CHECKING(for sysctl KERN_ARND)
@@ -740,16 +722,16 @@ if test x$build_libs_objc != xno; then
   AC_SUBST(DJINNI_OBJCXXFLAGS)
 fi
 
-if test x$build_utils$build_libs_node_js$build_libs_jni$build_libs_objc$build_daemon$use_tests$use_bench = xnonononononono; then
+if test "$build_utils$build_libs_node_js$build_libs_jni$build_libs_objc$build_daemon$use_tests$use_bench" = "nononononono"; then
     use_boost=no
 else
     use_boost=yes
 fi
 
-if test x$use_boost = xyes; then
+if test "$use_boost" = "yes"; then
 
 dnl Minimum required Boost version
-define(MINIMUM_REQUIRED_BOOST, 1.66.0)
+define(MINIMUM_REQUIRED_BOOST, 1.68.0)
 
 dnl Check for boost libs
 AX_BOOST_BASE([MINIMUM_REQUIRED_BOOST])
@@ -785,19 +767,19 @@ if test x$use_reduce_exports = xyes; then
 fi
 fi
 
-if test x$use_reduce_exports = xyes; then
+if test "$use_reduce_export" = "yes"; then
     CXXFLAGS="$CXXFLAGS $RE_CXXFLAGS"
     AX_CHECK_LINK_FLAG([[-Wl,--exclude-libs,ALL]], [RELDFLAGS="-Wl,--exclude-libs,ALL"])
 fi
 
-if test x$use_tests = xyes; then
+if test "$use_tests" = "yes"; then
 
-  if test x$HEXDUMP = x; then
+  if test "$HEXDUMP" = ""; then
     AC_MSG_ERROR(hexdump is required for tests)
   fi
 
 
-  if test x$use_boost = xyes; then
+  if test "$use_boost" = "yes"; then
 
   AX_BOOST_UNIT_TEST_FRAMEWORK
 
@@ -822,7 +804,7 @@ if test x$use_tests = xyes; then
   fi
 fi
 
-if test x$use_boost = xyes; then
+if test "$use_boost" = "yes"; then
 
 BOOST_LIBS="$BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_FILESYSTEM_LIB $BOOST_PROGRAM_OPTIONS_LIB $BOOST_THREAD_LIB $BOOST_CHRONO_LIB"
 
@@ -909,79 +891,48 @@ LIBS="$TEMP_LIBS"
 CPPFLAGS="$TEMP_CPPFLAGS"
 fi
 
-if test x$boost_sleep != xyes; then
+if test "$boost_sleep" != "yes"; then
   AC_MSG_ERROR(No working boost sleep implementation found.)
 fi
 
 fi
 
-if test x$use_pkgconfig = xyes; then
-  : dnl
-  m4_ifdef(
-    [PKG_CHECK_MODULES],
-    [
-      PKG_CHECK_MODULES([CRYPTOPP], [libcryptopp],, PKG_CHECK_MODULES([CRYPTOPP], [libcrypto++],, [AC_MSG_ERROR(libcryptopp not found.)]))
-      PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl  not found.)])
-      PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto  not found.)])
-      PKG_CHECK_MODULES([PROTOBUF], [protobuf],[have_protobuf=yes],[have_protobuf=no])
+: dnl
+m4_ifdef(
+  [PKG_CHECK_MODULES],
+  [
+    PKG_CHECK_MODULES([CRYPTOPP], [libcryptopp],, PKG_CHECK_MODULES([CRYPTOPP], [libcrypto++],, [AC_MSG_ERROR(libcryptopp not found.)]))
+    PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl  not found.)])
+    PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto  not found.)])
+    PKG_CHECK_MODULES([PROTOBUF], [protobuf],[have_protobuf=yes],[have_protobuf=no])
     if test x$build_utils$build_daemon$use_tests$build_libs_node_js != xnononono; then
-        PKG_CHECK_MODULES([EVENT], [libevent],, [AC_MSG_ERROR(libevent not found.)])
-        if test x$TARGET_OS != xwindows; then
-          PKG_CHECK_MODULES([EVENT_PTHREADS], [libevent_pthreads],, [AC_MSG_ERROR(libevent_pthreads not found.)])
-        fi
+      PKG_CHECK_MODULES([EVENT], [libevent],, [AC_MSG_ERROR(libevent not found.)])
+      if test x$TARGET_OS != xwindows; then
+        PKG_CHECK_MODULES([EVENT_PTHREADS], [libevent_pthreads],, [AC_MSG_ERROR(libevent_pthreads not found.)])
       fi
-
-      if test "x$use_zmq" = "xyes"; then
-        PKG_CHECK_MODULES([ZMQ],[libzmq >= 4],
-          [AC_DEFINE([ENABLE_ZMQ],[1],[Define to 1 to enable ZMQ functions])],
-          [AC_DEFINE([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])
-           AC_MSG_WARN([libzmq version 4.x or greater not found, disabling])
-           use_zmq=no])
-      else
-          AC_DEFINE_UNQUOTED([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])
-      fi
-    ]
-  )
-else
-  AC_CHECK_HEADER([cryptopp/config.h],,AC_MSG_ERROR(libcryptopp headers missing))
-  AC_CHECK_LIB([cryptopp],    [main],CRYPTOPP_LIBS=-lcryptopp, AC_MSG_ERROR(libcryptopp missing))
-
-  AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
-  AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
-
-  AC_CHECK_HEADER([openssl/crypto.h],,AC_MSG_ERROR(libcrypto headers missing))
-  AC_CHECK_LIB([crypto],      [main],CRYPTO_LIBS=-lcrypto, AC_MSG_ERROR(libcrypto missing))
-
-  if test x$build_utils$build_daemon$use_tests != xnononono; then
-    AC_CHECK_HEADER([event2/event.h],, AC_MSG_ERROR(libevent headers missing),)
-    AC_CHECK_LIB([event],[main],EVENT_LIBS=-levent,AC_MSG_ERROR(libevent missing))
-    if test x$TARGET_OS != xwindows; then
-      AC_CHECK_LIB([event_pthreads],[main],EVENT_PTHREADS_LIBS=-levent_pthreads,AC_MSG_ERROR(libevent_pthreads missing))
     fi
-  fi
+  ]
+)
 
-  if test "x$use_zmq" = "xyes"; then
-     AC_CHECK_HEADER([zmq.h],
-       [AC_DEFINE([ENABLE_ZMQ],[1],[Define to 1 to enable ZMQ functions])],
-       [AC_MSG_WARN([zmq.h not found, disabling zmq support])
-        use_zmq=no
-        AC_DEFINE([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])])
-     AC_CHECK_LIB([zmq],[zmq_ctx_shutdown],ZMQ_LIBS=-lzmq,
-       [AC_MSG_WARN([libzmq >= 4.0 not found, disabling zmq support])
-        use_zmq=no
-        AC_DEFINE([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])])
-  else
-    AC_DEFINE_UNQUOTED([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])
-  fi
+dnl ZMQ check
 
-  if test "x$use_zmq" = "xyes"; then
-    dnl Assume libzmq was built for static linking
-    case $host in
-      *mingw*)
-        ZMQ_CFLAGS="$ZMQ_CFLAGS -DZMQ_STATIC"
-      ;;
-    esac
-  fi
+if test "$use_zmq" = "yes"; then
+  PKG_CHECK_MODULES([ZMQ], [libzmq >= 4],
+    AC_DEFINE([ENABLE_ZMQ], [1], [Define to 1 to enable ZMQ functions]),
+    [AC_DEFINE([ENABLE_ZMQ], [0], [Define to 1 to enable ZMQ functions])
+    AC_MSG_WARN([libzmq version 4.x or greater not found, disabling])
+    use_zmq=no])
+else
+  AC_DEFINE_UNQUOTED([ENABLE_ZMQ], [0], [Define to 1 to enable ZMQ functions])
+fi
+
+if test "$use_zmq" = "yes"; then
+  dnl Assume libzmq was built for static linking
+  case $host in
+    *mingw*)
+      ZMQ_CFLAGS="$ZMQ_CFLAGS -DZMQ_STATIC"
+    ;;
+  esac
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
@@ -994,73 +945,27 @@ CXXFLAGS="${save_CXXFLAGS}"
 dnl RapidCheck Property Based Testing
 
 enable_property_tests=no
-if test "x$use_rapidcheck" = xauto; then
+if test "$use_rapidcheck" = "auto"; then
     AC_CHECK_HEADERS([rapidcheck.h], [enable_property_tests=yes])
-elif test "x$use_rapidcheck" != xno; then
+elif test "$use_rapidcheck" != "no"; then
     enable_property_tests=yes
 fi
 
 RAPIDCHECK_LIBS=
-if test "x$enable_property_tests" = xyes; then
+if test "$enable_property_tests" = "yes"; then
    RAPIDCHECK_LIBS=-lrapidcheck
 fi
 AC_SUBST(RAPIDCHECK_LIBS)
-AM_CONDITIONAL([ENABLE_PROPERTY_TESTS], [test x$enable_property_tests = xyes])
+AM_CONDITIONAL([ENABLE_PROPERTY_TESTS], [test "$enable_property_tests" = "yes"])
 
-dnl univalue check
 
-need_bundled_univalue=yes
-
-if test x$build_utils$build_daemon$use_tests$use_bench = xnonononono; then
-  need_bundled_univalue=no
-else
-
-if test x$system_univalue != xno ; then
-  found_univalue=no
-  if test x$use_pkgconfig = xyes; then
-    : #NOP
-    m4_ifdef(
-      [PKG_CHECK_MODULES],
-      [
-        PKG_CHECK_MODULES([UNIVALUE],[libunivalue >= 1.0.4],[found_univalue=yes],[true])
-      ]
-    )
-  else
-    AC_CHECK_HEADER([univalue.h],[
-      AC_CHECK_LIB([univalue],  [main],[
-        UNIVALUE_LIBS=-lunivalue
-        found_univalue=yes
-      ],[true])
-    ],[true])
-  fi
-
-  if test x$found_univalue = xyes ; then
-    system_univalue=yes
-    need_bundled_univalue=no
-  elif test x$system_univalue = xyes ; then
-    AC_MSG_ERROR([univalue not found])
-  else
-    system_univalue=no
-  fi
-fi
-
-if test x$need_bundled_univalue = xyes ; then
-  UNIVALUE_CFLAGS='-I$(srcdir)/univalue/include'
-  UNIVALUE_LIBS='univalue/libunivalue.la'
-fi
-
-fi
-
-AM_CONDITIONAL([EMBEDDED_UNIVALUE],[test x$need_bundled_univalue = xyes])
-AC_SUBST(UNIVALUE_CFLAGS)
-AC_SUBST(UNIVALUE_LIBS)
 
 AC_MSG_CHECKING([whether to build _DAEMON_NAME])
-AM_CONDITIONAL([BUILD_DAEMON], [test x$build_daemon = xyes])
+AM_CONDITIONAL([BUILD_DAEMON], [test "$build_daemon" = "yes"])
 AC_MSG_RESULT($build_daemon)
 
 AC_MSG_CHECKING([whether to build utils (_CLI_NAME _TX_NAME)])
-AM_CONDITIONAL([BUILD_UTILS], [test x$build_utils = xyes])
+AM_CONDITIONAL([BUILD_UTILS], [test "$build_utils" = "yes"])
 AC_MSG_RESULT($build_utils)
 
 AC_MSG_CHECKING([whether to build node.js libraries])
@@ -1078,10 +983,10 @@ AC_MSG_RESULT($build_libs_objc)
 
 AC_LANG_POP
 
-if test "x$use_ccache" != "xno"; then
-  AC_MSG_CHECKING(if ccache should be used)
-  if test x$CCACHE = x; then
-    if test "x$use_ccache" = "xyes"; then
+if test "$use_ccache" != "no"; then
+  AC_MSG_CHECKING([if ccache should be used])
+  if test "$CCACHE" = ""; then
+    if test "$use_ccache" = "yes"; then
       AC_MSG_ERROR([ccache not found.]);
     else
       use_ccache=no
@@ -1092,52 +997,54 @@ if test "x$use_ccache" != "xno"; then
     CXX="$ac_cv_path_CCACHE $CXX"
   fi
   AC_MSG_RESULT($use_ccache)
-fi
-if test "x$use_ccache" = "xyes"; then
-    AX_CHECK_PREPROC_FLAG([-Qunused-arguments],[CPPFLAGS="-Qunused-arguments $CPPFLAGS"])
+  if test "$use_ccache" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-fdebug-prefix-map=A=B], [DEBUG_CXXFLAGS="$DEBUG_CXXFLAGS -fdebug-prefix-map=\$(abs_top_srcdir)=."], [], [$CXXFLAG_WERROR])
+    AX_CHECK_PREPROC_FLAG([-fmacro-prefix-map=A=B], [DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -fmacro-prefix-map=\$(abs_top_srcdir)=."], [], [$CXXFLAG_WERROR])
+  fi
 fi
 
 dnl enable wallet
 AC_MSG_CHECKING([if wallet should be enabled])
-if test x$enable_wallet != xno; then
-  AC_MSG_RESULT(yes)
+if test "$enable_wallet" != "no"; then
+  AC_MSG_RESULT([yes])
   AC_DEFINE_UNQUOTED([ENABLE_WALLET],[1],[Define to 1 to enable wallet functions])
+  enable_wallet=yes
 
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi
 
 dnl enable upnp support
 AC_MSG_CHECKING([whether to build with support for UPnP])
-if test x$have_miniupnpc = xno; then
-  if test x$use_upnp = xyes; then
-     AC_MSG_ERROR("UPnP requested but cannot be built. use --without-miniupnpc")
+if test "$have_miniupnpc" = "no"; then
+  if test "$use_upnp" = "yes"; then
+     AC_MSG_ERROR([UPnP requested but cannot be built. Use --without-miniupnpc])
   fi
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 else
-  if test x$use_upnp != xno; then
-    AC_MSG_RESULT(yes)
+  if test "$use_upnp" != "no"; then
+    AC_MSG_RESULT([yes])
     AC_MSG_CHECKING([whether to build with UPnP enabled by default])
     use_upnp=yes
     upnp_setting=0
-    if test x$use_upnp_default != xno; then
+    if test "$use_upnp_default" != "no"; then
       use_upnp_default=yes
       upnp_setting=1
     fi
-    AC_MSG_RESULT($use_upnp_default)
+    AC_MSG_RESULT([$use_upnp_default])
     AC_DEFINE_UNQUOTED([USE_UPNP],[$upnp_setting],[UPnP support not compiled if undefined, otherwise value (0 or 1) determines default state])
-    if test x$TARGET_OS = xwindows; then
+    if test "$TARGET_OS" = "windows"; then
       MINIUPNPC_CPPFLAGS="-DSTATICLIB -DMINIUPNP_STATICLIB"
     fi
   else
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
   fi
 fi
 
-AM_CONDITIONAL([ENABLE_ZMQ], [test "x$use_zmq" = "xyes"])
+AM_CONDITIONAL([ENABLE_ZMQ], [test "$use_zmq" = "yes"])
 
 AC_MSG_CHECKING([whether to build test_gulden])
-if test x$use_tests = xyes; then
+if test "$use_tests" = "yes"; then
   AC_MSG_RESULT([yes])
   BUILD_TEST="yes"
 else
@@ -1146,26 +1053,26 @@ else
 fi
 
 AC_MSG_CHECKING([whether to reduce exports])
-if test x$use_reduce_exports = xyes; then
+if test "$use_reduce_exports" = "yes"; then
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
 fi
 
-if test x$build_utils$build_libs_node_js$build_libs_jni$build_libs_objc$build_daemon$use_bench$use_tests = xnononononononono; then
+if test "$build_utils$build_libs_node_js$build_libs_jni$build_libs_objc$build_daemon$use_bench$use_tests" = "nonononononono"; then
   AC_MSG_ERROR([No targets! Please specify at least one of: --with-utils --with-jni-libs --with-objc-libs --with-daemon --with-gui --enable-bench or --enable-tests])
 fi
 
-AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
-AM_CONDITIONAL([BUILD_DARWIN], [test x$BUILD_OS = xdarwin])
-AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
-AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet = xyes])
-AM_CONDITIONAL([ENABLE_TESTS],[test x$BUILD_TEST = xyes])
-AM_CONDITIONAL([ENABLE_BENCH],[test x$use_bench = xyes])
-AM_CONDITIONAL([USE_QRCODE], [test x$use_qr = xyes])
-AM_CONDITIONAL([USE_LCOV],[test x$use_lcov = xyes])
+AM_CONDITIONAL([TARGET_DARWIN], [test "$TARGET_OS" = "darwin"])
+AM_CONDITIONAL([BUILD_DARWIN], [test "$BUILD_OS" = "darwin"])
+AM_CONDITIONAL([TARGET_WINDOWS], [test "$TARGET_OS" = "windows"])
+AM_CONDITIONAL([ENABLE_WALLET], [test "$enable_wallet" = "yes"])
+AM_CONDITIONAL([ENABLE_TESTS], [test "$BUILD_TEST" = "yes"])
+AM_CONDITIONAL([ENABLE_BENCH], [test "$use_bench" = "yes"])
+AM_CONDITIONAL([USE_QRCODE], [test "$use_qr" = "yes"])
+AM_CONDITIONAL([USE_LCOV], [test "$use_lcov" = "yes"])
 AM_CONDITIONAL([GLIBC_BACK_COMPAT],[test x$use_glibc_compat = xyes])
-AM_CONDITIONAL([HARDEN],[test x$use_hardening = xyes])
+AM_CONDITIONAL([HARDEN], [test "$use_hardening" = "yes"])
 AM_CONDITIONAL([TARGET_INTEL], [test x$host_cpu = xx86_64 -o x$host_cpu = xi686])
 
 AC_DEFINE(CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MAJOR, [Major version])
@@ -1211,7 +1118,6 @@ AC_SUBST(MINIUPNPC_LIBS)
 AC_SUBST(CRYPTO_LIBS)
 AC_SUBST(QWT_LIBS)
 AC_SUBST(HAVE_WEBENGINE_VIEW)
-AC_SUBST(HAVE_WEBKIT)
 AC_SUBST(SSL_LIBS)
 AC_SUBST(EVENT_LIBS)
 AC_SUBST(EVENT_PTHREADS_LIBS)
@@ -1246,10 +1152,6 @@ PKG_CONFIG_PATH="$PKGCONFIG_PATH_TEMP"
 PKGCONFIG_LIBDIR_TEMP="$PKG_CONFIG_LIBDIR"
 unset PKG_CONFIG_LIBDIR
 PKG_CONFIG_LIBDIR="$PKGCONFIG_LIBDIR_TEMP"
-
-if test x$need_bundled_univalue = xyes; then
-  AC_CONFIG_SUBDIRS([src/univalue])
-fi
 
 ac_configure_args="${ac_configure_args} --disable-shared --with-pic --with-bignum=no --enable-module-recovery"
 AC_CONFIG_SUBDIRS([src/secp256k1])
