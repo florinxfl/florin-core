@@ -61,7 +61,6 @@ export default {
     onRightClick() {
       // TODO: Right Click
       // Add Context menu on Right Click
-      console.log(e);
     },
     getPeers() {
       clearTimeout(timeout);
