@@ -79,8 +79,11 @@
     <div>
       <portal to="footer-slot">
         <div style="display: flex">
-          <div v-on:scroll.passive="handleScroll" class="footer-layout">
-            <div class="scroll-arrow" v-if="showOverFlowArrow">
+          <div id="footer-layout" v-on:scroll.passive="handleScroll" class="footer-layout">
+            <div @click="scrollToStart" class="scroll-arrow-left" v-if="showOverFlowArrowLeft">
+              <fa-icon class="pen" :icon="['fal', 'fa-long-arrow-left']" />
+            </div>
+            <div @click="scrollToEnd" class="scroll-arrow-right" v-if="showOverFlowArrowRight">
               <fa-icon class="pen" :icon="['fal', 'fa-long-arrow-right']" />
             </div>
             <footer-button title="buttons.info" :icon="['fal', 'info-circle']" routeName="account" @click="routeTo" />
@@ -116,7 +119,8 @@ export default {
       statistics: null,
       compoundingPercent: 0,
       keyHash: null,
-      showOverFlowArrow: false
+      showOverFlowArrowRight: false,
+      showOverFlowArrowLeft: false
     };
   },
   mounted() {
@@ -245,41 +249,48 @@ export default {
       this.$router.push({ name: route, params: { id: this.account.UUID } });
     },
     isOverflown(e) {
-      console.log(this.renewButtonVisible);
-      console.log(this.optimiseButtonVisible);
-
       // Determine whether to show the overflow arrow
       if (e) {
         const width = e.currentTarget.innerWidth;
         if (width && width <= 1000) {
           if (this.renewButtonVisible || this.optimiseButtonVisible) {
-            this.showOverFlowArrow = true;
+            this.showOverFlowArrowRight = true;
           } else {
-            this.showOverFlowArrow = false;
+            this.showOverFlowArrowRight = false;
           }
         } else {
-          this.showOverFlowArrow = false;
+          this.showOverFlowArrowRight = false;
         }
       } else {
         // Triggered on page load.
         if (window.innerWidth <= 1000) {
           if (this.renewButtonVisible || this.optimiseButtonVisible) {
-            this.showOverFlowArrow = true;
+            this.showOverFlowArrowRight = true;
           } else {
-            this.showOverFlowArrow = false;
+            this.showOverFlowArrowRight = false;
           }
         } else {
-          this.showOverFlowArrow = false;
+          this.showOverFlowArrowRight = false;
         }
       }
     },
     handleScroll(e) {
       // Determine when user it at the end of the horizontal scroll bar.
       if (e.target.scrollWidth - e.target.scrollLeft === e.target.clientWidth) {
-        this.showOverFlowArrow = false;
+        this.showOverFlowArrowRight = false;
+        this.showOverFlowArrowLeft = true;
       } else {
-        this.showOverFlowArrow = true;
+        this.showOverFlowArrowRight = true;
+        this.showOverFlowArrowLeft = false;
       }
+    },
+    scrollToEnd() {
+      var container = document.querySelector("#footer-layout");
+      container.scrollLeft = container.scrollWidth;
+    },
+    scrollToStart() {
+      var container = document.querySelector("#footer-layout");
+      container.scrollLeft = 0;
     }
   }
 };
@@ -312,7 +323,8 @@ export default {
 .footer-layout::-webkit-scrollbar {
   display: none;
 }
-.scroll-arrow {
+.scroll-arrow-right {
+  cursor: pointer;
   background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.9), #ffffff);
   height: 55px;
   width: 55px;
@@ -322,6 +334,19 @@ export default {
   justify-content: center;
   align-items: center;
   right: 0;
+  bottom: 0;
+}
+.scroll-arrow-left {
+  cursor: pointer;
+  background-image: linear-gradient(270deg, rgba(255, 255, 255, 0.9), #ffffff);
+  height: 55px;
+  width: 55px;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  left: -30;
+  align-items: center;
   bottom: 0;
 }
 </style>
