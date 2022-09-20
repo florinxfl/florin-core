@@ -255,27 +255,21 @@ export default {
         if (width && width <= 1000) {
           if (this.renewButtonVisible || this.optimiseButtonVisible) {
             this.showOverFlowArrowRight = true;
-
           } else {
             this.showOverFlowArrowRight = false;
-
           }
         } else {
           this.showOverFlowArrowRight = false;
-
         }
       } else {
         // Triggered on page load.
         if (window.innerWidth <= 1000) {
           if (this.renewButtonVisible || this.optimiseButtonVisible) {
             this.showOverFlowArrowRight = true;
-
           } else {
             this.showOverFlowArrowRight = false;
-
           }
         } else {
-
           this.showOverFlowArrowRight = false;
         }
       }

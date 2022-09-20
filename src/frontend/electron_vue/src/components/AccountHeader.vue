@@ -33,6 +33,18 @@
           <button outlined class="small" @click="buyCoins" :disabled="buyDisabled">{{ $t("buttons.buy") }}</button>
           <button outlined class="small" @click="sellCoins" :disabled="sellDisabled">{{ $t("buttons.sell") }}</button>
         </div>
+        <div v-if="!showBuySellButtons && showHoldinButtons">
+          <div v-if="!isLinkedToHoldin">
+            <button outlined class="small" @click="linkToHoldin('add')" :disabled="sellDisabled">
+              {{ $t("saving_account.add_to_holdin") }}
+            </button>
+          </div>
+          <div v-else>
+            <button outlined class="small" @click="linkToHoldin('remove')" :disabled="sellDisabled">
+              {{ $t("saving_account.remove_from_holdin") }}
+            </button>
+          </div>
+        </div>
         <div v-if="isSingleAccount" class="flex-row icon-buttons">
           <div class="icon-button">
             <fa-icon :icon="['fal', 'cog']" @click="showSettings" />
@@ -43,18 +55,6 @@
         </div>
       </div>
       <input v-else ref="accountNameInput" type="text" v-model="newAccountName" @keydown="onKeydown" @blur="cancelEdit" />
-      <div v-if="!showBuySellButtons && showHoldinButtons">
-        <div v-if="!isLinkedToHoldin">
-          <button outlined class="small" @click="linkToHoldin('add')" :disabled="sellDisabled">
-            {{ $t("saving_account.add_to_holdin") }}
-          </button>
-        </div>
-        <div v-else>
-          <button outlined class="small" @click="linkToHoldin('remove')" :disabled="sellDisabled">
-            {{ $t("saving_account.remove_from_holdin") }}
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
