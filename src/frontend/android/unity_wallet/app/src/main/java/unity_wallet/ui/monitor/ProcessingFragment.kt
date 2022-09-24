@@ -1,6 +1,6 @@
-// Copyright (c) 2018 The Florin developers
+// Copyright (c) 2018-2022 The Centure developers
 // Authored by: Willem de Jonge (willem@isnapp.nl)
-// Distributed under the Florin software license, see the accompanying
+// Distributed under the Libre Chain License, see the accompanying
 // file COPYING
 
 package unity_wallet.ui.monitor
