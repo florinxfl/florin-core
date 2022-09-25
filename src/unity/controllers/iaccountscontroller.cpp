@@ -57,6 +57,10 @@ void IAccountsController::setListener(const std::shared_ptr<IAccountsListener>& 
                 accountsListener->onActiveAccountNameChanged(pAccount->getLabel());
             }
         }));
+        coreSignalConnections.push_back(pactiveWallet->NotifyAccountModified.connect([](CWallet* pWallet, CAccount* pAccount)
+        {
+            accountsListener->onAccountModified(getUUIDAsString(pAccount->getUUID()), GetAccountRecord(pAccount->getUUID(), pAccount));
+        }));
         coreSignalConnections.push_back(pactiveWallet->NotifyAccountAdded.connect([](CWallet* pWallet, CAccount* pAccount)
         {
             accountsListener->onAccountAdded(getUUIDAsString(pAccount->getUUID()), pAccount->getLabel());
