@@ -34,6 +34,7 @@
 #include "txmempool.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "util/thread.h"
 #include "witnessutil.h"
 #include "util/moneystr.h"
 #include "util/strencodings.h"
@@ -999,7 +1000,7 @@ void PeerLogicValidation::BlockConnected(const std::shared_ptr<const CBlock>& pb
 }
 
 // All of the following cache a recent block, and are protected by cs_most_recent_block
-static CCriticalSection cs_most_recent_block;
+static RecursiveMutex cs_most_recent_block;
 
 static std::shared_ptr<const CBlock> most_recent_block_pow;
 static std::shared_ptr<const CBlockHeaderAndShortTxIDs> most_recent_compact_block_pow;

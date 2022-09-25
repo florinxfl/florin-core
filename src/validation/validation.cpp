@@ -47,6 +47,7 @@
 #include "ui_interface.h"
 #include "undo.h"
 #include "util.h"
+#include "util/thread.h"
 #include "witnessutil.h"
 #include "util/moneystr.h"
 #include "util/strencodings.h"
@@ -80,7 +81,7 @@ using namespace boost::placeholders;
  * Global state
  */
 
-CCriticalSection cs_main;
+RecursiveMutex cs_main;
 
 bool fSPV = false;
 int ChainHeight()
@@ -104,8 +105,8 @@ CChain chainActive;
 CBlockIndex *pindexBestHeader = NULL;
 CPartialChain partialChain;
 CBlockIndex *pindexBestPartial = nullptr;
-CWaitableCriticalSection csBestBlock;
-CConditionVariable cvBlockChange;
+Mutex csBestBlock;
+std::condition_variable cvBlockChange;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 bool fReindex = false;
@@ -152,7 +153,7 @@ namespace {
      */
     std::multimap<CBlockIndex*, CBlockIndex*> mapBlocksUnlinked;
 
-    CCriticalSection cs_LastBlockFile;
+    RecursiveMutex cs_LastBlockFile;
     std::vector<CBlockFileInfo> vinfoBlockFile;
     int nLastBlockFile = 0;
     /** Global flag to indicate we should check to see if there are
@@ -165,7 +166,7 @@ namespace {
      * Every received block is assigned a unique and increasing identifier, so we
      * know which one to give priority in case of a fork.
      */
-    CCriticalSection cs_nBlockSequenceId;
+    RecursiveMutex cs_nBlockSequenceId;
     /** Blocks loaded from disk are assigned id 0, so start the counter at 1. */
     int32_t nBlockSequenceId = 1;
     /** Decreasing counter (used by subsequent preciousblock calls). */

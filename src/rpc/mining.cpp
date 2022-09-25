@@ -52,6 +52,7 @@
 #include <validation/witnessvalidation.h>
 
 #include <boost/algorithm/string/predicate.hpp> // for ends_with()
+#include <boost/uuid/uuid.hpp>
 
 /**
  * Return average network hashes per second based on the last 'lookup' blocks,

@@ -27,6 +27,9 @@
 #include "scheduler.h"
 #include "ui_interface.h"
 #include "util/strencodings.h"
+#include "util/thread.h"
+
+#include <boost/thread.hpp>
 
 #ifdef WIN32
 #include <string.h>
@@ -80,7 +83,7 @@ static const uint64_t RANDOMIZER_ID_LOCALHOSTNONCE = 0xd93e69e2bbfa5735ULL; // S
 bool fDiscover = true;
 bool fListen = true;
 bool fRelayTxes = true;
-CCriticalSection cs_mapLocalHost;
+RecursiveMutex cs_mapLocalHost;
 std::map<CNetAddr, LocalServiceInfo> mapLocalHost;
 static bool vfLimited[NET_MAX] = {};
 std::string strSubVersion;

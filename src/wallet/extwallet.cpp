@@ -16,6 +16,7 @@
 #include <boost/algorithm/string.hpp> // for split()
 #include <wallet/mnemonic.h>
 #include "util.h"
+#include "util/thread.h"
 #include <validation/validation.h>
 
 bool fShowChildAccountsSeperately = false;
@@ -245,7 +246,7 @@ static void ThreadShadowPoolManager()
 
 void StartShadowPoolManagerThread(boost::thread_group& threadGroup)
 {
-    threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "shadowpoolmanager", &ThreadShadowPoolManager));
+    threadGroup.create_thread(boost::bind(&util::TraceThread, "shadowpoolmanager", &ThreadShadowPoolManager));
 }
 
 std::string accountNameForAddress(const CWallet &wallet, const CTxDestination& dest)

@@ -54,6 +54,8 @@
 #include "torcontrol.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "util/thread.h"
+#include "util/threadnames.h"
 #include "witnessutil.h"
 #include "util/moneystr.h"
 #ifdef ENABLE_WALLET
@@ -195,7 +197,7 @@ extern void ServerShutdown(boost::thread_group& threadGroup);
 void CoreShutdown(boost::thread_group& threadGroup)
 {
     LogPrintf("Core shutdown: commence core shutdown\n");
-    static CCriticalSection cs_Shutdown;
+    static RecursiveMutex cs_Shutdown;
 
     TRY_LOCK(cs_Shutdown, lockShutdown);
     if (!lockShutdown)
@@ -425,14 +427,14 @@ static void BlockNotifyCallback(bool initialSync, const CBlockIndex *pBlockIndex
 }
 
 static bool fHaveGenesis = false;
-static boost::mutex cs_GenesisWait;
-static CConditionVariable condvar_GenesisWait;
+static Mutex cs_GenesisWait;
+static std::condition_variable condvar_GenesisWait;
 
 static void BlockNotifyGenesisWait(bool, const CBlockIndex *pBlockIndex)
 {
     if (pBlockIndex != NULL) {
         {
-            boost::unique_lock<boost::mutex> lock_GenesisWait(cs_GenesisWait);
+            std::unique_lock<Mutex> lock_GenesisWait(cs_GenesisWait);
             fHaveGenesis = true;
         }
         condvar_GenesisWait.notify_all();
@@ -497,7 +499,7 @@ static void CleanupBlockRevFiles()
 static void ThreadImport(std::vector<fs::path> vImportFiles)
 {
     const CChainParams& chainparams = Params();
-    RenameThread(GLOBAL_APPNAME"-loadblk");
+    util::ThreadRename(GLOBAL_APPNAME"-loadblk");
 
     {
     CImportingNow imp;
@@ -1725,10 +1727,19 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // Wait for genesis block to be processed
     {
-        boost::unique_lock<boost::mutex> lock(cs_GenesisWait);
-        while (!fHaveGenesis) {
-            condvar_GenesisWait.wait(lock);
+        WAIT_LOCK(cs_GenesisWait, lock);
+        // We previously could hang here if StartShutdown() is called prior to
+        // ThreadImport getting started, so instead we just wait on a timer to
+        // check ShutdownRequested() regularly.
+        while (!fHaveGenesis && !ShutdownRequested()) {
+            condvar_GenesisWait.wait_for(lock, std::chrono::milliseconds(500));
         }
+        
+        if (ShutdownRequested())
+        {
+            return false;
+        }
+
         uiInterface.NotifyBlockTip.disconnect(BlockNotifyGenesisWait);
     }
 

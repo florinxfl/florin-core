@@ -8,12 +8,14 @@
 #include "netbase.h"
 #include "net.h"
 #include "util.h"
+#include "util/thread.h"
 #include "crypto/hmac_sha256.h"
 
 #include <vector>
 #include <deque>
 #include <set>
 #include <stdlib.h>
+#include <thread>
 
 #include <boost/bind.hpp>
 #include <boost/signals2/signal.hpp>

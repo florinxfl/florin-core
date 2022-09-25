@@ -28,12 +28,14 @@
 #include "script/sign.h"
 #include <univalue.h>
 #include "util.h"
+#include "util/thread.h"
 #include "util/moneystr.h"
 #include "util/strencodings.h"
 
 #include <stdio.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/thread.hpp>
 
 #define _(x) std::string(x) /* Keep the _() around in case gettext or such will be used later to translate non-UI */
 

@@ -207,6 +207,7 @@ CORE_H = rpc/accounts.h \
   support/events.h \
   support/lockedpool.h \
   sync.h \
+  util/thread.h \
   threadsafety.h \
   threadinterrupt.h \
   timedata.h \
@@ -219,6 +220,7 @@ CORE_H = rpc/accounts.h \
   util/moneystr.h \
   util/strencodings.h \
   util/time.h \
+  util/threadnames.h \
   validation/validation.h \
   validation/witnessvalidation.h \
   validation/versionbitsvalidation.h \
@@ -677,11 +679,13 @@ lib_util_a_SOURCES = \
   random.cpp \
   support/cleanse.cpp \
   sync.cpp \
+  util/thread.cpp \
   threadinterrupt.cpp \
   util.cpp \
   util/moneystr.cpp \
   util/strencodings.cpp \
   util/time.cpp \
+  util/threadnames.cpp \
   $(CORE_H)
 
 # generic: shared between everything except the unity libraries (which provide their own specialised implementations)

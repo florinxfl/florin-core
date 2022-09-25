@@ -37,6 +37,8 @@
 #include "timedata.h"
 #include "txmempool.h"
 #include "util.h"
+#include "util/thread.h"
+#include "util/threadnames.h"
 #include "util/time.h"
 #include "util/moneystr.h"
 #include "validation/validationinterface.h"
@@ -1033,7 +1035,7 @@ int64_t nArenaSetupTime = 0;
 int64_t nHPSTimerStart = 0;
 int64_t nHashCounter=0;
 std::atomic<int64_t> nHashThrottle(-1);
-static CCriticalSection timerCS;
+static RecursiveMutex timerCS;
 
 inline void updateHashesPerSec(uint64_t& nStart, uint64_t nStop, uint64_t nCount)
 {
@@ -1073,7 +1075,7 @@ inline void clearHashesPerSecondStatistics()
 void static PoWGenerate(const CChainParams& chainparams, CAccount* forAccount, uint64_t nThreads, uint64_t nArenaThreads, uint64_t nMemoryKb)
 {
     LogPrintf("PoWGenerate thread started\n");
-    RenameThread(GLOBAL_APPNAME"-generate");
+    util::ThreadRename(GLOBAL_APPNAME"-generate");
 
     int64_t nUpdateTimeStart = GetTimeMillis();
 
@@ -1445,7 +1447,7 @@ void static PoWGenerate(const CChainParams& chainparams, CAccount* forAccount, u
 }
 
 boost::thread* minerThread = nullptr;
-CCriticalSection miningCS;
+RecursiveMutex miningCS;
 
 void PoWStopGeneration(bool notify)
 {

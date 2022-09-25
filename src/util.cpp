@@ -115,7 +115,7 @@ CTranslationInterface translationInterface;
 std::atomic<uint32_t> logCategories(0);
 
 /** Init OpenSSL library multithreading support */
-static std::unique_ptr<CCriticalSection[]> ppmutexOpenSSL;
+static std::unique_ptr<RecursiveMutex[]> ppmutexOpenSSL;
 
 #pragma message("Check thread safety of OpenSSL usage!")
 /* In recent versions of OpenSSL the CRYPTO_set_locking_callback taking the locking_callback below as an argument is
@@ -142,7 +142,7 @@ public:
     CInit()
     {
         // Init OpenSSL library multithreading support
-        ppmutexOpenSSL.reset(new CCriticalSection[CRYPTO_num_locks()]);
+        ppmutexOpenSSL.reset(new RecursiveMutex[CRYPTO_num_locks()]);
         CRYPTO_set_locking_callback(locking_callback);
 
         // OpenSSL can optionally load a config file which lists optional loadable modules and engines.
@@ -464,7 +464,7 @@ fs::path GetDefaultDataDir()
 
 static fs::path pathCached;
 static fs::path pathCachedNetSpecific;
-static CCriticalSection csPathCached;
+static RecursiveMutex csPathCached;
 
 const fs::path &GetDataDir(bool fNetSpecific)
 {
@@ -750,19 +750,6 @@ void runCommand(const std::string& strCommand)
     int nErr = ::system(strCommand.c_str());
     if (nErr)
         LogPrintf("runCommand error: system(%s) returned %d\n", strCommand, nErr);
-#endif
-}
-
-void RenameThread([[maybe_unused]] const char* name)
-{
-#if defined(PR_SET_NAME)
-    // Only the first 15 characters are used (16 - NUL terminator)
-    ::prctl(PR_SET_NAME, name, 0, 0, 0);
-#elif (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
-    pthread_set_name_np(pthread_self(), name);
-
-#elif defined(MAC_OSX)
-    pthread_setname_np(name);
 #endif
 }
 
