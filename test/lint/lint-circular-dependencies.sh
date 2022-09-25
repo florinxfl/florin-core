@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2018 The Bitcoin Core developers
+# Copyright (c) 2018-2021 The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
@@ -10,18 +10,14 @@ export LC_ALL=C
 
 EXPECTED_CIRCULAR_DEPENDENCIES=(
     "chainparamsbase -> util/system -> chainparamsbase"
-    "checkpoints -> validation -> checkpoints"
-    "index/txindex -> validation -> index/txindex"
+    "node/blockstorage -> validation -> node/blockstorage"
+    "index/blockfilterindex -> node/blockstorage -> validation -> index/blockfilterindex"
+    "index/base -> validation -> index/blockfilterindex -> index/base"
+    "index/coinstatsindex -> node/coinstats -> index/coinstatsindex"
     "policy/fees -> txmempool -> policy/fees"
-    "policy/policy -> validation -> policy/policy"
-    "txmempool -> validation -> txmempool"
-    "validation -> validationinterface -> validation"
-    "wallet/coincontrol -> wallet/wallet -> wallet/coincontrol"
     "wallet/fees -> wallet/wallet -> wallet/fees"
     "wallet/wallet -> wallet/walletdb -> wallet/wallet"
-    "policy/fees -> policy/policy -> validation -> policy/fees"
-    "policy/rbf -> txmempool -> validation -> policy/rbf"
-    "txmempool -> validation -> validationinterface -> txmempool"
+    "node/coinstats -> validation -> node/coinstats"
 )
 
 EXIT_CODE=0
@@ -30,7 +26,7 @@ CIRCULAR_DEPENDENCIES=()
 
 IFS=$'\n'
 for CIRC in $(cd src && ../contrib/devtools/circular-dependencies.py {*,*/*,*/*/*}.{h,cpp} | sed -e 's/^Circular dependency: //'); do
-    CIRCULAR_DEPENDENCIES+=($CIRC)
+    CIRCULAR_DEPENDENCIES+=( "$CIRC" )
     IS_EXPECTED_CIRC=0
     for EXPECTED_CIRC in "${EXPECTED_CIRCULAR_DEPENDENCIES[@]}"; do
         if [[ "${CIRC}" == "${EXPECTED_CIRC}" ]]; then
