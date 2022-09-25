@@ -12,6 +12,7 @@
 #include "validation/validation.h"
 #include "validation/witnessvalidation.h"
 #include <consensus/consensus.h>
+#include <consensus/validation.h>
 #include <boost/assign/list_of.hpp>
 
 #include "init.h"
@@ -22,7 +23,6 @@
 #include <wallet/rpcwallet.h>
 #include "wallet/wallet.h"
 #include "wallet/coincontrol.h"
-#include "wallet/wallet.h"
 #include "wallet/witness_operations.h"
 #endif
 
@@ -43,8 +43,6 @@
 
 #include "util/moneystr.h"
 
-#include <consensus/validation.h>
-#include <consensus/consensus.h>
 #include "net.h"
 
 
@@ -1007,6 +1005,8 @@ static UniValue restoreaccount(const JSONRPCRequest& request)
 
     return true;
 }
+
+
 
 static UniValue rpccreateaccounthelper(CWallet* pwallet, std::string accountName, std::string accountType, bool bMakeActive=true)
 {

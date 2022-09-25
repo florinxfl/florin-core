@@ -3,18 +3,19 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 //
-// File contains modifications by: The Gulden developers
+// File contains modifications by: The Centure developers
 // All modifications:
-// Copyright (c) 2020 The Gulden developers
+// Copyright (c) 2020-2022 The Centure developers
 // Authored by: Malcolm MacLeod (mmacleod@gmx.com)
-// Distributed under the GULDEN software license, see the accompanying
+// Distributed under the Libre Chain License, see the accompanying
 // file COPYING
 
 /**
  * Utilities for converting data from/to strings.
  */
-#ifndef UTILSTRENCODINGS_H
-#define UTILSTRENCODINGS_H
+
+#ifndef UTIL_STRENCODINGS_H
+#define UTIL_STRENCODINGS_H
 
 #include <stdint.h>
 #include <string>
@@ -156,4 +157,4 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out);
 //! Returns 0 if specifier is invalid.
 uint64_t GetMemLimitInBytesFromFormattedStringSpecifier(std::string formattedLockPeriodSpecifier);
 
-#endif
+#endif //UTIL_STRENCODINGS_H

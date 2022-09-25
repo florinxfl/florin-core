@@ -20,6 +20,7 @@
 #include "script/script.h"
 #include "uint256.h"
 #include <util.h>
+#include "chainparams.h"
 
 typedef std::vector<unsigned char> valtype;
 

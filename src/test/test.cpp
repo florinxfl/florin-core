@@ -28,6 +28,7 @@
 #include "rpc/server.h"
 #include "rpc/register.h"
 #include "script/sigcache.h"
+#include "scheduler.h"
 
 #ifdef ENABLE_WALLET
 #include <wallet/wallet.h>
@@ -85,6 +86,10 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
 
         ppow2witdbview = new CWitViewDB(1 << 20);
         ppow2witTip = std::shared_ptr<CCoinsViewCache>(new CCoinsViewCache(ppow2witdbview));
+        
+        nodeScheduler = new CScheduler();
+        nodeScheduler->m_service_thread = std::thread(&util::TraceThread, "scheduler", std::function<void()>([&] { nodeScheduler->serviceQueue(); }));
+        GetMainSignals().RegisterBackgroundSignalScheduler(*nodeScheduler);
 
         if (!InitBlockIndex(chainparams)) {
             throw std::runtime_error("InitBlockIndex failed.");
@@ -112,6 +117,10 @@ TestingSetup::~TestingSetup()
 
         StopScriptCheckWorkerThreads();
 
+        GetMainSignals().UnregisterBackgroundSignalScheduler();
+        nodeScheduler->stop();
+        delete nodeScheduler;
+        
         ppow2witTip = nullptr;
         delete ppow2witdbview;
 

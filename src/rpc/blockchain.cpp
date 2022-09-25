@@ -42,10 +42,10 @@
 
 #include <univalue.h>
 
-#include <boost/thread/thread.hpp> // boost::thread::interrupt
-
 #include <mutex>
 #include <condition_variable>
+
+#include <boost/thread.hpp>
 
 struct CUpdatedBlock
 {
@@ -1491,9 +1491,11 @@ static UniValue getchaintips(const JSONRPCRequest& request)
     return res;
 }
 
+extern std::atomic_bool fDumpMempoolLater;
 UniValue mempoolInfoToJSON()
 {
     UniValue ret(UniValue::VOBJ);
+    ret.pushKV("loaded", fDumpMempoolLater);
     ret.pushKV("size", (int64_t) mempool.size());
     ret.pushKV("bytes", (int64_t) mempool.GetTotalTxSize());
     ret.pushKV("usage", (int64_t) mempool.DynamicMemoryUsage());
@@ -1512,6 +1514,7 @@ static UniValue getmempoolinfo(const JSONRPCRequest& request)
             "\nReturns details on the active state of the TX memory pool.\n"
             "\nResult:\n"
             "{\n"
+            "  \"loaded\": xxxxx              (boolean) True if the mempool is fully loaded\n"
             "  \"size\": xxxxx,               (numeric) Current tx count\n"
             "  \"bytes\": xxxxx,              (numeric) Sum of all virtual transaction sizes.\n"
             "  \"usage\": xxxxx,              (numeric) Total memory usage for the mempool\n"

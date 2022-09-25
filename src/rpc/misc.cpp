@@ -142,17 +142,23 @@ public:
         UniValue obj(UniValue::VOBJ);
         CPubKey vchPubKey;
         obj.pushKV("isscript", false);
-        if (pwallet && pwallet->GetPubKey(dest.spendingKey, vchPubKey))
+        if (pwallet)
         {
-            obj.pushKV("spendingpubkey", HexStr(vchPubKey));
+            if (pwallet->GetPubKey(dest.spendingKey, vchPubKey))
+            {
+                obj.pushKV("spendingpubkey", HexStr(vchPubKey));
+            }
             CKey privKey;
             bool ismine = pwallet->GetKey(dest.spendingKey, privKey);
             obj.pushKV("spendingprivkey_isavailable", ismine?"true":"false");
         }
         obj.pushKV("spendingpubkeyhash", dest.spendingKey.GetHex());
-        if (pwallet && pwallet->GetPubKey(dest.witnessKey, vchPubKey))
+        if (pwallet)
         {
-            obj.pushKV("witnesspubkey", HexStr(vchPubKey));
+            if (pwallet->GetPubKey(dest.witnessKey, vchPubKey))
+            {
+                obj.pushKV("witnesspubkey", HexStr(vchPubKey));
+            }
             CKey privKey;
             bool ismine = pwallet->GetKey(dest.witnessKey, privKey);
             obj.pushKV("witnessprivkey_isavailable", ismine?"true":"false");

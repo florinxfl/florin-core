@@ -35,6 +35,7 @@
 #include <stdio.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/thread.hpp>
 
 #define _(x) std::string(x) /* Keep the _() around in case gettext or such will be used later to translate non-UI */
 
@@ -42,14 +43,6 @@
 static bool fCreateBlank;
 static std::map<std::string,UniValue> registers;
 static const int CONTINUE_EXECUTION=-1;
-
-//NB! This is only for RPC code and similar (display purposes) and only works when txindex is enabled. DO NOT call this in any validation or similar code
-uint256 getHashFromTxIndexRef(uint64_t blockHeight, uint64_t txIndex)
-{
-    uint256 ret;
-    ret.SetNull();
-    return ret;
-}
 
 //
 // This function returns either one of EXIT_ codes when it's expected to stop the process or
