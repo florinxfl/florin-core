@@ -28,8 +28,8 @@
 #include "script/sign.h"
 #include <univalue.h>
 #include "util.h"
-#include "utilmoneystr.h"
-#include "utilstrencodings.h"
+#include "util/moneystr.h"
+#include "util/strencodings.h"
 
 #include <stdio.h>
 

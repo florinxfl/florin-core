@@ -31,11 +31,10 @@
 #include "rpc/server.h"
 #include "txmempool.h"
 #include "util.h"
-#include "utilstrencodings.h"
+#include "util/strencodings.h"
 #include "arith_uint256.h"
 #include "warnings.h"
 #include "witnessutil.h"
-#include "utilstrencodings.h"
 #include <compat/sys.h>
 
 #include <memory>

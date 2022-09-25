@@ -55,7 +55,7 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "witnessutil.h"
-#include "utilmoneystr.h"
+#include "util/moneystr.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"

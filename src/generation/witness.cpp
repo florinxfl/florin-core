@@ -32,8 +32,8 @@
 #include "timedata.h"
 #include "txmempool.h"
 #include "util.h"
-#include "utiltime.h"
-#include "utilmoneystr.h"
+#include "util/time.h"
+#include "util/moneystr.h"
 #include "validation/validationinterface.h"
 #include "init.h"
 

@@ -216,9 +216,9 @@ CORE_H = rpc/accounts.h \
   ui_interface.h \
   undo.h \
   util.h \
-  utilmoneystr.h \
-  utilstrencodings.h \
-  utiltime.h \
+  util/moneystr.h \
+  util/strencodings.h \
+  util/time.h \
   validation/validation.h \
   validation/witnessvalidation.h \
   validation/versionbitsvalidation.h \
@@ -679,9 +679,9 @@ lib_util_a_SOURCES = \
   sync.cpp \
   threadinterrupt.cpp \
   util.cpp \
-  utilmoneystr.cpp \
-  utilstrencodings.cpp \
-  utiltime.cpp \
+  util/moneystr.cpp \
+  util/strencodings.cpp \
+  util/time.cpp \
   $(CORE_H)
 
 # generic: shared between everything except the unity libraries (which provide their own specialised implementations)
