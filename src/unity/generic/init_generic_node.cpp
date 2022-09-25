@@ -22,6 +22,7 @@
 #include "util.h"
 #include "util/moneystr.h"
 #include "validation/validation.h"
+#include "node/context.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
@@ -250,7 +251,8 @@ void InitRegisterRPC()
         RegisterWalletRPCCommands(tableRPC);
     #endif
 }
-void ServerInterrupt(boost::thread_group& threadGroup)
+
+void ServerInterrupt()
 {
     InterruptHTTPServer();
     InterruptHTTPRPC();
@@ -259,7 +261,7 @@ void ServerInterrupt(boost::thread_group& threadGroup)
     InterruptTorControl();
 }
 
-void ServerShutdown(boost::thread_group& threadGroup)
+void ServerShutdown(node::NodeContext& nodeContext)
 {
     StopHTTPServer();
     StopHTTPRPC();
@@ -268,6 +270,10 @@ void ServerShutdown(boost::thread_group& threadGroup)
     StopREST();
     MilliSleep(20); //Allow other threads (UI etc. a chance to cleanup as well)
     StopTorControl();
+    // After everything has been shut down, but before things get flushed, stop the
+    // CScheduler/checkqueue, scheduler and load block thread.
+    if (nodeContext.scheduler) nodeContext.scheduler->stop();
+    StopScriptCheckWorkerThreads();
 }
 
 static void OnRPCStarted()
@@ -292,7 +298,7 @@ static void OnRPCPreCommand(const CRPCCommand& cmd)
         throw JSONRPCError(RPC_FORBIDDEN_BY_SAFE_MODE, std::string("Safe mode: ") + strWarning);
 }
 
-static bool AppInitServers(boost::thread_group& threadGroup)
+static bool AppInitServers()
 {
     RPCServer::OnStarted(&OnRPCStarted);
     RPCServer::OnStopped(&OnRPCStopped);
@@ -310,20 +316,22 @@ static bool AppInitServers(boost::thread_group& threadGroup)
     return true;
 }
 
-bool InitRPCWarmup(boost::thread_group& threadGroup)
+bool InitRPCWarmup()
 {
     if (GetBoolArg("-server", false))
     {
         uiInterface.InitMessage.connect(SetRPCWarmupStatus);
-        if (!AppInitServers(threadGroup))
+        if (!AppInitServers())
             return InitError(errortr("Unable to start HTTP server. See debug log for details."));
     }
     return true;
 }
 
-bool InitTor(boost::thread_group& threadGroup, CScheduler& scheduler)
+bool InitTor()
 {
     if (GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
-        StartTorControl(threadGroup, scheduler);
+        StartTorControl();
     return true;
 }
+
+

@@ -180,4 +180,4 @@ private:
 };
 
 
-#endif
+#endif // TEST_BIGNUM_H

@@ -18,18 +18,15 @@
 #include "script/sigcache.h"
 #include "torcontrol.h"
 #include "txdb.h"
-#include "ui_interface.h"
 #include "util.h"
 #include "util/moneystr.h"
-#include "validation/validation.h"
-#include "node/context.h"
+#include <warnings.h>
+#include "init.h"
+
+
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
-#include "warnings.h"
-
-
-#include <boost/thread.hpp>
 
 //If we want to translate help messages in future we can replace helptr with _ and everything will just work.
 #define helptr(x) std::string(x)
@@ -247,11 +244,12 @@ std::string HelpMessage(HelpMessageMode mode)
 void InitRegisterRPC()
 {
 }
-void ServerInterrupt(boost::thread_group& threadGroup)
+
+void ServerInterrupt()
 {
 }
 
-void ServerShutdown(boost::thread_group& threadGroup, node::NodeContext& nodeContext)
+void ServerShutdown(node::NodeContext& nodeContext)
 {
 }
 
@@ -267,17 +265,19 @@ static void OnRPCPreCommand(const CRPCCommand& cmd)
 {
 }
 
-static bool AppInitServers(boost::thread_group& threadGroup)
+static bool AppInitServers()
 {
     return true;
 }
 
-bool InitRPCWarmup(boost::thread_group& threadGroup)
+bool InitRPCWarmup()
 {
     return true;
 }
 
-bool InitTor(boost::thread_group& threadGroup, CScheduler& scheduler)
+bool InitTor()
 {
     return true;
 }
+
+

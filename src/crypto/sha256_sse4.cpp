@@ -8,7 +8,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifdef COMPILER_HAS_SSE4
+#include <compat/sys.h>
+#include <compat/arch.h>
+
+#if defined(ARCH_X86_64) && defined(COMPILER_HAS_SSE4) && !defined(PLATFORM_MOBILE_ANDROID)
 
 namespace sha256_sse4
 {

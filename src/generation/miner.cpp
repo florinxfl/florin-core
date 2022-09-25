@@ -28,7 +28,6 @@
 #include "hash.h"
 #include "validation/validation.h"
 #include "validation/witnessvalidation.h"
-#include "net.h"
 #include "policy/feerate.h"
 #include "policy/policy.h"
 #include "pow/pow.h"
@@ -64,7 +63,6 @@
 #include "streams.h"
 #include <boost/scope_exit.hpp>
 
-#include "alert.h"
 #include "base58.h"
 
 //

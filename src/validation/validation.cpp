@@ -435,13 +435,12 @@ void static InvalidChainFound(CBlockIndex* pindexNew)
 
     LogPrintf("%s: invalid block=%s  height=%d  log2_work=%.8g  date=%s\n", __func__,
       pindexNew->GetBlockHashPoW2().ToString(), pindexNew->nHeight,
-      log(pindexNew->nChainWork.getdouble())/log(2.0), DateTimeStrFormat("%Y-%m-%d %H:%M:%S",
-      pindexNew->GetBlockTime()));
+      log(pindexNew->nChainWork.getdouble())/log(2.0), FormatISO8601DateTime(pindexNew->GetBlockTime()));
     CBlockIndex *tip = chainActive.Tip();
     assert (tip);
     LogPrintf("%s:  current best=%s  height=%d  log2_work=%.8g  date=%s\n", __func__,
       tip->GetBlockHashPoW2().ToString(), chainActive.Height(), log(tip->nChainWork.getdouble())/log(2.0),
-      DateTimeStrFormat("%Y-%m-%d %H:%M:%S", tip->GetBlockTime()));
+      FormatISO8601DateTime(tip->GetBlockTime()));
     CheckForkWarningConditions();
 }
 
@@ -874,7 +873,7 @@ static int64_t nTimeTotal = 0;
  *  Validity checks that depend on the UTXO set are also done; ConnectBlock()
  *  can fail if those validity checks fail (among other reasons). */
 bool ConnectBlock(CChain& chain, const CBlock& block, CValidationState& state, CBlockIndex* pindex,
-                  CCoinsViewCache& view, const CChainParams& chainparams, bool fJustCheck, bool fVerifyWitness)
+                  CCoinsViewCache& view, const CChainParams& chainparams, bool fJustCheck, bool fVerifyWitness, bool fDoScriptChecks)
 {
     if (!ContextualCheckBlock(block, state, chainparams, pindex->pprev, chain, &view, true))
         return error("%s: Consensus::CheckBlock, failed ContextualCheckBlock with utxo check: %s", __func__, FormatStateMessage(state));
@@ -1063,10 +1062,10 @@ bool ConnectBlock(CChain& chain, const CBlock& block, CValidationState& state, C
         }
     }
 
+    //NB! This must occur before CCheckQueueControl to prevent CCheckQueueControl re-entrancy.
     //fixme: (PHASE5) After phase4 activates the below re-entrancy from WitnessCoinbaseInfoIsValid is no longer a thing.
     //So we can move this down and combine it with the scope where we check:
     //unsigned int nWitnessCoinbasePayoutIndex = nWitnessCoinbaseIndex + 1;
-    //NB! This must occur before CCheckQueueControl to prevent CCheckQueueControl re-entrancy.
     unsigned int nWitnessCoinbaseIndex = 0;
     if (block.nVersionPoW2Witness == 0)
     {
@@ -1096,7 +1095,7 @@ bool ConnectBlock(CChain& chain, const CBlock& block, CValidationState& state, C
         }
     }
 
-    CCheckQueueControl<CScriptCheck> control(fScriptChecks && nScriptCheckThreads ? &scriptcheckqueue : NULL);
+    CCheckQueueControl<CScriptCheck> control(fDoScriptChecks && fScriptChecks && nScriptCheckThreads ? &scriptcheckqueue : NULL);
 
     CAmount nFees = 0;
     CAmount nFeesPoW2Witness = 0;
@@ -1646,7 +1645,7 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
         LogPrintf("%s: new best=%s height=%d version=0x%08x versionpow2=0x%08x log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)", __func__,
             chainActive.Tip()->GetBlockHashPoW2().ToString(), chainActive.Height(), chainActive.Tip()->nVersion, chainActive.Tip()->nVersionPoW2Witness,
             log(chainActive.Tip()->nChainWork.getdouble())/log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
-            DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
+            FormatISO8601DateTime(chainActive.Tip()->GetBlockTime()),
             GuessVerificationProgress(chainActive.Tip()), pcoinsTip->DynamicMemoryUsage() * (1.0 / (1<<20)), pcoinsTip->GetCacheSize());
         if (!warningMessages.empty())
             LogPrintf(" warning='%s'", boost::algorithm::join(warningMessages, ", "));
@@ -3674,7 +3673,7 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
 
     LogPrintf("%s: hashBestChain=%s height=%d date=%s progress=%f\n", __func__,
         chainActive.Tip()->GetBlockHashPoW2().ToString(), chainActive.Height(),
-        DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
+        FormatISO8601DateTime(chainActive.Tip()->GetBlockTime()),
         GuessVerificationProgress(chainActive.Tip()));
 
     return true;
@@ -4292,7 +4291,7 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
 
 std::string CBlockFileInfo::ToString() const
 {
-    return strprintf("CBlockFileInfo(blocks=%u, size=%u, heights=%u...%u, time=%s...%s)", nBlocks, nSize, nHeightFirst, nHeightLast, DateTimeStrFormat("%Y-%m-%d", nTimeFirst), DateTimeStrFormat("%Y-%m-%d", nTimeLast));
+    return strprintf("CBlockFileInfo(blocks=%u, size=%u, heights=%u...%u, time=%s...%s)", nBlocks, nSize, nHeightFirst, nHeightLast, FormatISO8601DateTime(nTimeFirst), FormatISO8601DateTime(nTimeLast));
 }
 
 CBlockFileInfo* GetBlockFileInfo(size_t n)
