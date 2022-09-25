@@ -21,7 +21,7 @@
 #include "net.h"
 #include "alert.h"
 #include "appname.h"
-#include "utilmoneystr.h"
+#include "util/moneystr.h"
 #include "wallet.h"
 
 static witnessOutputsInfoVector getCurrentOutputsForWitnessAccount(CAccount* forAccount)
