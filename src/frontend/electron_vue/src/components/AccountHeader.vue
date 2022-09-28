@@ -266,7 +266,7 @@ export default {
                 alert(err.message);
                 this.dismissIndicator();
               });
-          } else if (infoResult.data.available === 0 && infoResult.data.active === "0") {
+          } else if (infoResult.data.available === 0) {
             // Add account for the first time.
             result = await BackendUtilities.holdinAPIActions(key, "add");
             if (result.status_code === 200) {
