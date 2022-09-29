@@ -79,19 +79,6 @@ prepend_to_search_env_var() {
     export "${1}=${2}${!1:+:}${!1}"
 }
 
-case "$HOST" in
-    *darwin*)
-        # When targeting darwin, zlib is required by native_libdmg-hfsplus.
-        zlib_store_path=$(store_path "zlib")
-        zlib_static_store_path=$(store_path "zlib" static)
-
-        prepend_to_search_env_var LIBRARY_PATH "${zlib_static_store_path}/lib:${zlib_store_path}/lib"
-        prepend_to_search_env_var C_INCLUDE_PATH "${zlib_store_path}/include"
-        prepend_to_search_env_var CPLUS_INCLUDE_PATH "${zlib_store_path}/include"
-        prepend_to_search_env_var OBJC_INCLUDE_PATH "${zlib_store_path}/include"
-        prepend_to_search_env_var OBJCPLUS_INCLUDE_PATH "${zlib_store_path}/include"
-esac
-
 # Set environment variables to point the CROSS toolchain to the right
 # includes/libs for $HOST
 case "$HOST" in
@@ -244,6 +231,7 @@ CONFIGFLAGS="--enable-reduce-exports --disable-bench --disable-gui-tests --disab
 
 # CFLAGS
 HOST_CFLAGS="-O2 -g"
+HOST_CFLAGS+=$(find /gnu/store -maxdepth 1 -mindepth 1 -type d -exec echo -n " -ffile-prefix-map={}=/usr" \;)
 case "$HOST" in
     *linux*)  HOST_CFLAGS+=" -ffile-prefix-map=${PWD}=." ;;
     *mingw*)  HOST_CFLAGS+=" -fno-ident" ;;
