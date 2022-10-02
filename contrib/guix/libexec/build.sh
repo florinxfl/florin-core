@@ -273,15 +273,15 @@ mkdir -p "$DISTSRC"
 
     case "$HOST" in
         *mingw*)
-            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/gulden/depends/${HOST}/include/node -I/gulden/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -DNODE_HOST_BINARY=node.exe -DUSING_UV_SHARED=1 -DUSING_V8_SHARED=1 -DV8_DEPRECATION_WARNINGS=1 -DV8_DEPRECATION_WARNINGS -DV8_IMMINENT_DEPRECATION_WARNINGS -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DBUILDING_NODE_EXTENSION -D_WINDLL -lminiupnpc"
+            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/florin/depends/${HOST}/include/node -I/florin/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -DNODE_HOST_BINARY=node.exe -DUSING_UV_SHARED=1 -DUSING_V8_SHARED=1 -DV8_DEPRECATION_WARNINGS=1 -DV8_DEPRECATION_WARNINGS -DV8_IMMINENT_DEPRECATION_WARNINGS -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DBUILDING_NODE_EXTENSION -D_WINDLL -lminiupnpc"
             export HOST_LDFLAGS="${HOST_LDFLAGS} -fPIC -Bsymbolic -lnode -Wl,--gc-sections"
         ;;
         *darwin*)
-            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/gulden/depends/${HOST}/include/node -I/gulden/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -D_HAS_EXCEPTIONS=1"
+            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/florin/depends/${HOST}/include/node -I/florin/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -D_HAS_EXCEPTIONS=1"
             export HOST_LDFLAGS="${HOST_LDFLAGS} -fPIC -Bsymbolic -Wl,-undefined -Wl,dynamic_lookup"
         ;;
         *linux*)
-            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/gulden/depends/${HOST}/include/node -I/gulden/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -lminiupnpc"
+            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/florin/depends/${HOST}/include/node -I/florin/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -lminiupnpc"
             export HOST_LDFLAGS="${HOST_LDFLAGS} -fPIC -Bsymbolic -Wl,--gc-sections"
         ;;
     esac
@@ -297,7 +297,7 @@ mkdir -p "$DISTSRC"
                     --disable-ccache \
                     --disable-maintainer-mode \
                     --disable-dependency-tracking \
-                    --with-protoc-bindir=/gulden/depends/${HOST}/native/bin/ \
+                    --with-protoc-bindir=/florin/depends/${HOST}/native/bin/ \
                     ${CONFIGFLAGS} \
                     ${HOST_CFLAGS:+CFLAGS="${HOST_CFLAGS}"} \
                     ${HOST_CXXFLAGS:+CXXFLAGS="${HOST_CXXFLAGS}"} \
@@ -305,7 +305,7 @@ mkdir -p "$DISTSRC"
 
     sed -i.old 's/-lstdc++ //g' config.status libtool
 
-    # Build Gulden
+    # Build Florin
     make --jobs="$JOBS" ${V:+V=1}
 
     # Check that symbol/security checks tools are sane.
@@ -334,12 +334,12 @@ mkdir -p "$DISTSRC"
             ;;
     esac
 
-    # Setup the directory where our Gulden build for HOST will be
+    # Setup the directory where our Florin build for HOST will be
     # installed. This directory will also later serve as the input for our
     # binary tarballs.
     INSTALLPATH="${PWD}/installed/${DISTNAME}"
     mkdir -p "${INSTALLPATH}"
-    # Install built Gulden to $INSTALLPATH
+    # Install built Florin to $INSTALLPATH
     case "$HOST" in
         *darwin*)
             make install-strip DESTDIR="${INSTALLPATH}" ${V:+V=1}
@@ -352,15 +352,15 @@ mkdir -p "$DISTSRC"
     mkdir ${OUTDIR}/nodelib
     case "$HOST" in
         *mingw*)
-            cp -f src/.libs/lib_unity_node_js-0.dll ${OUTDIR}/nodelib/libgulden_${HOST}.node
+            cp -f src/.libs/lib_unity_node_js-0.dll ${OUTDIR}/nodelib/libflorin_${HOST}.node
         ;;
         *darwin*)
-            cp -f src/.libs/lib_unity_node_js.0.so ${OUTDIR}/nodelib/libgulden_${HOST}.node
+            cp -f src/.libs/lib_unity_node_js.0.so ${OUTDIR}/nodelib/libflorin_${HOST}.node
         ;;
         *)
-            cp -f src/.libs/lib_unity_node_js.so.0.0.0 ${OUTDIR}/nodelib/libgulden_${HOST}.node
+            cp -f src/.libs/lib_unity_node_js.so.0.0.0 ${OUTDIR}/nodelib/libflorin_${HOST}.node
     esac
-    ${DISTSRC}/contrib/devtools/split-debug.sh ${OUTDIR}/nodelib/libgulden_${HOST}.node ${OUTDIR}/nodelib/libgulden_${HOST}.node ${OUTDIR}/nodelib/libgulden_${HOST}.node.dbg
+    ${DISTSRC}/contrib/devtools/split-debug.sh ${OUTDIR}/nodelib/libflorin_${HOST}.node ${OUTDIR}/nodelib/libflorin_${HOST}.node ${OUTDIR}/nodelib/libflorin_${HOST}.node.dbg
 
     (
         cd installed
