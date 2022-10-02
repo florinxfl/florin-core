@@ -276,9 +276,14 @@ mkdir -p "$DISTSRC"
             export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/gulden/depends/${HOST}/include/node -I/gulden/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -DNODE_HOST_BINARY=node.exe -DUSING_UV_SHARED=1 -DUSING_V8_SHARED=1 -DV8_DEPRECATION_WARNINGS=1 -DV8_DEPRECATION_WARNINGS -DV8_IMMINENT_DEPRECATION_WARNINGS -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DBUILDING_NODE_EXTENSION -D_WINDLL -lminiupnpc"
             export HOST_LDFLAGS="${HOST_LDFLAGS} -fPIC -Bsymbolic -lnode -Wl,--gc-sections"
         ;;
-        *)
+        *darwin*)
+            export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/gulden/depends/${HOST}/include/node -I/gulden/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -D_HAS_EXCEPTIONS=1"
+            export HOST_LDFLAGS="${HOST_LDFLAGS} -fPIC -Bsymbolic -Wl,-undefined -Wl,dynamic_lookup"
+        ;;
+        *linux*)
             export HOST_CXXFLAGS="${HOST_CXXFLAGS} -I/gulden/depends/${HOST}/include/node -I/gulden/depends/${HOST}/include/node-addon-api -fPIC -fdata-sections -ffunction-sections -fomit-frame-pointer -DNAPI_VERSION=5 -DDJINNI_NODEJS -lminiupnpc"
             export HOST_LDFLAGS="${HOST_LDFLAGS} -fPIC -Bsymbolic -Wl,--gc-sections"
+        ;;
     esac
     export HOST_CFLAGS=${HOST_CFLAGS}
     #end electron specific setup
@@ -349,32 +354,14 @@ mkdir -p "$DISTSRC"
         *mingw*)
             cp -f src/.libs/lib_unity_node_js-0.dll ${OUTDIR}/nodelib/libgulden_${HOST}.node
         ;;
+        *darwin*)
+            cp -f src/.libs/lib_unity_node_js.0.so ${OUTDIR}/nodelib/libgulden_${HOST}.node
+        ;;
         *)
             cp -f src/.libs/lib_unity_node_js.so.0.0.0 ${OUTDIR}/nodelib/libgulden_${HOST}.node
     esac
     ${DISTSRC}/contrib/devtools/split-debug.sh ${OUTDIR}/nodelib/libgulden_${HOST}.node ${OUTDIR}/nodelib/libgulden_${HOST}.node ${OUTDIR}/nodelib/libgulden_${HOST}.node.dbg
 
-    case "$HOST" in
-        *darwin*)
-            make osx_volname ${V:+V=1}
-            make deploydir ${V:+V=1}
-            mkdir -p "unsigned-app-${HOST}"
-            cp  --target-directory="unsigned-app-${HOST}" \
-                osx_volname \
-                contrib/macdeploy/detached-sig-create.sh \
-                "${BASEPREFIX}/${HOST}"/native/bin/dmg
-            mv --target-directory="unsigned-app-${HOST}" dist
-            (
-                cd "unsigned-app-${HOST}"
-                find . -print0 \
-                    | sort --zero-terminated \
-                    | tar --create --no-recursion --mode='u+rw,go+r-w,a+X' --null --files-from=- \
-                    | pigz -9n > "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.tar.gz" \
-                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.tar.gz" && exit 1 )
-            )
-            make deploy ${V:+V=1} OSX_DMG="${OUTDIR}/${DISTNAME}-${HOST}-unsigned.dmg"
-            ;;
-    esac
     (
         cd installed
 
