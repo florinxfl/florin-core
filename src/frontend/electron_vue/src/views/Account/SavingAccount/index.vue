@@ -203,9 +203,16 @@ export default {
       this.initialize();
     },
     compoundingPercent() {
-      WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
-      if (this.keyHash) {
-        BackendUtilities.holdinAPIActions(this.keyHash, "distribution", this.compoundingPercent);
+      // Prevent calling this on initialization.
+      if (this.compoundingPercent === 0) {
+        return;
+      } else {
+        if (this.keyHash) {
+          BackendUtilities.holdinAPIActions(this.keyHash, "distribution", this.compoundingPercent);
+          WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
+        } else {
+          WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
+        }
       }
     }
   },
@@ -213,12 +220,24 @@ export default {
     initialize() {
       this.updateStatistics();
 
-      this.compoundingPercent = WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent || 0;
-      AccountsController.ListAccountLinksAsync(this.account.UUID).then(result => {
+      this.compoundingPercent = parseInt(WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent) || 0;
+
+      AccountsController.ListAccountLinksAsync(this.account.UUID).then(async result => {
         const findHoldin = result.find(element => element.serviceName == "holdin");
 
         if (findHoldin) {
+          // Use the Holdin %
           this.keyHash = findHoldin.serviceData;
+          let infoResult = await BackendUtilities.holdinAPIActions(this.keyHash, "getinfo");
+
+          if (infoResult.data.compound) {
+            this.compoundingPercent = parseInt(infoResult.data.compound);
+          } else {
+            this.compoundingPercent = parseInt(WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent) || 0;
+          }
+        } else {
+          // Use the Florin compounding Percent
+          this.compoundingPercent = parseInt(WitnessController.GetAccountWitnessStatistics(this.account.UUID).compounding_percent) || 0;
         }
       });
 
