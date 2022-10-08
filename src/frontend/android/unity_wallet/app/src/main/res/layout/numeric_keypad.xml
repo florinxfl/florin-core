@@ -166,12 +166,13 @@ file COPYING
         android:layout_marginBottom="@dimen/keypad_key_gap_size"
         >
 
-        <Button
+        <TextView
             android:id="@+id/button_currency"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:background="@drawable/shape_square_button"
             android:text=""
+            android:gravity="center"
             android:textColor="@android:color/white" />
 
         <Button

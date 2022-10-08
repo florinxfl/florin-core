@@ -51,10 +51,12 @@ class SendCoinsFragment : BottomSheetDialogFragment(), CoroutineScope
         set(value)
         {
             field = value
+            var nativeIcon = SpannableString(" ")
+            nativeIcon.setSpan(ImageSpan(requireContext(), R.drawable.ic_logo_white), 0, 1, 0)
             when (entryMode)
             {
-                EntryMode.Local -> mMainlayout.findViewById<Button>(R.id.button_currency).text = "F"
-                EntryMode.Native -> mMainlayout.findViewById<Button>(R.id.button_currency).text = foreignCurrency.short
+                EntryMode.Local -> mMainlayout.findViewById<TextView>(R.id.button_currency).text = nativeIcon;
+                EntryMode.Native -> mMainlayout.findViewById<TextView>(R.id.button_currency).text = foreignCurrency.short
             }
         }
     private var amountEditStr: String = "0"
@@ -200,25 +202,24 @@ class SendCoinsFragment : BottomSheetDialogFragment(), CoroutineScope
         var primaryStr = ""
         var secondaryStr = ""
         val amount = amountEditStr.toDoubleOrZero()
+        val primaryTextView = (mMainlayout.findViewById<View>(R.id.send_coins_amount_primary) as TextView?)
+        val secondaryTextView = (mMainlayout.findViewById<View>(R.id.send_coins_amount_secondary) as TextView?)
         when (entryMode) {
             EntryMode.Native -> {
-                primaryStr = "F %s".format(amountEditStr)
+                primaryStr = "%s".format(amountEditStr)
                 if (localRate > 0.0) {
                     secondaryStr = String.format("(%s %.${foreignCurrency.precision}f)", foreignCurrency.short, localRate * amount)
                 }
-
-
             }
             EntryMode.Local -> {
                 primaryStr = "%s %s".format(foreignCurrency.short, amountEditStr)
                 if (localRate > 0.0) {
-                    secondaryStr = String.format("(F %.${PRECISION_SHORT}f)", amount / localRate)
+                    secondaryStr = String.format("(%.${PRECISION_SHORT}f)", amount / localRate)
                 }
             }
         }
-
-        (mMainlayout.findViewById<View>(R.id.send_coins_amount_primary) as TextView?)?.text = primaryStr
-        (mMainlayout.findViewById<View>(R.id.send_coins_amount_secondary) as TextView?)?.text = secondaryStr
+        primaryTextView?.text = primaryStr
+        secondaryTextView?.text = secondaryStr
     }
 
     private fun performAuthenticatedPayment(d : Dialog, request : UriRecipient, msg: String?, subtractFee: Boolean = false)

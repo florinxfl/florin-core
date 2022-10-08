@@ -126,7 +126,7 @@ class SyncService : Service(), UnityCore.Observer
                 .setContentTitle("Florin")
                 .setTicker("Florin")
                 .setContentText("Florin")
-                .setSmallIcon(R.drawable.ic_logo_minimal)
+                .setSmallIcon(R.drawable.ic_logo)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
 

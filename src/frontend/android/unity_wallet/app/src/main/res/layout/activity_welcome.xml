@@ -33,11 +33,11 @@ file COPYING
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_square_button_with_border"
+            android:background="@drawable/shape_square_button"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:text="@string/welcome_activity_create_new_wallet"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/text_button" />
 
         <Button
             android:id="@+id/recover_wallet_button"
@@ -45,11 +45,11 @@ file COPYING
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:background="@drawable/shape_square_button_with_border"
+            android:background="@drawable/shape_square_button"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:text="@string/welcome_activity_recover_existing_wallet"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/text_button" />
 
         <Button
             android:id="@+id/sync_with_desktop_button"
@@ -57,24 +57,23 @@ file COPYING
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:background="@drawable/shape_square_button_with_border"
+            android:background="@drawable/shape_square_button"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:text="@string/welcome_activity_sync_with_desktop"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/text_button" />
     </TableLayout>
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
+        android:layout_width="@dimen/top_logo_size"
+        android:layout_height="@dimen/top_logo_size"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:contentDescription="@string/image_content_description_logo"
-        android:src="@drawable/ic_logo_minimal"
-        app:tint="@android:color/white"
+        android:src="@drawable/ic_logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_logo_minimal" />
+        app:srcCompat="@drawable/ic_logo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,7 +11,8 @@ file COPYING
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical|center_horizontal"
-    tools:context="unity_wallet.main_activity_fragments.ReceiveFragment">
+    tools:context="unity_wallet.main_activity_fragments.ReceiveFragment"
+    android:background="@color/bg_main">
 
     <Space
         android:id="@+id/top"
@@ -56,7 +57,7 @@ file COPYING
         android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/bg_bright"
+        android:background="@color/bg_main"
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -78,7 +79,7 @@ file COPYING
             android:background="@drawable/shape_square_button"
             android:text="@string/action_bar_buy"
             android:textAllCaps="false"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/text_button" />
 
         <Button
             android:id="@+id/shareButton"
@@ -96,7 +97,7 @@ file COPYING
             android:maxLines="2"
             android:text="@string/action_bar_share"
             android:textAllCaps="false"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/text_button" />
 
     </LinearLayout>
 

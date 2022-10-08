@@ -35,14 +35,14 @@ class PeerListFragment : AppBaseFragment(), CoroutineScope {
         val viewModel = ViewModelProviders.of(this).get(PeerListViewModel::class.java)
 
         // observe peer changes
-        viewModel.getPeers().observe(viewLifecycleOwner) { peers ->
+        viewModel.getPeers().observe(viewLifecycleOwner, { peers ->
             if (peers.isEmpty()) {
                 peer_list_group.displayedChild = 1
             } else {
                 peer_list_group.displayedChild = 2
                 adapter.submitList(peers)
             }
-        }
+        })
 
         // periodically update peers
         peerUpdateJob = launch(Dispatchers.Main) {

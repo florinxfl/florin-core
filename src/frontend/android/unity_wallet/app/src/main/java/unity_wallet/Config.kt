@@ -7,7 +7,7 @@ class Config {
         const val PRECISION_FULL = 8
         val DEFAULT_CURRENCY_CODE get() = getDefaultCurrencyCode()
         const val USER_AGENT = "/Florin android:${BuildConfig.VERSION_NAME}/"
-        const val BLOCK_EXPLORER_TX_TEMPLATE = "https://www.dactual.com/transaction.php?tx=%s"
+        const val BLOCK_EXPLORER_TX_TEMPLATE = "https://florin.chainviewer.org/tx/%s"
         const val BLOCK_EXPLORER_BLOCK_TEMPLATE = "https://blockchain.florin.org/block/%s"
         const val AUDIBLE_NOTIFICATIONS_INTERVAL = 30 * 1000
         const val USE_RATE_PRECISION = true

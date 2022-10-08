@@ -139,46 +139,49 @@ class SendFragment : AppBaseFragment(), UnityCore.Observer {
             val MyRequestQueue = Volley.newRequestQueue(context)
             val failURL = "https://florin.org/sell"
             val request = object : StringRequest(Request.Method.POST,"https://blockhut.com/buysession.php",
-                    Response.Listener { response ->
-                        try
-                        {
-                            var jsonResponse = JSONObject(response)
-                            if (jsonResponse.getInt("status_code") == 200)
-                            {
-                                var sessionID = jsonResponse.getString("sessionid")
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://blockhut.com/sellflorin.php?sessionid=%s".format(sessionID)))
-                                startActivity(intent)
-                            }
-                            else
-                            {
-                                // Redirect user to the default fallback site
-                                //fixme: Do something with the status message here
-                                //var statusMessage = jsonResponse.getString("status_message")
-                                val intent = Intent(failURL)
-                                startActivity(intent)
-                            }
-                        }
-                        catch (e:Exception)
-                        {
-                            // Redirect user to the default fallback site
-                            //fixme: Do something with the error message here
-                            val intent = Intent(failURL)
-                            startActivity(intent)
-                        }
-                    },
-                    Response.ErrorListener
+                Response.Listener { response ->
+                    try
                     {
-                        // If we are sure its a local connectivity issue, alert the user, otherwise send them to the default fallback site
-                        if (it is NetworkError || it is AuthFailureError || it is NoConnectionError)
+                        var jsonResponse = JSONObject(response);
+                        if (jsonResponse.getInt("status_code") == 200)
                         {
-                            Toast.makeText(context, getString(unity_wallet.R.string.error_check_internet_connection), Toast.LENGTH_SHORT).show()
+                            var sessionID = jsonResponse.getString("sessionid")
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://blockhut.com/sellflorin.php?sessionid=%s".format(sessionID)))
+                            startActivity(intent)
                         }
                         else
                         {
+                            // Redirect user to the default fallback site
+                            //fixme: Do something with the status message here
+                            //var statusMessage = jsonResponse.getString("status_message")
                             val intent = Intent(failURL)
                             startActivity(intent)
                         }
                     }
+                    catch (e:Exception)
+                    {
+                        // Redirect user to the default fallback site
+                        //fixme: Do something with the error message here
+                        val intent = Intent(failURL)
+                        startActivity(intent)
+                    }
+                },
+                Response.ErrorListener
+                {
+                   // If we are sure its a local connectivity issue, alert the user, otherwise send them to the default fallback site
+                   if (it is NetworkError || it is AuthFailureError || it is NoConnectionError)
+                   {
+                       Toast.makeText(context, getString(unity_wallet.R.string.error_check_internet_connection), Toast.LENGTH_SHORT).show()
+                   }
+                   else
+                   {
+                       // Redirect user to the default fallback site
+                       //fixme: Do something with the status message here
+                       //var statusMessage = jsonResponse.getString("status_message")
+                       val intent = Intent(failURL)
+                       startActivity(intent)
+                   }
+                }
             )
             // Force values to be send at x-www-form-urlencoded
             {
