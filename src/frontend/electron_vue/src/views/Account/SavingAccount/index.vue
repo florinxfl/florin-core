@@ -95,7 +95,7 @@
             <footer-button title="buttons.saving_key" :icon="['fal', 'key']" routeName="link-saving-account" @click="routeTo" />
             <footer-button title="buttons.transactions" :icon="['far', 'list-ul']" routeName="transactions" @click="routeTo" />
             <footer-button title="buttons.send" :icon="['fal', 'arrow-from-bottom']" routeName="send-saving" @click="routeTo" />
-            <footer-button v-if="optimiseButtonVisible" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
+            <footer-button :class="optimiseButtonClass" title="buttons.optimise" :icon="['fal', 'redo-alt']" routeName="optimise-account" @click="routeTo" />
             <footer-button v-if="renewButtonVisible" title="buttons.renew" :icon="['fal', 'redo-alt']" routeName="renew-account" @click="routeTo" />
           </div>
         </div>
@@ -185,6 +185,14 @@ export default {
     optimiseButtonVisible() {
       return this.getStatistics("is_optimal") === false;
     },
+    optimiseButtonClass() {
+      if (this.getStatistics("is_optimal") === true && this.getStatistics("blocks_since_last_activity") < 100) {
+        return "optimise-button-inactive";
+      } else if (this.getStatistics("is_optimal") === false) {
+        return "optimise-button-hidden";
+      }
+      return "";
+    },
     totalBalanceFiat() {
       if (!this.rate) return "";
       return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
@@ -269,8 +277,12 @@ export default {
       return classNames;
     },
     routeTo(route) {
-      if (this.$route.name === route) return;
-      this.$router.push({ name: route, params: { id: this.account.UUID } });
+      if (route === "optimise-account" && this.optimiseButtonClass === "optimise-button-inactive") {
+        alert("Cannot perform this operation while account is in cooldown, please wait and try again later.");
+      } else {
+        if (this.$route.name === route) return;
+        this.$router.push({ name: route, params: { id: this.account.UUID } });
+      }
     },
     isOverflown(e) {
       // Determine whether to show the overflow arrow
@@ -373,5 +385,11 @@ export default {
   left: -30;
   align-items: center;
   bottom: 0;
+}
+.optimise-button-inactive {
+  color: #a8a8a8;
+}
+.optimise-button-hidden {
+  display: none !important;
 }
 </style>
