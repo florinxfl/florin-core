@@ -89,7 +89,8 @@
     "percent": "%",
     "add_to_holdin": "Add to holdin.com",
     "remove_from_holdin": "Remove from holdin.com",
-    "optimise_holding_account": "Select Funding Account"
+    "optimise_holding_account": "Select Funding Account",
+    "optimise_info": "Your account currently has {parts} parts. After optimisation, your account will have {futureOptimalAmount} parts."
   },
   "loader": {
     "shutdown": "Shutting down...",
