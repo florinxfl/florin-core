@@ -276,9 +276,12 @@ app.on("ready", async () => {
 async function updateRate(seconds) {
   try {
     // use blockhut api instead of https://api.florin.org/api/v1/ticker
-    const response = await axios.get("https://blockhut.com/florin/xfleuro.json");
+    // const response = await axios.get("https://blockhut.com/florin/xfleuro.json"); // Deprecated
+    const response = await axios.get("https://florin.chainviewer.org/api/v1/ticker");
+    const currentRate = response.data.data.find(item => item.code.toLowerCase() === store.state.app.currency.value.toLowerCase());
 
-    store.dispatch("app/SET_RATE", response.data.eurxfl);
+    store.dispatch("app/SET_RATE", currentRate.rate);
+    store.dispatch("app/SET_CURRENCIES", response.data.data);
   } catch (error) {
     console.error(error);
   } finally {

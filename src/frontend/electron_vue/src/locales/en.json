@@ -122,7 +122,8 @@
     "choose_language": "Language",
     "choose_decimal_places": "Decimal places",
     "english": "EN",
-    "dutch": "NL"
+    "dutch": "NL",
+    "select_display_currency": "Select Display Currency"
   },
   "setup": {
     "choose_password": "Choose a password of at least 6 characters",

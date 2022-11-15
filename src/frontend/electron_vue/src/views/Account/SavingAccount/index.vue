@@ -132,7 +132,7 @@ export default {
     this.isOverflown();
   },
   computed: {
-    ...mapState("app", ["rate", "activityIndicator"]),
+    ...mapState("app", ["rate", "activityIndicator", "currency"]),
     isAccountView() {
       return this.$route.name === "account";
     },
@@ -195,7 +195,7 @@ export default {
     },
     totalBalanceFiat() {
       if (!this.rate) return "";
-      return `€ ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
+      return `${this.currency.symbol || ""} ${formatMoneyForDisplay(this.account.balance * this.rate, true)}`;
     },
     balanceForDisplay() {
       if (this.account.balance == null) return "";
