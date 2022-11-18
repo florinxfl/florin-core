@@ -1,7 +1,15 @@
-2.x.x
+2.0.12
 
 CORE      - Implement several important fixes to the (previously disabled) fast path of the "index based" portion of the coin cache, with these fixes in place we also turn the fast path on allowing for faster coin cache computations
 RPC       - Improve "getrawtransaction" output to also show a hash for index based outpoints when "txindex" is enabled
+UI        - Add ability co change currency display between Euro and other major currencies
+UI        - Add an optimise button/dialog to help optimise holding accounts
+UI        - Integrate with holdin.com, allowing holders to link/unlink their accounts with holdin.com from within the software
+UI        - Introduce a new peers tab to the debug dialog
+UI        - Improve the way wallet lock/unlock is handled
+UI        - Add a "max" button to the send dialog
+UI        - Add ability to delete accounts when they are empty
+UI        - Variety of other minor UI improvements
 
 
 
