@@ -416,7 +416,6 @@ std::string LicenseInfo()
            + strprintf(helptr("This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit %s and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard."), "<https://www.openssl.org>")+ "\n"
            + strprintf(helptr("This product uses a licensed copy of Font Awesome Pro"))+ "\n"
            + strprintf(helptr("This product includes and uses the Lato font which is licensed under the SIL Open Font License"))+ "\n"
-           + strprintf(helptr("This product makes use of the Qt toolkit which is dynamically linked and licensed under the LGPL"))+ "\n";
 }
 
 static void BlockNotifyCallback(bool initialSync, const CBlockIndex *pBlockIndex)
