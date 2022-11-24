@@ -234,7 +234,12 @@ HOST_CFLAGS="-O2 -g"
 HOST_CFLAGS+=$(find /gnu/store -maxdepth 1 -mindepth 1 -type d -exec echo -n " -ffile-prefix-map={}=/usr" \;)
 case "$HOST" in
     *linux*)  HOST_CFLAGS+=" -ffile-prefix-map=${PWD}=." ;;
-    *mingw*)  HOST_CFLAGS+=" -fno-ident" ;;
+    *mingw*)
+        HOST_CFLAGS+=" -fno-ident"
+        # Hardening currently breaks mingw builds because it pulls libssp in as a dep; even though this isn't meant to happen (gcc is meant to be providing these symbols)
+        # disable for now until we can investigate further
+        CONFIGFLAGS+=" --disable-hardening "
+    ;;
     *darwin*) unset HOST_CFLAGS ;;
 esac
 
@@ -326,11 +331,11 @@ mkdir -p "$DISTSRC"
             # Split debug symbols
             find "release" -type f -executable -print0 | xargs -0 -P"$JOBS" -I{} "${DISTSRC}/contrib/devtools/split-debug.sh" {} {} {}.dbg
             #Sign all executables
-            find release -name "*.exe" | xargs --max-procs 32 -i sh -c "(osslsigncode -spc \"${CODESIGN_PATH}/codesign.spc\" -key \"${CODESIGN_PATH}/codesign.key\" -n \"Gulden\" -i \"https://www.Gulden.com\" -in \"{}\" -out \"{}s\") && (mv {}s {})"
+            find release -name "*.exe" | xargs --max-procs 32 -i sh -c "(osslsigncode -spc \"${CODESIGN_PATH}/codesign.spc\" -key \"${CODESIGN_PATH}/codesign.key\" -n \"Florin\" -i \"https://www.Florin.org\" -in \"{}\" -out \"{}s\") && (mv {}s {})"
             # Make os-specific installer
             make deploy ${V:+V=1}
             # Sign the installer as well; place result in output folder
-            find -name "*setup*.exe" | xargs -i sh -c "(osslsigncode -spc \"${CODESIGN_PATH}/codesign.spc\" -key \"${CODESIGN_PATH}/codesign.key\" -n \"Gulden\" -i \"https://www.Gulden.com\" -in \"{}\" -out \"${OUTDIR}/${DISTNAME}-win64-setup.exe\")"
+            find -name "*setup*.exe" | xargs -i sh -c "(osslsigncode -spc \"${CODESIGN_PATH}/codesign.spc\" -key \"${CODESIGN_PATH}/codesign.key\" -n \"Florin\" -i \"https://www.Florin.org\" -in \"{}\" -out \"${OUTDIR}/${DISTNAME}-win64-setup.exe\")"
             ;;
     esac
 
@@ -360,7 +365,14 @@ mkdir -p "$DISTSRC"
         *)
             cp -f src/.libs/lib_unity_node_js.so.0.0.0 ${OUTDIR}/nodelib/libflorin_${HOST}.node
     esac
-    ${DISTSRC}/contrib/devtools/split-debug.sh ${OUTDIR}/nodelib/libflorin_${HOST}.node ${OUTDIR}/nodelib/libflorin_${HOST}.node ${OUTDIR}/nodelib/libflorin_${HOST}.node.dbg
+
+    #darwin builds choke one split-debug.sh script, but other platforms need to run it or we have giant binaries to deal with
+    #run for every platform except darwin for now until we can make this work also on darwin
+    case "$HOST" in
+        *darwin*) ;;
+        *)
+            ${DISTSRC}/contrib/devtools/split-debug.sh ${OUTDIR}/nodelib/libflorin_${HOST}.node ${OUTDIR}/nodelib/libflorin_${HOST}.node ${OUTDIR}/nodelib/libflorin_${HOST}.node.dbg
+    esac
 
     (
         cd installed
@@ -387,7 +399,7 @@ mkdir -p "$DISTSRC"
         # Sign binaries after debug symbols split
         case "$HOST" in
         *mingw*)
-            find "${DISTNAME}/bin" -name "*.exe" | xargs --max-procs 32 -i sh -c "(osslsigncode -spc \"${CODESIGN_PATH}/codesign.spc\" -key \"${CODESIGN_PATH}/codesign.key\" -n \"Gulden\" -i \"https://www.Gulden.com\" -in \"{}\" -out \"{}s\") && (mv {}s {})"
+            find "${DISTNAME}/bin" -name "*.exe" | xargs --max-procs 32 -i sh -c "(osslsigncode -spc \"${CODESIGN_PATH}/codesign.spc\" -key \"${CODESIGN_PATH}/codesign.key\" -n \"Florin\" -i \"https://www.Florin.org\" -in \"{}\" -out \"{}s\") && (mv {}s {})"
             ;;
         esac
 
