@@ -377,7 +377,8 @@ static std::pair<bool, CMutableTransaction> CreateWitnessCoinbase(int nWitnessHe
         else if (selectedWitnessAccount->getCompounding() > 0)
         {
             auto compoundAmount = selectedWitnessAccount->getCompounding();
-            if (compoundAmount == MAX_MONEY)
+            //NB! This used to check for MAX_MONEY but RPC can't take MAX_MONEY as a paramter so we instead settle on gMaximumWitnessCompoundAmount (which is 40) here for Novo, anything over this amount can't be compound anyway so the users intentions are then clear.
+            if (compoundAmount >= gMaximumWitnessCompoundAmount)
             {
                 compoundAmount = witnessBlockSubsidy;
                 // Subsidy and any overflow fees to compound
