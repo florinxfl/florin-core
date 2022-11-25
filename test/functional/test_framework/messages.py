@@ -4,11 +4,11 @@
 # Copyright (c) 2010-2019 The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Gulden test framework primitive and message structures
+"""Munt test framework primitive and message structures
 
 CBlock, CTransaction, CBlockHeader, CTxIn, CTxOut, etc....:
     data structures that should map to corresponding structures in
-    gulden/primitives
+    munt/primitives
 
 msg_block, msg_tx, msg_headers, etc.:
     data structures that represent network messages
@@ -31,7 +31,7 @@ from test_framework.siphash import siphash256
 from test_framework.util import hex_str_to_bytes, assert_equal
 
 MIN_VERSION_SUPPORTED = 60001
-MY_VERSION = 70014  # past bip-31 for ping/pong
+MY_VERSION = 70020  # past bip-31 for ping/pong
 MY_SUBVERSION = b"/python-mininode-tester:0.0.3/"
 MY_RELAY = 1 # from version 70001 onwards, fRelay should be appended to version messages (BIP37)
 
@@ -183,7 +183,7 @@ def FromHex(obj, hex_string):
 def ToHex(obj):
     return obj.serialize().hex()
 
-# Objects that map to GuldenD objects, which can be serialized/deserialized
+# Objects that map to Munt-daemon objects, which can be serialized/deserialized
 
 
 class CAddress:
@@ -441,7 +441,7 @@ class CTransaction:
         if len(self.vin) == 0:
             flags = struct.unpack("<B", f.read(1))[0]
             # Not sure why flags can't be zero, but this
-            # matches the implementation in GuldenD
+            # matches the implementation in Munt-daemon
             if (flags != 0):
                 self.vin = deser_vector(f, CTxIn)
                 self.vout = deser_vector(f, CTxOut)
@@ -544,7 +544,7 @@ def read_compact_size(f):
 
 class CBlockHeader:
     __slots__ = ("hash", "hashMerkleRoot", "hashPrevBlock", "nBits", "nNonce",
-                 "nTime", "nVersion", "sha256", "nVersionPoW2Witness", "nTimePoW2Witness", "hashMerkleRootPoW2Witness", "witnessHeaderPoW2Sig")
+                 "nTime", "nVersion", "sha256", "nVersionPoW2Witness", "nTimePoW2Witness", "hashMerkleRootPoW2Witness", "witnessHeaderPoW2Sig", "witnessUTXODelta")
 
     def __init__(self, header=None):
         if header is None:
@@ -561,6 +561,7 @@ class CBlockHeader:
             self.nTimePoW2Witness = header.nTimePoW2Witness
             self.hashMerkleRootPoW2Witness = header.hashMerkleRootPoW2Witness
             self.witnessHeaderPoW2Sig = header.witnessHeaderPoW2Sig
+            self.witnessUTXODelta = header.witnessUTXODelta
 
             self.sha256 = header.sha256
             self.hash = header.hash
@@ -577,6 +578,7 @@ class CBlockHeader:
         self.nBits = 0
         self.nNonce = 0
         self.witnessHeaderPoW2Sig = 0
+        self.witnessUTXODelta = 0
         self.sha256 = None
         self.hash = None
 
@@ -594,6 +596,8 @@ class CBlockHeader:
 
         if self.nVersionPoW2Witness != 0:
             self.witnessHeaderPoW2Sig = f.read(65)
+            deltaSize = read_compact_size(f)
+            self.witnessUTXODelta = f.read(deltaSize)
 
         self.sha256 = None
         self.hash = None
@@ -613,6 +617,9 @@ class CBlockHeader:
 
         if self.nVersionPoW2Witness != 0:
             r += self.witnessHeaderPoW2Sig
+            deltaSize = get_compact_size(len(self.witnessUTXODelta))
+            r += struct.pack("<c", deltaSize)
+            r += self.witnessUTXODelta
         return r
 
     def calc_sha256(self):
@@ -627,6 +634,9 @@ class CBlockHeader:
 
             if self.nVersionPoW2Witness != 0:
                 r += self.witnessHeaderPoW2Sig
+                deltaSize = get_compact_size(len(self.witnessUTXODelta))
+                r += struct.pack("<c", deltaSize)
+                r += self.witnessUTXODelta
 
             self.sha256 = uint256_from_str(hash256(r))
             self.hash = encode(hash256(r)[::-1], 'hex_codec').decode('ascii')
@@ -1353,7 +1363,7 @@ class msg_headers:
         self.headers = headers if headers is not None else []
 
     def deserialize(self, f):
-        # comment in GuldenD indicates these should be deserialized as blocks
+        # comment in Munt-daemon indicates these should be deserialized as blocks
         blocks = deser_vector(f, CBlock)
         for x in blocks:
             self.headers.append(CBlockHeader(x))
