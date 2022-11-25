@@ -271,6 +271,11 @@ bool GetWitnessInfoForAccount(CAccount* forAccount, WitnessInfoForAccount& infoF
         });
         infoForAccount.nEstimatedWitnessBlockPeriod = uint64_t(1.0/fInv);
     }
+    else
+    {
+        infoForAccount.nExpectedWitnessBlockPeriod = 0;
+        infoForAccount.nEstimatedWitnessBlockPeriod = 0;
+    }
 
     infoForAccount.nLockBlocksRemaining = GetPoW2RemainingLockLengthInBlocks(accountStatus.nLockUntilBlock, chainActive.Tip()->nHeight);
 
@@ -318,7 +323,11 @@ WitnessAccountStatisticsRecord IWitnessController::getAccountWitnessStatistics(c
 
     bool accountNearOptimal = isWitnessDistributionNearOptimal(pactiveWallet, witnessAccount, witnessInfo);
     
-    uint64_t nBlocksSinceLastActivity = std::get<1>(*std::min_element(infoForAccount.accountStatus.parts.begin(), infoForAccount.accountStatus.parts.end(), [](std::tuple<uint64_t, uint64_t> l, std::tuple<uint64_t, uint64_t> r) {return std::get<1>(l) < std::get<1>(r);}));
+    uint64_t nBlocksSinceLastActivity = 0;
+    if (infoForAccount.accountStatus.parts.size() > 0)
+    {
+        nBlocksSinceLastActivity = std::get<1>(*std::min_element(infoForAccount.accountStatus.parts.begin(), infoForAccount.accountStatus.parts.end(), [](std::tuple<uint64_t, uint64_t> l, std::tuple<uint64_t, uint64_t> r) {return std::get<1>(l) < std::get<1>(r);}));
+    }
     
     return WitnessAccountStatisticsRecord(
         "success",                                                      //request_status
