@@ -21,6 +21,9 @@
 #include "util.h"
 #include <crypto/hash/hash.h>
 
+#ifdef WITNESS_HEADER_SYNC
+#define SERIALIZE_BLOCK_HEADER_NO_WITNESS_DELTA    0x10000000
+#endif
 #define SERIALIZE_BLOCK_HEADER_NO_POW2_WITNESS     0x20000000
 #define SERIALIZE_BLOCK_HEADER_NO_POW2_WITNESS_SIG 0x40000000
 
@@ -62,7 +65,11 @@ public:
     uint256 hashMerkleRootPoW2Witness;
     //fixme: (POST-PHASE5) Optimisation - this is always 65 bits, we should use a fixed size data structure.
     std::vector<unsigned char> witnessHeaderPoW2Sig;
-
+    
+    #ifdef WITNESS_HEADER_SYNC
+    // Changes in the witness UTXO that this block causes
+    std::vector<unsigned char> witnessUTXODelta;
+    #endif
 
     // PoW header
     int32_t nVersion;
@@ -119,6 +126,19 @@ public:
                         assert(witnessHeaderPoW2Sig.size() == 65);
                     READWRITENOSIZEVECTOR(witnessHeaderPoW2Sig);
                 }
+                
+                #ifdef WITNESS_HEADER_SYNC
+                if (!(s.GetVersion() & SERIALIZE_BLOCK_HEADER_NO_WITNESS_DELTA))
+                {
+                    if( (s.GetType() == SER_DISK) || 
+                        ((s.GetType() == SER_NETWORK) && (s.GetVersion() % 80000 >= WITNESS_SYNC_VERSION)) ||
+                        ((s.GetType() == SER_GETHASH) && (witnessUTXODelta.size() > 0)) )
+                    {
+                        //fixme: (WITNESS_SYNC) - If size is frequently above 200 then switch to varint instead
+                        READWRITECOMPACTSIZEVECTOR(witnessUTXODelta);
+                    }
+                }
+                #endif
             }
         }
     }
@@ -136,6 +156,9 @@ public:
         nTimePoW2Witness = 0;
         hashMerkleRootPoW2Witness.SetNull();
         witnessHeaderPoW2Sig.clear();
+        #ifdef WITNESS_HEADER_SYNC
+        witnessUTXODelta.clear();
+        #endif
     }
 
     bool IsNull() const
@@ -215,6 +238,9 @@ public:
         block.nTimePoW2Witness = nTimePoW2Witness;
         block.hashMerkleRootPoW2Witness = hashMerkleRootPoW2Witness;
         block.witnessHeaderPoW2Sig = witnessHeaderPoW2Sig;
+        #ifdef WITNESS_HEADER_SYNC
+        block.witnessUTXODelta = witnessUTXODelta;
+        #endif
         return block;
     }
 

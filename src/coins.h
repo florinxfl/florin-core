@@ -250,6 +250,10 @@ public:
     virtual size_t EstimateSize() const { return 0; }
 
     virtual void GetAllCoins(std::map<COutPoint, Coin>&) const {};
+    #ifdef WITNESS_HEADER_SYNC
+    virtual void GetAllCoinsIndexBased(std::map<COutPoint, Coin>&) const {};
+    virtual void GetAllCoinsIndexBasedDirect(std::map<COutPoint, Coin>& allCoins) const {};
+    #endif
 };
 
 
@@ -272,6 +276,16 @@ public:
     {
         base->GetAllCoins(allCoins);
     }
+    #ifdef WITNESS_HEADER_SYNC
+    void GetAllCoinsIndexBased(std::map<COutPoint, Coin>& allCoins) const override
+    {
+        base->GetAllCoinsIndexBased(allCoins);
+    }
+    void GetAllCoinsIndexBasedDirect(std::map<COutPoint, Coin>& allCoins) const override
+    {
+        base->GetAllCoinsIndexBasedDirect(allCoins);
+    }
+    #endif
 };
 
 
@@ -387,6 +401,34 @@ public:
             }
         }
     }
+    
+    #ifdef WITNESS_HEADER_SYNC
+    void GetAllCoinsIndexBased(std::map<COutPoint, Coin>& allCoinsIndexBased) const override
+    {
+        std::map<COutPoint, Coin> allCoins;
+        GetAllCoins(allCoins);
+        
+        for (auto& [outPoint, coin] : allCoins)
+        {
+            COutPoint indexBased(coin.nHeight, coin.nTxIndex, outPoint.n);
+            allCoinsIndexBased[indexBased] = coin;
+        }
+    }
+    
+    //fixme: (FUT) We keep this form around but don't use it
+    // If/When we can prove beyond a shadow of a doubt that it introduces no problems and that it really is faster consider switching to it, otherwise we should delete and stick to the simpler implementation
+    void GetAllCoinsIndexBasedDirect(std::map<COutPoint, Coin>& allCoinsIndexBased) const override
+    {
+        for (auto iter : cacheCoins)
+        {
+            COutPoint indexBased(iter.second.coin.nHeight, iter.second.coin.nTxIndex, iter.first.n);
+            if (!iter.second.coin.out.IsNull())
+            {
+                allCoinsIndexBased[indexBased] = iter.second.coin;
+            }
+        }
+    }
+    #endif
 
 private:
     CCoinsMap::iterator FetchCoin(const COutPoint &outpoint, CCoinsRefMap::iterator* pRefIterReturn=nullptr) const;

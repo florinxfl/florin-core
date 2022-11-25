@@ -310,6 +310,9 @@ CBlockIndex* GetPoWBlockForPoSBlock(const CBlockIndex* pIndex)
         pBlockPoW->nTimePoW2Witness = 0;
         pBlockPoW->hashMerkleRootPoW2Witness = uint256();
         pBlockPoW->witnessHeaderPoW2Sig.clear();
+	#ifdef WITNESS_HEADER_SYNC
+        pBlockPoW->witnessUTXODelta.clear();
+	#endif
 
         if (!ProcessNewBlock(Params(), pBlockPoW, true, nullptr, false, true))
             return nullptr;

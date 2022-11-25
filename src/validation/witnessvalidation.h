@@ -7,13 +7,132 @@
 #define WITNESS_VALIDATION_H
 
 #include "validation/validation.h"
+#include <boost/container/flat_set.hpp>
 
 //fixme: (PHASE5) - Properly document all of these; including pre/post conditions;
 //fixme: (PHASE5) implement unit tests.
 
+#ifdef WITNESS_HEADER_SYNC
+// Encapusulate the bare minimum information we need to know about every witness address in order to select/verify a valid witness for a block
+// Without any of the additional information thats necessary for other parts of the witness system (e.g. spending key) but not this specific function
+// And without information that can be derived from this core information (e.g. age)
+class SimplifiedWitnessRouletteItem
+{
+public:
+    SimplifiedWitnessRouletteItem(){};
+    SimplifiedWitnessRouletteItem(const std::tuple<const CTxOut, CTxOutPoW2Witness, COutPoint>& witnessInput)
+    {    
+        blockNumber = std::get<2>(witnessInput).getTransactionBlockNumber();
+        transactionIndex = std::get<2>(witnessInput).getTransactionIndex();
+        transactionOutputIndex = std::get<2>(witnessInput).n;
+
+        lockUntilBlock = std::get<1>(witnessInput).lockUntilBlock;
+        lockFromBlock = std::get<1>(witnessInput).lockFromBlock;
+        if (lockFromBlock == 0)
+        {
+            lockFromBlock = blockNumber;
+        }
+        witnessPubKeyID = std::get<1>(witnessInput).witnessKeyID;
+        nValue = std::get<0>(witnessInput).nValue;
+    }
+    uint64_t blockNumber;
+    uint64_t transactionIndex;
+    uint32_t transactionOutputIndex;
+    uint64_t lockUntilBlock;
+    uint64_t lockFromBlock;
+    CKeyID witnessPubKeyID;
+    CAmount nValue;
+    
+    uint64_t GetLockLength()
+    {
+        return (lockUntilBlock-lockFromBlock)+1;
+    }
+    
+    friend inline bool operator!=(const SimplifiedWitnessRouletteItem& a, const SimplifiedWitnessRouletteItem& b)
+    {
+        return !(a == b);
+    }
+
+    friend inline bool operator==(const SimplifiedWitnessRouletteItem& a, const SimplifiedWitnessRouletteItem& b)
+    {
+        if (a.blockNumber != b.blockNumber ||
+            a.transactionIndex != b.transactionIndex ||
+            a.transactionOutputIndex != b.transactionOutputIndex ||
+            a.lockUntilBlock != b.lockUntilBlock ||
+            a.nValue != b.nValue ||
+            a.witnessPubKeyID != b.witnessPubKeyID
+        )
+        {
+            return false;
+        }
+        return true;
+    }
+    
+    //NB! This ordering must precisely match the ordering of RouletteItem::operator< (assuming all items use index based outpoints)
+    friend inline bool operator<(const SimplifiedWitnessRouletteItem& a, const SimplifiedWitnessRouletteItem& b)
+    {
+        if (a.blockNumber == b.blockNumber)
+        {
+            if (a.transactionIndex == b.transactionIndex)
+            {
+                return a.transactionOutputIndex < b.transactionOutputIndex;
+            }
+            return a.transactionIndex < b.transactionIndex;
+        }
+        return a.blockNumber < b.blockNumber;
+    }
+};
+
+// Simplified view of the entire "witness UTXO" encapsulated as basic SimplifiedWitnessRouletteItem items instead of transactions
+class SimplifiedWitnessUTXOSet
+{
+public:
+    uint256 currentTipForSet;
+    //fixme: (OPTIMISE) - We make an educated guess that for our specific case 'flat_set' will perform well
+    //We base this on a few things:
+    // 1) Set size is not very large (around 600-1200 elements in size)
+    // 2) We have to iterate the entire set a lot for witness selection (for which contiguous memory is good)
+    // 3) We only perform at most a few inserts/deletions per block, so slightly slower insertion/deletion isn't necessarily that bad
+    //However we don't know this for a fact; therefore this should actually be tested against other alternatives and the most performant container for the job chosen.
+    boost::container::flat_set<SimplifiedWitnessRouletteItem> witnessCandidates;
+    
+    friend inline bool operator!=(const SimplifiedWitnessUTXOSet& a, const SimplifiedWitnessUTXOSet& b)
+    {
+        return !(a == b);
+    }
+    
+    friend inline bool operator==(const SimplifiedWitnessUTXOSet& a, const SimplifiedWitnessUTXOSet& b)
+    {
+        if (a.currentTipForSet != b.currentTipForSet)
+            return false;
+
+        if (a.witnessCandidates.size() != b.witnessCandidates.size())
+            return false;
+
+        for (uint64_t i=0; i<a.witnessCandidates.size(); ++i)
+        {
+            auto aComp = *a.witnessCandidates.nth(i);
+            auto bComp = *b.witnessCandidates.nth(i);
+            if (aComp != bComp)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+SimplifiedWitnessUTXOSet GenerateSimplifiedWitnessUTXOSetFromUTXOSet(std::map<COutPoint, Coin> allWitnessCoinsIndexBased);
+bool GetSimplifiedWitnessUTXOSetForIndex(const CBlockIndex* pBlockIndex, SimplifiedWitnessUTXOSet& pow2SimplifiedWitnessUTXOForBlock);
+bool GetSimplifiedWitnessUTXODeltaForBlock(const CBlockIndex* pBlockIndexPrev, const CBlock& block, std::shared_ptr<SimplifiedWitnessUTXOSet> pow2SimplifiedWitnessUTXOForPrevBlock, std::vector<unsigned char>& compWitnessUTXODelta, CPubKey* pubkey);
+#endif
+
 /** Global variable that points to the witness coins database (protected by cs_main) */
 extern CWitViewDB* ppow2witdbview;
 extern std::shared_ptr<CCoinsViewCache> ppow2witTip;
+#ifdef WITNESS_HEADER_SYNC
+extern SimplifiedWitnessUTXOSet pow2SimplifiedWitnessUTXO;
+#endif
 
 struct RouletteItem
 {
@@ -104,6 +223,9 @@ bool GetWitnessHelper(uint256 blockHash, CGetWitnessInfo& witnessInfo, uint64_t 
 bool GetWitnessInfo(CChain& chain, const CChainParams& chainParams, CCoinsViewCache* viewOverride, CBlockIndex* pPreviousIndexChain, CBlock block, CGetWitnessInfo& witnessInfo, uint64_t nBlockHeight);
 
 bool GetWitness(CChain& chain, const CChainParams& chainParams, CCoinsViewCache* viewOverride, CBlockIndex* pPreviousIndexChain, CBlock block, CGetWitnessInfo& witnessInfo);
+#ifdef WITNESS_HEADER_SYNC
+bool GetWitnessFromSimplifiedUTXO(SimplifiedWitnessUTXOSet simplifiedWitnessUTXO, const CBlockIndex* pBlockIndex, CGetWitnessInfo& witnessInfo);
+#endif
 
 bool witnessHasExpired(uint64_t nWitnessAge, uint64_t nWitnessWeight, uint64_t nNetworkTotalWitnessWeight);
 

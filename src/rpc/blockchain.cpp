@@ -93,6 +93,10 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     result.pushKV("pow_time", (int64_t)blockindex->nTime);
     result.pushKV("witness_time", (int64_t)blockindex->nTimePoW2Witness);
     result.pushKV("witness_merkleroot", blockindex->hashMerkleRootPoW2Witness.GetHex());
+    #ifdef WITNESS_HEADER_SYNC
+    result.pushKV("witness_signature", HexStr(blockindex->witnessHeaderPoW2Sig.begin(), blockindex->witnessHeaderPoW2Sig.end()));
+    result.pushKV("witness_utxo_delta", HexStr(blockindex->witnessUTXODelta.begin(), blockindex->witnessUTXODelta.end()));
+    #endif
     result.pushKV("nonce", (uint64_t)blockindex->nNonce);
     result.pushKV("pre_nonce", (uint64_t)blockindex->nPreNonce);
     result.pushKV("post_nonce", (uint64_t)blockindex->nPostNonce);
@@ -139,6 +143,10 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     result.pushKV("witness_time", (int64_t)block.nTimePoW2Witness);
     result.pushKV("pow_time", (int64_t)block.nTime);
     result.pushKV("witness_merkleroot", block.hashMerkleRootPoW2Witness.GetHex());
+    #ifdef WITNESS_HEADER_SYNC
+    result.pushKV("witness_signature", HexStr(block.witnessHeaderPoW2Sig.begin(), block.witnessHeaderPoW2Sig.end()));
+    result.pushKV("witness_utxo_delta", HexStr(block.witnessUTXODelta.begin(), block.witnessUTXODelta.end()));
+    #endif
     UniValue txs(UniValue::VARR);
     for(const auto& tx : block.vtx)
     {

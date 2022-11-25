@@ -69,6 +69,19 @@ struct CDiskTxPos : public CDiskBlockPos
         CDiskBlockPos::SetNull();
         nTxOffset = 0;
     }
+
+    #ifdef WITNESS_HEADER_SYNC    
+    friend bool operator< (const CDiskTxPos a, const CDiskTxPos b)
+    {
+        if ((CDiskBlockPos)a < (CDiskBlockPos)b)
+            return true;
+        if ((CDiskBlockPos)b < (CDiskBlockPos)a)
+            return false;
+        if (a.nTxOffset < b.nTxOffset)
+            return true;
+        return false;
+    }
+    #endif
 };
 
 /** CCoinsView backed by the coin database (chainstate/) */
@@ -108,10 +121,18 @@ public:
     
     size_t EstimateSize() const override;
     // For handling of upgrades.
+    #ifdef WITNESS_HEADER_SYNC
     uint32_t nCurrentVersion=3;
+    #else
+    uint32_t nCurrentVersion=4;
+    #endif
     uint32_t nPreviousVersion=1;
 
     void GetAllCoins(std::map<COutPoint, Coin>& allCoins) const override;
+    #ifdef WITNESS_HEADER_SYNC
+    void GetAllCoinsIndexBased(std::map<COutPoint, Coin>& allCoins) const override;
+    void GetAllCoinsIndexBasedDirect(std::map<COutPoint, Coin>& allCoins) const override;
+    #endif
 };
 
 /** CWitViewDB backed by the witness database (witstate/) */

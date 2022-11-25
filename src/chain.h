@@ -120,6 +120,21 @@ struct CDiskBlockPos
     friend bool operator!=(const CDiskBlockPos &a, const CDiskBlockPos &b) {
         return !(a == b);
     }
+    
+    #ifdef WITNESS_HEADER_SYNC
+    friend bool operator< (const CDiskBlockPos a, const CDiskBlockPos b)
+    {
+        if (a.nFile > b.nFile)
+            return false;
+        else if (a.nFile < b.nFile)
+            return true;
+        if (a.nPos > b.nPos)
+            return false;
+        else if (a.nPos < b.nPos)
+            return true;
+        return false;
+    }
+    #endif
 
     void SetNull() { nFile = -1; nPos = 0; }
     bool IsNull() const { return (nFile == -1); }
@@ -230,6 +245,10 @@ public:
     uint256 hashMerkleRootPoW2Witness;
     std::vector<unsigned char> witnessHeaderPoW2Sig; // 65 bytes
 
+    #ifdef WITNESS_HEADER_SYNC
+    // Changes in the witness UTXO that this block causes
+    std::vector<unsigned char> witnessUTXODelta;
+    #endif
 
     //! block header
     int32_t nVersion;
@@ -273,6 +292,9 @@ public:
         nTimePoW2Witness = 0;
         hashMerkleRootPoW2Witness = uint256();
         witnessHeaderPoW2Sig.clear();
+        #ifdef WITNESS_HEADER_SYNC
+        witnessUTXODelta.clear();
+        #endif
 
         nVersion       = 0;
         hashMerkleRoot = uint256();
@@ -294,6 +316,9 @@ public:
         nTimePoW2Witness = block.nTimePoW2Witness;
         hashMerkleRootPoW2Witness = block.hashMerkleRootPoW2Witness;
         witnessHeaderPoW2Sig = block.witnessHeaderPoW2Sig;
+        #ifdef WITNESS_HEADER_SYNC
+        witnessUTXODelta = block.witnessUTXODelta;
+        #endif
         nVersion       = block.nVersion;
         hashMerkleRoot = block.hashMerkleRoot;
         nTime          = block.nTime;
@@ -326,6 +351,9 @@ public:
         block.nTimePoW2Witness = nTimePoW2Witness;
         block.hashMerkleRootPoW2Witness = hashMerkleRootPoW2Witness;
         block.witnessHeaderPoW2Sig = witnessHeaderPoW2Sig;
+        #ifdef WITNESS_HEADER_SYNC
+        block.witnessUTXODelta = witnessUTXODelta;
+        #endif
         block.nVersion       = nVersion;
         if (pprev)
             block.hashPrevBlock = pprev->GetBlockHashPoW2();
@@ -565,6 +593,16 @@ public:
                 if (ser_action.ForRead())
                     witnessHeaderPoW2Sig.resize(65);
                 READWRITENOSIZEVECTOR(witnessHeaderPoW2Sig);
+
+                #ifdef WITNESS_HEADER_SYNC
+                if( ((s.GetType() == SER_DISK) && (_nVersion>= 2030013)) || 
+                ((s.GetType() == SER_NETWORK) && (_nVersion % 80000 >= WITNESS_SYNC_VERSION)) ||
+                ((s.GetType() == SER_GETHASH) && (witnessUTXODelta.size() > 0)) )
+                {
+                    //fixme: (WITNESS_SYNC) - If size is frequently above 200 then switch to varint instead
+                    READWRITECOMPACTSIZEVECTOR(witnessUTXODelta);
+                }
+                #endif
             }
         }
         catch (...)
@@ -579,6 +617,9 @@ public:
         block.nTimePoW2Witness = nTimePoW2Witness;
         block.hashMerkleRootPoW2Witness = hashMerkleRootPoW2Witness;
         block.witnessHeaderPoW2Sig = witnessHeaderPoW2Sig;
+        #ifdef WITNESS_HEADER_SYNC
+        block.witnessUTXODelta = witnessUTXODelta;
+        #endif
         block.nVersion        = nVersion;
         block.hashPrevBlock   = hashPrev;
         block.hashMerkleRoot  = hashMerkleRoot;
@@ -595,6 +636,9 @@ public:
         block.nTimePoW2Witness = nTimePoW2Witness;
         block.hashMerkleRootPoW2Witness = hashMerkleRootPoW2Witness;
         block.witnessHeaderPoW2Sig = witnessHeaderPoW2Sig;
+        #ifdef WITNESS_HEADER_SYNC
+        block.witnessUTXODelta = witnessUTXODelta;
+        #endif
         block.nVersion        = nVersion;
         block.hashPrevBlock   = hashPrev;
         block.hashMerkleRoot  = hashMerkleRoot;
