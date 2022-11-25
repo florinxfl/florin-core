@@ -1346,6 +1346,8 @@ bool CWallet::AbandonTransaction(const uint256& hashTx)
 
 static void forceRestart()
 {
+    LogPrintf("shutdown: 'forceRestart' function triggered");
+
     // Immediately disable what we can so this is cleaner.
     if (g_connman)
     {

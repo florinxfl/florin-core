@@ -566,6 +566,7 @@ static void ThreadImport(std::vector<fs::path> vImportFiles)
     CValidationState state;
     if (!ActivateBestChain(state, chainparams)) {
         LogPrintf("Failed to connect best block\n");
+        LogPrintf("shutdown: terminating app due to block connect failiure");
         AppLifecycleManager::gApp->shutdown();
     }
 

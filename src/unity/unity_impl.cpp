@@ -1044,6 +1044,8 @@ void ILibraryController::InitUnityLibThreaded(const std::string& dataDir, const 
 
 void ILibraryController::TerminateUnityLib()
 {
+    LogPrintf("shutdown: TerminateUnityLib called from frontend");
+
     // Terminate in thread so we don't block interprocess communication
     std::thread([=]
     {

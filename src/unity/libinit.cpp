@@ -52,6 +52,7 @@ static void handleAppInitResult(bool bResult)
     if (!bResult)
     {
         // InitError will have been called with detailed error, which ends up on console
+        LogPrintf("shutdown: handleAppInitResult called with error, terminating app");
         AppLifecycleManager::gApp->shutdown();
         return;
     }

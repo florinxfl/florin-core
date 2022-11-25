@@ -90,6 +90,7 @@ void AppLifecycleManager::initialize()
             //However we should just use a custom combiner and boolean && the results to be future safe for other ports.
             if (!signalAboutToInitMain())
             {
+                LogPrintf("shutdown: AppLifecycleManager, signalAboutToInitMain returned false, terminating app");
                 //Start shutdown process.
                 shutdown();
                 return;
