@@ -761,7 +761,7 @@ fi
 if test "$enable_wallet" != "no"; then
     dnl Check for libdb_cxx only if wallet enabled
     if test "$use_bdb" != "no"; then
-      GULDEN_FIND_BDB48
+      CENTURE_FIND_BDB48
     fi
     dnl Disable wallet if --without-bdb
     if test "$use_bdb" = "no"; then
