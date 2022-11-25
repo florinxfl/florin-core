@@ -1,6 +1,6 @@
 # Accelerated testnet
 
-Gulden implements a unique "accelerated testnet" system, that is used extensively by the developers for testing.
+Florin implements a unique "accelerated testnet" system, that is used extensively by the developers for testing.
 The system allows for the easy creation/management of multiple testnets, with different block target paramaters and different hash types; and even the ability to switch between them at will.
 
 This allows for easy setup of a custom testnet to test specific scenarios.
@@ -33,7 +33,7 @@ Just start with `-testnet=C1534687770:60 -addnode=devbak.net` to connect then he
 To create a new testnet simply create a new testnet specifier from the options above picking the ones that suit your need.
 You can then pass it to the program:
 
-- `./Gulden -testnet=C1529510552:5`
+- `./Florin -testnet=C1529510552:5`
 
 Once in the program open the debug window and type the following (which will limit mining to 3000 hashes a second and start mining on a single core):
 

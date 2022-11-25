@@ -1,4 +1,4 @@
-This directory contains integration tests that test GuldenD and its
+This directory contains integration tests that test Florin-daemon and its
 utilities in their entirety. It does not contain unit tests, which
 can be found in [/src/test](/src/test), [/src/wallet/test](/src/wallet/test),
 etc.
@@ -6,10 +6,10 @@ etc.
 This directory contains the following sets of tests:
 
 - [functional](/test/functional) which test the functionality of
-GuldenD and Gulden by interacting with them through the RPC and P2P
+Florin-daemon by interacting with it through the RPC and P2P
 interfaces.
-- [util](/test/util) which tests the Gulden utilities, currently only
-Gulden-tx.
+- [util](/test/util) which tests the Florin utilities, currently only
+Florin-tx.
 - [lint](/test/lint/) which perform various static analysis checks.
 
 The util tests are run as part of `make check` target. The functional
