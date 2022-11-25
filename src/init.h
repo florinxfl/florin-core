@@ -68,8 +68,8 @@ bool AppInitMain(boost::thread_group& threadGroup, node::NodeContext& node);
 
 /** The help message mode determines what help message to show */
 enum HelpMessageMode {
-    HMM_GULDEND,
-    HMM_GULDEN_QT
+    HMM_DAEMON,
+    HMM_UI
 };
 
 /** Help for options shared between UI and daemon (for -help) */

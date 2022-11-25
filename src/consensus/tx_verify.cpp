@@ -23,7 +23,7 @@
 #include "util/moneystr.h"
 #include "base58.h"
 
-//Gulden dependencies
+//Munt dependencies
 #include "witnessutil.h"
 
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)

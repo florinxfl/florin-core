@@ -203,7 +203,7 @@ AC_ARG_ENABLE([ccache],
 
 dnl Suppress warnings from external headers (e.g. Boost, Qt).
 dnl May be useful if warnings from external headers clutter the build output
-dnl too much, so that it becomes difficult to spot Gulden Core warnings
+dnl too much, so that it becomes difficult to spot Core warnings
 dnl or if they cause a build failure with --enable-werror.
 AC_ARG_ENABLE([suppress-external-warnings],
   [AS_HELP_STRING([--enable-suppress-external-warnings],
@@ -426,7 +426,7 @@ case $host in
 
          if test "$use_bdb" != "no" && $BREW list --versions berkeley-db@4 >/dev/null && test "$BDB_CFLAGS" = "" && test "$BDB_LIBS" = ""; then
            bdb_prefix=$($BREW --prefix berkeley-db@4 2>/dev/null)
-           dnl This must precede the call to GULDEN_FIND_BDB48 below.
+           dnl This must precede the call to CENTURE_FIND_BDB48 below.
            BDB_CFLAGS="-I$bdb_prefix/include"
            BDB_LIBS="-L$bdb_prefix/lib -ldb_cxx-4.8"
          fi
@@ -590,7 +590,7 @@ AC_CHECK_DECLS([getifaddrs, freeifaddrs],,,
 )
 AC_CHECK_DECLS([strnlen])
 
-dnl These are used for daemonization in GuldenD
+dnl These are used for daemonization in daemon binary
 AC_CHECK_DECLS([fork])
 
 AC_CHECK_DECLS([le16toh, le32toh, le64toh, htole16, htole32, htole64, be16toh, be32toh, be64toh, htobe16, htobe32, htobe64],,,

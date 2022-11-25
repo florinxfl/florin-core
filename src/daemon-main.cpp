@@ -125,7 +125,7 @@ static void AppInit(int argc, char* argv[])
         else
         {
             strUsage += "\n" + _("Usage:") + "\n" + "  " + DAEMON_NAME + " [options]                     " + strprintf(_("Start %s Daemon"), _(PACKAGE_NAME)) + "\n";
-            strUsage += "\n" + HelpMessage(HMM_GULDEND);
+            strUsage += "\n" + HelpMessage(HMM_DAEMON);
         }
         fprintf(stdout, "%s", strUsage.c_str());
         return;

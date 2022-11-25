@@ -415,7 +415,7 @@ static std::string FormatException(const std::exception* pex, const char* pszThr
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(NULL, pszModule, sizeof(pszModule));
 #else
-    const char* pszModule = "Florin";
+    const char* pszModule = GLOBAL_APPNAME;
 #endif
     if (pex)
         return strprintf(
@@ -468,7 +468,6 @@ static RecursiveMutex csPathCached;
 
 const fs::path &GetDataDir(bool fNetSpecific)
 {
-
     LOCK(csPathCached);
 
     fs::path &path = fNetSpecific ? pathCachedNetSpecific : pathCached;

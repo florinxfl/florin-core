@@ -271,7 +271,7 @@ public:
     //! Create a new legacy account. Legacy accounts are accounts that generate random keys in a keypool as required instead of generating keys deterministically.
     virtual CAccount* GenerateNewLegacyAccount(std::string strAccount);
 
-    //! Parse the contents of a gulden "witness key" URL into an vector of  private key / birth date  pairs.
+    //! Parse the contents of a "witness key" URL into an vector of  private key / birth date  pairs.
     std::vector<std::pair<CKey, uint64_t>> ParseWitnessKeyURL(SecureString sEncodedPrivWitnessKeysURL);
 
     //! Import vector of  private key / birth date  pairs into an existing "witness only" account.

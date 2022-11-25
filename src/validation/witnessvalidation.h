@@ -36,6 +36,7 @@ public:
         return a.nCumulativeWeight < b;
     }
 };
+
 struct CGetWitnessInfo
 {
     //! All unspent witness coins on the network

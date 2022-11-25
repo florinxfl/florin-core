@@ -135,7 +135,7 @@ static const char* FEE_ESTIMATES_FILENAME="fee_estimates.dat";
 // 2 - Interrupts the thread groups.
 // 3 - Notifies the UI to disconnect from signals.
 // 4 - Stops all the thread groups, syncs all files to disk etc.
-// 5 - Notifies the App/UI to close themeselves (or in the case of GuldenD to simply exit).
+// 5 - Notifies the App/UI to close themselves (or in the case of the daemon to simply exit).
 
 
 std::atomic<bool> fDumpMempoolLater(false);
@@ -145,7 +145,7 @@ bool fullyEraseDatadirOnShutdown=false;
 /**
  * This is a minimally invasive approach to shutdown on LevelDB read errors from the
  * chainstate, while keeping user interface out of the common library, which is shared
- * between GuldenD, and Gulden (qt) and non-server tools.
+ * between the daemon, UI application, and non-server tools.
 */
 class CCoinsViewErrorCatcher : public CCoinsViewBacked
 {
