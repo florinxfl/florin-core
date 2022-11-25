@@ -358,7 +358,7 @@ static void HandleSIGTERM(int)
     // We call a sigterm safe 'shutdown' function that does nothing but write to a socket.
     // The shutdown thread then safely handles the rest from within the already existing shutdown thread.
     if (AppLifecycleManager::gApp)
-        AppLifecycleManager::gApp->shutdown();
+        AppLifecycleManager::gApp->shutdown(true);
 }
 
 static void HandleSIGHUP(int)
