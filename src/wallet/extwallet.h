@@ -28,7 +28,7 @@
 #include <utility>
 #include <vector>
 
-//Gulden specific includes
+//Munt specific includes
 #include "wallet/walletdberrors.h"
 #include "account.h"
 

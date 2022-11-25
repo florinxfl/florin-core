@@ -12,7 +12,7 @@
 #include "unity_impl.h"
 #include "libinit.h"
 
-// Standard gulden headers
+// Standard munt headers
 #include "appname.h"
 #include "clientversion.h"
 
@@ -1029,7 +1029,12 @@ void InitAppSpecificConfigParamaters()
         std::vector<const char*> args;
         auto splitted = boost::program_options::split_unix(extraArgs_);
         for(const auto& part: splitted)
-            args.push_back(part.c_str());
+        {
+            if (!boost::starts_with(part, "-datadir"))
+            {
+                args.push_back(part.c_str());
+            }
+        }
         gArgs.ParseExtraParameters(int(args.size()), args.data());
     }
 }
@@ -1287,7 +1292,7 @@ void ILibraryController::DoRescan()
 
 UriRecipient ILibraryController::IsValidRecipient(const UriRecord & request)
 {
-     // return if URI is not valid or is no Gulden: URI
+     // return if URI is not valid or is no Munt: URI
     std::string lowerCaseScheme = boost::algorithm::to_lower_copy(request.scheme);
     if (lowerCaseScheme != "florin")
         return UriRecipient(false, "", "", "", 0);

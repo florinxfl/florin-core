@@ -530,6 +530,9 @@ bool CBlockTreeDB::LoadBlockIndexGuts(std::function<CBlockIndex*(const uint256&)
                 pindexNew->nTimePoW2Witness = diskindex.nTimePoW2Witness;
                 pindexNew->hashMerkleRootPoW2Witness = diskindex.hashMerkleRootPoW2Witness;
                 pindexNew->witnessHeaderPoW2Sig = diskindex.witnessHeaderPoW2Sig;
+                #ifdef WITNESS_HEADER_SYNC
+                pindexNew->witnessUTXODelta = diskindex.witnessUTXODelta;
+                #endif
 
                 /** Scrypt is used for block proof-of-work, but for purposes of performance the index internally uses sha256.
                 *  This check was considered unneccessary given the other safeguards like the genesis and checkpoints. */

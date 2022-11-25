@@ -789,8 +789,8 @@ static int CommandLineRawTx(int argc, char* argv[])
             argv++;
         }
 
-        //fixme: (PHASE4POSTREL) SEGSIG) Some of the MutateTx stuff doesn't work at all for segsig - it is only used by gulden-tx, we should consider just refusing to allow them for now.
-        //fixme: (PHASE4POSTREL) (SEGSIG) (HIGH) (CURRENT_TX_VERSION_POW2) - Hardcoding to 1 below is (probably?) wrong but CURRENT_TX_VERSION_POW2 doesn't work right as it requires symbols that are undefined for Gulden-tx
+        //fixme: (PHASE4POSTREL) SEGSIG) Some of the MutateTx stuff doesn't work at all for segsig - it is only used by munt-tx, we should consider just refusing to allow them for now.
+        //fixme: (PHASE4POSTREL) (SEGSIG) (HIGH) (CURRENT_TX_VERSION_POW2) - Hardcoding to 1 below is (probably?) wrong but CURRENT_TX_VERSION_POW2 doesn't work right as it requires symbols that are undefined for Munt-tx
         CMutableTransaction tx(1);
         int startArg;
 
@@ -799,7 +799,7 @@ static int CommandLineRawTx(int argc, char* argv[])
             if (argc < 2)
                 throw std::runtime_error("too few parameters");
 
-            // param: hex-encoded Gulden transaction
+            // param: hex-encoded Munt transaction
             std::string strHexTx(argv[1]);
             if (strHexTx == "-")                 // "-" implies standard input
                 strHexTx = readStdin();

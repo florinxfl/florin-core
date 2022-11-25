@@ -22,6 +22,7 @@
 #include "serialize.h"
 #include "util/strencodings.h"
 #include "util/time.h"
+#include "appname.h"
 
 #include <stdarg.h>
 
@@ -518,7 +519,7 @@ void ArgsManager::ReadConfigFile(const std::string& confPath)
     static bool fRegTestLegacy = IsArgSet("-regtestlegacy");
     fs::ifstream streamConfig(GetConfigFile(confPath));
     if (!streamConfig.good())
-        return; // No Gulden.conf file is OK
+        return; // No florin.conf file is OK
 
     {
         LOCK(cs_args);
@@ -527,7 +528,7 @@ void ArgsManager::ReadConfigFile(const std::string& confPath)
 
         for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
         {
-            // Don't overwrite existing settings so command line settings override Gulden.conf
+            // Don't overwrite existing settings so command line settings override florin.conf
             std::string strKey = std::string("-") + it->string_key;
             std::string strValue = it->value[0];
             if (fRegTest)

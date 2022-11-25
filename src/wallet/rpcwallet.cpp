@@ -736,7 +736,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
 
     DS_LOCK2(cs_main, pwallet->cs_wallet);
 
-    // Gulden address
+    // Munt address
     CNativeAddress address = CNativeAddress(request.params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid " GLOBAL_APPNAME " address");
