@@ -122,6 +122,8 @@ int InitUnity()
 
     try
     {
+        InitAppSpecificDatadirParamaters();
+        
         if (!fs::is_directory(GetDataDir(false)))
         {
             fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", GetArg("-datadir", "").c_str());

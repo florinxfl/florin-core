@@ -1034,6 +1034,20 @@ void InitAppSpecificConfigParamaters()
     }
 }
 
+void InitAppSpecificDatadirParamaters()
+{
+    std::vector<const char*> args;
+    auto splitted = boost::program_options::split_unix(extraArgs_);
+    for(const auto& part: splitted)
+    {
+        if (boost::starts_with(part, "-datadir"))
+        {
+            args.push_back(part.c_str());
+        }
+    }
+    gArgs.ParseExtraParameters(int(args.size()), args.data());
+}
+
 void ILibraryController::InitUnityLibThreaded(const std::string& dataDir, const std::string& staticFilterPath, int64_t staticFilterOffset, int64_t staticFilterLength, bool testnet, bool spvMode, const std::shared_ptr<ILibraryListener>& signalHandler_, const std::string& extraArgs)
 {
     std::thread([=]
