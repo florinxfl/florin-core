@@ -726,7 +726,6 @@ lib_generic_a_CPPFLAGS = $(AM_CPPFLAGS) $(COMMON_INCLUDES)
 lib_generic_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 lib_generic_a_SOURCES = \
   unity/generic/logging.cpp \
-  unity/generic/init_generic.cpp \
   core_read.cpp \
   core_write.cpp \
   $(CORE_H)
@@ -1074,6 +1073,7 @@ lib_unity_objc_a_SOURCES = \
   unity/unity_impl.h \
   unity/unity_impl.cpp \
   unity/controllers/ip2pnetworkcontroller.cpp \
+  unity/controllers/iwalletcontroller.cpp \
   $(DJINNI_CPP_GEN) \
   $(DJINNI_OBJC_GEN) \
   $(CORE_H)
