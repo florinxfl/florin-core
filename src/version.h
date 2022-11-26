@@ -33,9 +33,9 @@ static const int GETHEADERS_VERSION = 31800;
 
 //! disconnect from peers older than this proto version
 #ifdef WITNESS_HEADER_SYNC
-static const int MIN_PEER_PROTO_VERSION = 70017;
-#else
 static const int MIN_PEER_PROTO_VERSION = 70020;
+#else
+static const int MIN_PEER_PROTO_VERSION = 70017;
 #endif
 
 //! nTime field added to CAddress, starting with this version;

@@ -122,9 +122,9 @@ public:
     size_t EstimateSize() const override;
     // For handling of upgrades.
     #ifdef WITNESS_HEADER_SYNC
-    uint32_t nCurrentVersion=3;
-    #else
     uint32_t nCurrentVersion=4;
+    #else
+    uint32_t nCurrentVersion=3;
     #endif
     uint32_t nPreviousVersion=1;
 
