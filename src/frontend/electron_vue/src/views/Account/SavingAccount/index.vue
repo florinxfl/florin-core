@@ -215,17 +215,23 @@ export default {
     account() {
       this.initialize();
     },
-    compoundingPercent() {
+    compoundingPercent(newVal) {
       // Prevent calling this on initialization.
       if (this.compoundingPercent === 0) {
         return;
       } else {
-        if (this.keyHash) {
-          BackendUtilities.holdinAPIActions(this.keyHash, "distribution", this.compoundingPercent);
-          WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
-        } else {
-          WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
-        }
+        const timeoutHandler = setTimeout(() => {
+          if (newVal == this.compoundingPercent) {
+            if (this.keyHash) {
+              BackendUtilities.holdinAPIActions(this.keyHash, "distribution", this.compoundingPercent);
+              WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
+            } else {
+              WitnessController.SetAccountCompounding(this.account.UUID, this.compoundingPercent);
+            }
+          }
+        }, 1000);
+
+        return timeoutHandler;
       }
     }
   },
