@@ -15,7 +15,7 @@
     "publish": "electron-builder -p always"
   },
   "devDependencies": {
-    "electron": "^9.1.0",
+    "electron": "^18.3.7",
     "electron-builder": "^21.0.0",
     "electron-packager": "^14.2.1"
   },
