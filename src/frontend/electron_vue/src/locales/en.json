@@ -166,7 +166,8 @@
     "confirm_transaction": "Confirm transaction",
     "target_account": "Send to account",
     "fee_will_be_subtracted": "Fee will be subtracted from the amount",
-    "unlock_your_wallet_to_complete_the_transaction": "Unlock your wallet to complete the transaction"
+    "unlock_your_wallet_to_complete_the_transaction": "Unlock your wallet to complete the transaction",
+    "select_account": "Select Account"
   },
   "renew_saving_account": {
     "funding_account": "Pay renewal fee from account"
