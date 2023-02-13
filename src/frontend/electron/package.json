@@ -15,13 +15,13 @@
     "publish": "electron-builder -p always"
   },
   "devDependencies": {
-    "electron": "^18.3.7",
-    "electron-builder": "^21.0.0",
-    "electron-packager": "^14.2.1"
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
+    "electron-packager": "^17.1.1"
   },
   "dependencies": {
-    "electron-updater": "^4.3.1",
-    "electron-context-menu": "^2.0.1"
+    "electron-context-menu": "^3.6.1",
+    "electron-updater": "^5.3.0"
   },
   "build": {
     "files": [
