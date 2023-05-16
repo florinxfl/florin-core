@@ -53,8 +53,7 @@ export function downloadTransactionList(transactions, fileName) {
     transformedTransactionArray.push({
       ...tx,
       timestamp: formatTime(tx.timestamp),
-      unixTime: tx.timestamp,
-      change: formatMoneyForDisplay(tx.change),
+      change: formatMoneyForDisplay(tx.change)
     });
 
     if (index + 1 === transactions.length) {

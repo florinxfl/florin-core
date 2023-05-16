@@ -137,7 +137,6 @@ export default {
     ...mapState("app", ["rate", "activityIndicator", "currency"]),
     ...mapState("wallet", ["mutations"]),
     isAccountView() {
-      console.log("Is account view", this.$route.name === "account");
       return this.$route.name === "account";
     },
     accountStatus() {
