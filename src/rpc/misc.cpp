@@ -13,8 +13,10 @@
 #include "base58.h"
 #include "chain.h"
 #include "clientversion.h"
+#include "core_io.h"
 #include "init.h"
 #include "validation/validation.h"
+#include "validation/witnessvalidation.h"
 #include "httpserver.h"
 #include "net.h"
 #include "netbase.h"
@@ -23,6 +25,7 @@
 #include "timedata.h"
 #include "util.h"
 #include "util/strencodings.h"
+#include "util/moneystr.h"
 #ifdef ENABLE_WALLET
 #include "wallet/rpcwallet.h"
 #include "wallet/wallet.h"
@@ -30,6 +33,8 @@
 #endif
 #include "wallet/account.h"
 #include "warnings.h"
+#include "wallet/witness_operations.h"
+
 
 #include <stdint.h>
 #ifdef HAVE_MALLOC_INFO
@@ -533,6 +538,198 @@ UniValue signmessagewithprivkey(const JSONRPCRequest& request)
     return EncodeBase64(&vchSig[0], vchSig.size());
 }
 
+static bool HashFromString(const std::string& strReq, uint256& v)
+{
+    if (!IsHex(strReq) || (strReq.size() != 64))
+        return false;
+
+    v.SetHex(strReq);
+    return true;
+}
+
+UniValue verifyproofoffunds(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "verifymessage \"address\" \"signature\" \"message\"\n"
+            "\nVerify a signed proof of funds message\n"
+            "\nArguments:\n"
+            "1. \"proof\"       (string, required) The proof provided by the signer (see generateproofoffunds).\n"
+            "\nResult:\n"
+            "true|false   (boolean) If the signature is verified or not.\n"
+            "\nExamples:\n"
+            "\nUnlock the wallet for 30 seconds\n"
+            + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
+            "\nCreate the signature\n"
+            + HelpExampleCli("signmessage", "\"GD1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"my message\"") +
+            "\nVerify the signature\n"
+            + HelpExampleCli("verifymessage", "\"GD1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"signature\" \"my message\"") +
+            "\nAs json rpc\n"
+            + HelpExampleRpc("verifymessage", "\"GD1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\", \"signature\", \"my message\"")
+        );
+
+    LOCK(cs_main);
+
+    UniValue ret(UniValue::VOBJ);
+    ret.pushKV("isvalid", false);
+    
+    std::string strSign     = request.params[0].get_str();
+    std::vector<std::string> vStrInputParts;
+    boost::split(vStrInputParts, strSign, boost::is_any_of(":"));
+    if (vStrInputParts.size() != 2)
+    {
+        ret.pushKV("info", "invalid proof");
+        return ret;
+    }
+    
+    std::string address = vStrInputParts[0];
+    std::string strBlockHash = vStrInputParts[1];
+    uint256 blockHash;
+    if (!HashFromString(strBlockHash, blockHash))
+    {
+        ret.pushKV("info", "proof with invalid hash");
+        return ret;
+    }
+    
+    if (mapBlockIndex.count(blockHash) == 0)
+    {
+        ret.pushKV("info", "proof with invalid block");
+        return ret;
+    }
+    
+    CBlock block;
+    CBlockIndex* signingChainTip = mapBlockIndex[blockHash];
+
+    bool fInvalid = false;
+    std::vector<unsigned char> vchSig = DecodeBase64(strSign.c_str(), &fInvalid);
+
+    if (fInvalid)
+    {
+        ret.pushKV("info", "proof with malformed base64 encoding");
+        return ret;
+    }
+
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << std::string("Florin Proof Of Funds:\n");
+    // Introduce sufficient entropy such that it would be difficult to force signing of a weak message
+    auto prev = signingChainTip;
+    for (int i=0; i < 20; ++i)
+    {
+        prev->GetBlockHashPoW2().Serialize(ss);
+        prev=prev->pprev;
+    }
+
+    CPubKey pubkey;
+    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig))
+    {
+        ret.pushKV("info", "unable to recover pubkey from proof");
+        return ret;
+    }
+    
+    std::map<COutPoint, Coin> allWitnessCoins;
+    if (!getAllUnspentWitnessCoins(chainActive, Params(), chainActive.Tip(), allWitnessCoins))
+    {
+        ret.pushKV("info", "failed to enumerate all witness coins");
+        return ret;
+    }
+
+    CAmount fundsForKey = 0;
+    int partsForKey = 0;
+    for (const auto& [outpoint, coin] : allWitnessCoins)
+    {
+        CTxDestination compareDestination;
+        bool fValidAddress = ExtractDestination(coin.out, compareDestination);
+
+        if (fValidAddress && boost::get<CPoW2WitnessDestination>(compareDestination).spendingKey == pubkey.GetID())
+        {
+            fundsForKey += coin.out.nValue;
+            ++partsForKey;
+        }
+    }
+
+    if (fundsForKey)
+    {
+        ret.pushKV("isvalid", true);
+        ret.pushKV("info", "valid proof with funds");
+        ret.pushKV("height", signingChainTip->nHeight);
+        ret.pushKV("amount", FormatMoney(fundsForKey));
+        ret.pushKV("parts", partsForKey);
+        return ret;
+    }
+    else
+    {
+        ret.pushKV("info", "valid proof but no funds tied to key");
+        return ret;
+    }
+}
+
+UniValue generateproofoffunds(const JSONRPCRequest& request)
+{
+    #ifndef ENABLE_WALLET
+    return "Command not supported without wallet";
+    #else
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    LOCK2(cs_main, pwallet ? &pwallet->cs_wallet : NULL);
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+        return NullUniValue;
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "generateproofoffunds \"account\"\n"
+            "\nSign a message that proves a holding account is yours\n"
+            "\nAnd that can be used by others to see that you have control of the funds you claim\n"
+            "\nArguments:\n"
+            "1. \"account\"         (string, required) The private key to sign the message with.\n"
+            "\nResult:\n"
+            "\"signature\"          (string) The signature of the message encoded in base 64\n"
+            "\nExamples:\n"
+            "\nCreate the proof\n"
+            + HelpExampleCli("generateproofoffunds", "\"my account\"") +
+            "\nAs json rpc\n"
+            + HelpExampleRpc("generateproofoffunds", "\"my account\"")
+        );
+
+    if (!pwallet)
+        throw std::runtime_error("Cannot use command without an active wallet");
+
+    EnsureWalletIsUnlocked(pwallet);
+    
+    CAccount* forAccount = AccountFromValue(pwallet, request.params[0], false);
+    
+    if (!forAccount->IsPoW2Witness())
+        throw std::runtime_error("This command only works on holding accounts");
+    
+    std::string address = witnessAddressForAccount(pwallet, forAccount);
+    CKeyID witnessKeyID = spendingKeyForWitnessAccount(pwallet, forAccount);
+    CKey witnessPrivKey;
+    if (!forAccount->GetKey(witnessKeyID, witnessPrivKey))
+    {
+        throw std::runtime_error("Unable to read private key for holding account");
+    }
+    if (!witnessPrivKey.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Private key outside allowed range");
+
+    CEncodedSecretKey vchSecret;
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << std::string("Florin Proof Of Funds:\n");
+    // Introduce sufficient entropy such that it would be difficult to force signing of a weak message
+    auto signingChainTip = chainActive.Tip();
+    auto prev = signingChainTip;
+    for (int i=0; i < 20; ++i)
+    {
+        prev->GetBlockHashPoW2().Serialize(ss);
+        prev=prev->pprev;
+    }
+
+    std::vector<unsigned char> vchSig;
+    if (!witnessPrivKey.SignCompact(ss.GetHash(), vchSig))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+
+    return EncodeBase64(&vchSig[0], vchSig.size()) + ":" + signingChainTip->GetBlockHashPoW2().ToString();
+    #endif
+}
+
 UniValue forcesigseg(const JSONRPCRequest& request)
 {
  if (request.fHelp)
@@ -739,6 +936,8 @@ static const CRPCCommand commands[] =
     { "util",               "createmultisig",         &createmultisig,         true,  {"num_required","keys"} },
     { "util",               "verifymessage",          &verifymessage,          true,  {"address","signature","message"} },
     { "util",               "signmessagewithprivkey", &signmessagewithprivkey, true,  {"privkey","message"} },
+    { "util",               "verifyproofoffunds",     &verifyproofoffunds,     true,  {"signature"} },
+    { "util",               "generateproofoffunds",   &generateproofoffunds,   true,  {"address"} },
 
     /* Not shown in help */
     { "hidden",             "setmocktime",            &setmocktime,            true,  {"timestamp"}},

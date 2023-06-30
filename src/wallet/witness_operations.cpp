@@ -1224,6 +1224,31 @@ std::string witnessAddressForAccount(CWallet* pWallet, CAccount* account)
     return "";
 }
 
+CKeyID spendingKeyForWitnessAccount(CWallet* pWallet, CAccount* account)
+{
+    LOCK2(cs_main, pWallet->cs_wallet);
+
+    if (chainActive.Tip())
+    {
+        std::map<COutPoint, Coin> allWitnessCoins;
+        if (getAllUnspentWitnessCoins(chainActive, Params(), chainActive.Tip(), allWitnessCoins))
+        {
+            for (const auto& [witnessOutPoint, witnessCoin] : allWitnessCoins)
+            {
+                (unused)witnessOutPoint;
+                CTxOutPoW2Witness witnessDetails;
+                GetPow2WitnessOutput(witnessCoin.out, witnessDetails);
+                if (account->HaveKey(witnessDetails.witnessKeyID))
+                {
+                    return witnessDetails.spendingKeyID;
+                }
+            }
+        }
+    }
+
+    return CKeyID();
+}
+
 std::string witnessKeysLinkUrlForAccount(CWallet* pWallet, CAccount* account)
 {
     std::set<CKeyID> keys;
