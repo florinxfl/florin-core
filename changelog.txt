@@ -1,3 +1,11 @@
+2.0.14
+
+RPC       - New commands verifyproofoffunds, generateproofoffunds
+UI        - Add functionality to export transaction history
+
+
+
+
 2.0.12
 
 CORE      - Implement several important fixes to the (previously disabled) fast path of the "index based" portion of the coin cache, with these fixes in place we also turn the fast path on allowing for faster coin cache computations
