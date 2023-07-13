@@ -1,3 +1,10 @@
+2.0.x
+
+Change software licensing to LGPLv3
+
+
+
+
 2.0.14
 
 RPC       - New commands verifyproofoffunds, generateproofoffunds
