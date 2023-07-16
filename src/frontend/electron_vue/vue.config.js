@@ -42,7 +42,7 @@ module.exports = {
         }
       },
       // HACK! Work around issues with electron-vue-builder being too old and new webpack... (files not loading without this)
-      customFileProtocol: './'
+      customFileProtocol: "./"
     },
     i18n: {
       locale: "en",
@@ -53,8 +53,7 @@ module.exports = {
   },
   css: {
     loaderOptions: {
-      less: {
-      },
+      less: {},
       postcss: { postcssOptions: { config: false } }
     }
   }

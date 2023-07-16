@@ -3,6 +3,7 @@
 Change software licensing to LGPLv3
 RPC       - New commands verifyproofoffunds, generateproofoffunds
 UI        - Add functionality to export transaction history
+UI        - Add a basic about dialog diaplying licensing information
 
 
 
