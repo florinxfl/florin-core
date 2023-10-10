@@ -1,15 +1,16 @@
 var os = require("os");
 
-let repo =
-  "https://github.com/florinxfl/florin-core/releases/download/development/";
+let repo = "https://github.com/florinxfl/florin-core/releases/download/development/";
 
 let file = "";
+
 if (os.platform() === "win32") {
   file = "libflorin_win_" + os.arch() + ".node";
 } else if (os.platform() === "linux") {
   file = "libflorin_linux_" + os.arch() + ".node";
 } else if (os.platform() === "darwin") {
-    file = "libflorin_macos_" + os.arch() + ".node";
+  console.log(os.arch(), "os.arch()");
+  file = "libflorin_macos_" + os.arch() + ".node";
 } else {
   throw "Unable to determine platform";
 }
@@ -38,5 +39,6 @@ const download = (uri, filename) => {
 
 const path = require("path");
 let src = repo + file;
+console.log(src, "src");
 let dst = path.join(__dirname, `../src/unity/lib_unity.node`);
 download(src, dst);
